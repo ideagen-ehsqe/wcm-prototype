@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work clearance management — Praxis prototype</title>
+
+<!-- Element normalisation first. It is shipped outside the bundle on purpose
+     (it restyles bare elements), and it must load BEFORE praxis.css: it sets
+     a{color:inherit}, which after the bundle silently flattens every link in
+     the app to body ink. -->
+<link rel="stylesheet" href="node_modules/@ideagen-ax/praxis/dist/praxis-reset.css">
+<!-- The Praxis bundle from the npm package: tokens, materials, dark mode and
+     every component, in the order the package guarantees. Pinned to 0.1.2
+     because Praxis is pre-1.0 and any release can break markup. -->
+<link rel="stylesheet" href="node_modules/@ideagen-ax/praxis/dist/praxis.css">
+<link rel="stylesheet" href="wcm-praxis.css">
+</head>
+
+<body data-variant="praxis" data-theme="light">
+<script>
+  /* First thing inside <body>, before first paint: the attribute lives on
+     <body>, so this cannot run from <head>. gl-theme is the key the Praxis
+     profile menu writes, so the choice survives navigation. */
+  try {
+    var t = localStorage.getItem('gl-theme');
+    if (t) document.body.setAttribute('data-theme', t);
+  } catch (e) {}
+</script>
+
+<a class="px-skip" href="#content">Skip to content</a>
+
+<!-- ============================================================ start card -->
+<div class="wcm-sov" id="startOv">
+  <div class="wcm-sov__in">
+    <p class="wcm-sov__eyebrow">
+      <span class="mazlan-mark mazlan-mark--sm" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+      Praxis prototype
+    </p>
+    <h1>Work clearance management</h1>
+    <p>
+      A guided, narrated walkthrough of the full work clearance lifecycle for Urenco
+      Deutschland — from the SAP work order that triggers it, through digitally signed
+      isolation certification and authorisation with segregation of duties enforced by
+      role, out to the technician’s phone on site, and back through de-isolation and
+      hand-back to close-out. Turn your sound on.
+    </p>
+    <div class="wcm-sov__btns">
+      <button class="wcm-sov__btn wcm-sov__btn--pri" type="button" data-act="begin-demo">
+        <span class="material-symbols-rounded" aria-hidden="true">play_arrow</span> Play guided demo
+      </button>
+      <button class="wcm-sov__btn wcm-sov__btn--sec" type="button" data-act="begin-explore">Explore freely</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= demo title card -->
+<div class="wcm-dmtitle" id="dmTitle" aria-hidden="true">
+  <div>
+    <p class="wcm-sov__eyebrow">
+      <span class="mazlan-mark mazlan-mark--sm" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+      Groom Lake / Praxis
+    </p>
+    <h2>Work clearance management</h2>
+    <p>SAP work order &rarr; signed isolation and authorisation &rarr; technician on site &rarr; de-isolation and hand-back, narrated end to end.</p>
+  </div>
+</div>
+
+<!-- ============================================================== demo bar -->
+<div class="wcm-dmb" id="dmb">
+  <div class="wcm-dmb__prog"><span id="dmbProg"></span></div>
+  <div class="wcm-dmb__in">
+    <div class="wcm-dmb__n" id="dmbNum">1</div>
+    <div>
+      <div class="wcm-dmb__lbl">Guided demo</div>
+      <div class="wcm-dmb__scene" id="dmbScene">Opening</div>
+    </div>
+    <p class="wcm-dmb__cap" id="dmbCap"></p>
+    <div class="wcm-dmb__ctl">
+      <span class="wcm-dmb__time" id="dmbTime">0:00 / 0:00</span>
+      <button type="button" id="dmbMute" data-act="dm-mute" aria-label="Mute narration">
+        <span class="material-symbols-rounded" aria-hidden="true">volume</span>
+      </button>
+      <button type="button" id="dmbPause" data-act="dm-pause" aria-label="Pause demo">
+        <span class="material-symbols-rounded" aria-hidden="true">pause</span>
+      </button>
+      <button type="button" data-act="dm-skip" aria-label="Next scene">
+        <span class="material-symbols-rounded" aria-hidden="true">east</span>
+      </button>
+      <button type="button" data-act="dm-exit" aria-label="Exit demo">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ========================================================== app bar -->
+  <header class="appbar">
+    <a class="appbar__brand" href="#" data-act="home" aria-label="Ideagen EHSQ Enterprise home">
+      <img class="appbar__logo-img appbar__logo-img--onlight" src="assets/ideagen-logo-onlight.svg" alt="Ideagen">
+      <img class="appbar__logo-img appbar__logo-img--ondark" src="assets/ideagen-logo-dark.svg" alt="">
+    </a>
+
+    <div class="appbar__search">
+      <button class="appbar__module" type="button">
+        Work clearance management
+        <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+      </button>
+      <input type="search" aria-label="Search records, people and help" placeholder="Search records, people, help">
+      <button class="appbar__search-btn" type="button" aria-label="Search">
+        <span class="material-symbols-rounded" aria-hidden="true">search</span>
+      </button>
+    </div>
+
+    <div class="appbar__right">
+      <div class="appbar__ai">
+        <button class="appbar__mazlan" type="button" data-act="mazlan">
+          <span class="mazlan-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          Mazlan
+        </button>
+      </div>
+
+      <button class="appbar__iconbtn" type="button" data-act="demo" aria-label="Play guided demo">
+        <span class="material-symbols-rounded" aria-hidden="true">play_arrow</span>
+      </button>
+
+      <button class="appbar__iconbtn wcm-bell" type="button" id="bellbtn" data-act="notifications"
+              aria-label="Notifications">
+        <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+        <span class="wcm-bell__badge" id="bellBadge">1</span>
+      </button>
+
+      <button class="appbar__iconbtn" type="button" id="themeBtn" data-act="theme" aria-label="Switch to dark theme">
+        <span class="wcm-ico wcm-theme__moon" aria-hidden="true"><i data-lucide="moon"></i></span>
+        <span class="wcm-ico wcm-theme__sun" aria-hidden="true"><i data-lucide="sun"></i></span>
+      </button>
+
+      <!-- Avatar-only trigger, and the persona switcher lives inside the
+           popover — the same move praxis-workspace.css records ("persona
+           switcher relocated INTO the profile menu"). It also keeps the right
+           cluster inside the 420px the centred search pill reserves; a pill
+           carrying the full name and role overlapped the search field. -->
+      <div class="wcm-role">
+        <button class="appbar__avatar" type="button" id="roleTrigger"
+                aria-haspopup="true" aria-expanded="false" aria-controls="roleMenu">jo</button>
+        <div class="px-pop wcm-role__pop" id="roleMenu" hidden>
+          <div class="wcm-role__head">
+            <span class="wcm-role__init" id="curAvatar" aria-hidden="true">jo</span>
+            <span class="wcm-role__who">
+              <span class="wcm-role__nm" id="curRoleName">Julia O’Connell</span>
+              <span class="wcm-role__rl" id="curRoleTag">Planner</span>
+            </span>
+          </div>
+          <div class="wcm-pop__rule"></div>
+          <p class="wcm-pop__label" id="roleMenuLabel">Viewing as</p>
+          <div role="radiogroup" aria-labelledby="roleMenuLabel" id="roleList"></div>
+          <div class="wcm-pop__rule"></div>
+          <div class="wcm-pop__row">
+            <span class="wcm-ico" aria-hidden="true"><i data-lucide="moon"></i></span>
+            <span>Dark theme</span>
+            <span class="wcm-pop__spacer"></span>
+            <label class="switch">
+              <input type="checkbox" id="themeSwitch" aria-label="Dark theme">
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- ======================================================= nav rail -->
+    <nav class="praxis-navrail" aria-label="Primary">
+      <div class="praxis-navrail__core">
+        <div class="praxis-navrail__item">
+          <button class="praxis-navrail__btn praxis-navrail__btn--create" type="button"
+                  id="railCreate" data-act="new-permit" aria-label="New permit">
+            <span class="material-symbols-rounded" aria-hidden="true">add</span>
+          </button>
+        </div>
+        <div class="praxis-navrail__item">
+          <button class="praxis-navrail__btn" type="button" data-rail="home" data-act="view" data-view="home" aria-label="Home">
+            <span class="material-symbols-rounded" aria-hidden="true">home</span>
+          </button>
+        </div>
+        <div class="praxis-navrail__item">
+          <button class="praxis-navrail__btn" type="button" data-rail="sap" data-act="view" data-view="sap" aria-label="SAP work orders">
+            <span class="material-symbols-rounded" aria-hidden="true">description</span>
+          </button>
+        </div>
+        <div class="praxis-navrail__item">
+          <button class="praxis-navrail__btn" type="button" data-rail="dashboard" data-act="view" data-view="dashboard" aria-label="Dashboard">
+            <span class="material-symbols-rounded" aria-hidden="true">dashboard</span>
+          </button>
+        </div>
+        <div class="praxis-navrail__item">
+          <button class="praxis-navrail__btn" type="button" data-rail="list" data-act="view" data-view="list" aria-label="Permits">
+            <span class="material-symbols-rounded" aria-hidden="true">checklist</span>
+          </button>
+        </div>
+      </div>
+      <div class="praxis-navrail__core">
+        <div class="praxis-navrail__item">
+          <button class="praxis-navrail__btn" type="button" aria-label="Administration" data-act="stub">
+            <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ================================================ content column -->
+    <div class="content">
+
+      <!-- ---------------------------------------------- page header band -->
+      <div class="pageheader">
+
+        <div class="wcm-head" data-head="home" hidden>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <span class="breadcrumb__home" aria-hidden="true"><span class="material-symbols-rounded">home</span></span>
+            <span class="breadcrumb__current">Home</span>
+          </nav>
+          <div class="pageheader__titlerow">
+            <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">home</span></span>
+            <h1 class="pageheader__title">Home</h1>
+            <div class="pageheader__status">
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">place</span>Urenco Deutschland, Gronau</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wcm-head" data-head="sap" hidden>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="breadcrumb__home" href="#" data-act="view" data-view="home" aria-label="Home"><span class="material-symbols-rounded" aria-hidden="true">home</span></a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <a href="#" data-act="stub">External systems</a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <span class="breadcrumb__current">SAP plant maintenance</span>
+          </nav>
+          <div class="pageheader__titlerow">
+            <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">description</span></span>
+            <h1 class="pageheader__title">Work order 4471029</h1>
+            <div class="pageheader__status">
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">visibility</span>Read-only mirror</span>
+              <span class="wcm-chip wcm-chip--warning">EHS clearance flag</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wcm-head" data-head="dashboard" hidden>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="breadcrumb__home" href="#" data-act="view" data-view="home" aria-label="Home"><span class="material-symbols-rounded" aria-hidden="true">home</span></a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <span class="breadcrumb__current">Work clearance management</span>
+          </nav>
+          <div class="pageheader__titlerow">
+            <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">dashboard</span></span>
+            <h1 class="pageheader__title">Dashboard</h1>
+            <div class="pageheader__status">
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">place</span>Gronau</span>
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">schedule</span>Updated just now</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wcm-head" data-head="list" hidden>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="breadcrumb__home" href="#" data-act="view" data-view="home" aria-label="Home"><span class="material-symbols-rounded" aria-hidden="true">home</span></a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <a href="#" data-act="view" data-view="dashboard">Work clearance management</a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <span class="breadcrumb__current">Permits</span>
+          </nav>
+          <div class="pageheader__titlerow">
+            <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">checklist</span></span>
+            <h1 class="pageheader__title">Permits</h1>
+            <div class="pageheader__status">
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">place</span>Gronau</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wcm-head" data-head="record" hidden>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="breadcrumb__home" href="#" data-act="view" data-view="home" aria-label="Home"><span class="material-symbols-rounded" aria-hidden="true">home</span></a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <a href="#" data-act="view" data-view="dashboard">Work clearance management</a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <a href="#" data-act="view" data-view="list">Permits</a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <span class="breadcrumb__current">WCM-00482</span>
+          </nav>
+          <div class="pageheader__titlerow">
+            <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">local_fire_department</span></span>
+            <h1 class="pageheader__title">WCM-00482 &middot; hot work on boiler B2 relief valve</h1>
+            <div class="pageheader__status">
+              <span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-pink-60)" aria-hidden="true"></span>P206 hot work</span>
+              <span class="wcm-chip wcm-chip--warning" id="hdrStatus482">Isolation pending</span>
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">place</span>Boiler house, bay 3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wcm-head" data-head="record-rad" hidden>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="breadcrumb__home" href="#" data-act="view" data-view="home" aria-label="Home"><span class="material-symbols-rounded" aria-hidden="true">home</span></a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <a href="#" data-act="view" data-view="dashboard">Work clearance management</a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <a href="#" data-act="view" data-view="list">Permits</a>
+            <span class="breadcrumb__sep" aria-hidden="true"><span class="material-symbols-rounded">chevron_right</span></span>
+            <span class="breadcrumb__current">WCM-00459</span>
+          </nav>
+          <div class="pageheader__titlerow">
+            <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">science</span></span>
+            <h1 class="pageheader__title">WCM-00459 &middot; valve maintenance, cascade separator train 3</h1>
+            <div class="pageheader__status">
+              <span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-red-60)" aria-hidden="true"></span>P207 radiation protection</span>
+              <span class="wcm-chip wcm-chip--warning" id="hdrStatus459">RWP pending</span>
+              <span class="wcm-chip"><span class="material-symbols-rounded" aria-hidden="true">place</span>Enrichment area 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- -------------------------------------------------- toolbar band -->
+      <div class="toolbar">
+
+        <div class="wcm-tools" data-tools="home" hidden>
+          <button class="tbtn tbtn--primary" type="button" data-act="new-permit">
+            <span class="material-symbols-rounded" aria-hidden="true">add</span> New permit
+          </button>
+          <button class="tbtn" type="button" data-act="view" data-view="dashboard">
+            <span class="material-symbols-rounded" aria-hidden="true">dashboard</span> Open dashboard
+          </button>
+          <span class="toolbar__spacer"></span>
+          <button class="tbtn tbtn--ghost" type="button" data-act="demo">
+            <span class="material-symbols-rounded" aria-hidden="true">play_arrow</span> Play guided demo
+          </button>
+        </div>
+
+        <div class="wcm-tools" data-tools="sap" hidden>
+          <button class="tbtn tbtn--icon" type="button" data-act="view" data-view="home" aria-label="Back to home">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <button class="tbtn tbtn--primary" type="button" id="sapPullBtn" data-act="sap-pull">
+            <span class="material-symbols-rounded" aria-hidden="true">east</span> Pull into work clearance management
+          </button>
+          <span class="toolbar__spacer"></span>
+          <span class="wcm-muted">Mirrored from Urenco Deutschland ERP &middot; no write-back from this screen</span>
+        </div>
+
+        <div class="wcm-tools" data-tools="dashboard" hidden>
+          <button class="tbtn" type="button" data-act="stub">
+            <span class="material-symbols-rounded" aria-hidden="true">tune</span> Filters
+          </button>
+          <button class="tbtn" type="button" data-act="stub">
+            <span class="material-symbols-rounded" aria-hidden="true">refresh</span> Refresh
+          </button>
+          <span class="toolbar__spacer"></span>
+          <button class="tbtn tbtn--ghost" type="button" data-act="view" data-view="list">
+            <span class="material-symbols-rounded" aria-hidden="true">checklist</span> All permits
+          </button>
+        </div>
+
+        <div class="wcm-tools" data-tools="list" hidden>
+          <button class="tbtn tbtn--primary" type="button" data-act="new-permit">
+            <span class="material-symbols-rounded" aria-hidden="true">add</span> New permit
+          </button>
+          <div class="wcm-seg" role="group" aria-label="Filter permits by status" id="statusFilter">
+            <button class="wcm-seg__btn" type="button" data-filter="all" aria-pressed="true">All</button>
+            <button class="wcm-seg__btn" type="button" data-filter="draft" aria-pressed="false">Draft</button>
+            <button class="wcm-seg__btn" type="button" data-filter="open" aria-pressed="false">In progress</button>
+            <button class="wcm-seg__btn" type="button" data-filter="live" aria-pressed="false">Live</button>
+            <button class="wcm-seg__btn" type="button" data-filter="closed" aria-pressed="false">Closed</button>
+          </div>
+          <span class="toolbar__spacer"></span>
+          <span class="wcm-muted" id="listCount">6 records</span>
+        </div>
+
+        <div class="wcm-tools" data-tools="record" hidden>
+          <button class="tbtn tbtn--icon" type="button" data-act="view" data-view="list" aria-label="Back to permits">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <button class="tbtn tbtn--primary" type="button" id="authbtn" data-act="authorise">
+            <span class="material-symbols-rounded" aria-hidden="true">verified</span> Authorise
+          </button>
+          <button class="tbtn tbtn--danger" type="button" data-act="stub">Reject</button>
+          <button class="tbtn" type="button" data-act="phone">
+            <span class="material-symbols-rounded" aria-hidden="true">phone_iphone</span> Technician view
+          </button>
+          <span class="toolbar__spacer"></span>
+          <div class="wcm-req">
+            <button class="wcm-req__pill" type="button" id="reqPill482" aria-expanded="false" aria-controls="reqPop482">
+              <span class="wcm-req__track"><span class="wcm-req__fill" style="width:83%"></span></span>
+              5 of 6 required fields
+              <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="px-pop wcm-req__pop" id="reqPop482" hidden>
+              <p>Still outstanding</p>
+              <ul><li>Isolation certificate sign-off</li></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="wcm-tools" data-tools="record-rad" hidden>
+          <button class="tbtn tbtn--icon" type="button" data-act="view" data-view="list" aria-label="Back to permits">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <button class="tbtn tbtn--primary" type="button" id="authbtnRad" data-act="authorise-rad">
+            <span class="material-symbols-rounded" aria-hidden="true">verified</span> Authorise
+          </button>
+          <button class="tbtn tbtn--danger" type="button" data-act="stub">Reject</button>
+          <span class="toolbar__spacer"></span>
+          <div class="wcm-req">
+            <button class="wcm-req__pill" type="button" id="reqPill459" aria-expanded="false" aria-controls="reqPop459">
+              <span class="wcm-req__track"><span class="wcm-req__fill" style="width:80%"></span></span>
+              4 of 5 required fields
+              <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="px-pop wcm-req__pop" id="reqPop459" hidden>
+              <p>Still outstanding</p>
+              <ul><li>Radiation work permit sign-off</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ------------------------------------------------------ page body -->
+      <main class="page-body" id="content">
+
+        <!-- ============================================== home =========== -->
+        <section class="wcm-view" data-view="home" hidden>
+          <div class="wcm-hero">
+            <h2>Good morning, Julia</h2>
+            <p>Urenco Deutschland &middot; Gronau &middot; Ideagen EHSQ Enterprise</p>
+          </div>
+
+          <div class="wcm-tiles">
+            <button class="card wcm-card wcm-tile" type="button" data-act="notifications" data-tab="action">
+              <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>
+              <span class="wcm-tile__label">Action required</span>
+              <span class="wcm-tile__count wcm-tile__count--live" id="tileBadge">1</span>
+            </button>
+            <button class="card wcm-card wcm-tile" type="button" data-act="notifications" data-tab="updates">
+              <span class="material-symbols-rounded" aria-hidden="true">campaign</span>
+              <span class="wcm-tile__label">Recent updates</span>
+              <span class="wcm-tile__count">0</span>
+            </button>
+            <button class="card wcm-card wcm-tile" type="button" data-act="stub">
+              <span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>
+              <span class="wcm-tile__label">Upcoming events</span>
+              <span class="wcm-tile__count">4</span>
+            </button>
+          </div>
+
+          <div class="wcm-grid2">
+            <div class="card wcm-card">
+              <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">apps</span> Shortcuts</h3>
+              <div class="wcm-apps">
+                <button class="wcm-app" type="button" data-act="view" data-view="dashboard">
+                  <span class="wcm-app__icon" aria-hidden="true"><span class="material-symbols-rounded">checklist</span></span>
+                  Work clearance
+                </button>
+                <button class="wcm-app" type="button" data-act="stub">
+                  <span class="wcm-app__icon" aria-hidden="true"><span class="material-symbols-rounded">health_and_safety</span></span>
+                  Ideagen EHSQ
+                </button>
+                <button class="wcm-app" type="button" data-act="stub">
+                  <span class="wcm-app__icon" aria-hidden="true"><span class="material-symbols-rounded">engineering</span></span>
+                  Workplace
+                </button>
+                <button class="wcm-app" type="button" data-act="stub">
+                  <span class="wcm-app__icon" aria-hidden="true"><span class="material-symbols-rounded">fact_check</span></span>
+                  Audit and assurance
+                </button>
+                <button class="wcm-app" type="button" data-act="view" data-view="sap">
+                  <span class="wcm-app__icon" aria-hidden="true"><span class="material-symbols-rounded">description</span></span>
+                  SAP work orders
+                </button>
+              </div>
+            </div>
+
+            <div class="wcm-maz">
+              <div class="wcm-maz__in">
+                <p class="wcm-maz__head">
+                  <span class="mazlan-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+                  Mazlan
+                </p>
+                <p class="wcm-maz__lede">What do you need today?</p>
+                <!-- Suggested prompts use the package's own .mazlan-sugg cards,
+                     the exact markup praxis-mazlan.js renders into the Mazlan
+                     drawer. Icon tints follow the drawer's category map:
+                     Workspace purple, Create pink, Search blue. -->
+                <div class="mazlan-suggestions__grid">
+                  <button class="mazlan-sugg" type="button" data-act="mazlan">
+                    <span class="mazlan-sugg__icon mazlan-sugg__icon--purple" aria-hidden="true">
+                      <span class="material-symbols-rounded">summarize</span>
+                    </span>
+                    <span class="mazlan-sugg__title">Summarise open permits for Gronau</span>
+                  </button>
+                  <button class="mazlan-sugg" type="button" data-act="mazlan">
+                    <span class="mazlan-sugg__icon mazlan-sugg__icon--pink" aria-hidden="true">
+                      <span class="material-symbols-rounded">note_add</span>
+                    </span>
+                    <span class="mazlan-sugg__title">Draft a toolbox talk for hot work</span>
+                  </button>
+                  <button class="mazlan-sugg" type="button" data-act="mazlan">
+                    <span class="mazlan-sugg__icon mazlan-sugg__icon--blue" aria-hidden="true">
+                      <span class="material-symbols-rounded">manage_search</span>
+                    </span>
+                    <span class="mazlan-sugg__title">Which permits clash with the bay 3 window?</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== SAP mirror ====== -->
+        <section class="wcm-view" data-view="sap" hidden>
+          <div class="wcm-sap" id="sapCard">
+            <div class="wcm-sap__bar">
+              <span class="wcm-sap__tag">order</span>
+              4471029 &middot; PM01 corrective maintenance &middot; priority 2, high
+            </div>
+            <div class="wcm-sap__body">
+              <div class="wcm-sap__grid">
+                <dl>
+                  <div class="wcm-sap__row"><dt>Functional location</dt><dd>UD-GRO-BLR-B02</dd></div>
+                  <div class="wcm-sap__row"><dt>Equipment</dt><dd>Boiler B2 relief valve</dd></div>
+                  <div class="wcm-sap__row"><dt>Notification</dt><dd>10004821</dd></div>
+                  <div class="wcm-sap__row"><dt>Planner group</dt><dd>MECH-GRO</dd></div>
+                </dl>
+                <dl>
+                  <div class="wcm-sap__row"><dt>Work center</dt><dd>GRO-MECH-01</dd></div>
+                  <div class="wcm-sap__row"><dt>Basic start</dt><dd>12.08.2026 08:00</dd></div>
+                  <div class="wcm-sap__row"><dt>Basic finish</dt><dd>12.08.2026 14:00</dd></div>
+                  <div class="wcm-sap__row"><dt>System status</dt><dd id="sapStatus">REL &mdash; released</dd></div>
+                </dl>
+              </div>
+              <p class="wcm-sap__desc">
+                Relief valve on boiler B2 seeping at flange — grinding and re-weld required.
+                EHS clearance flag set: hot work plus isolation.
+              </p>
+              <div class="wcm-sap__foot">
+                <div class="wcm-callout">
+                  <span class="material-symbols-rounded" aria-hidden="true">warning</span>
+                  <span class="wcm-callout__body">
+                    This order carries an EHS clearance flag.
+                    <span class="wcm-callout__detail">Work cannot be scheduled from SAP alone — it needs a permit in work clearance management first.</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== dashboard ======= -->
+        <section class="wcm-view" data-view="dashboard" hidden>
+          <div class="wcm-kpis">
+            <div class="card wcm-card">
+              <div class="wcm-kpi__label">Open permits</div>
+              <div class="wcm-kpi__value" id="kpiOpen">6</div>
+              <div class="wcm-kpi__trend wcm-kpi__trend--up"><span class="material-symbols-rounded" aria-hidden="true">trending_up</span> 2 more than last week</div>
+            </div>
+            <div class="card wcm-card">
+              <div class="wcm-kpi__label">Awaiting authorisation</div>
+              <div class="wcm-kpi__value" id="kpiAwait">1</div>
+              <div class="wcm-kpi__trend wcm-kpi__trend--warn"><span class="material-symbols-rounded" aria-hidden="true">pending_actions</span> Blocked on isolation</div>
+            </div>
+            <div class="card wcm-card">
+              <div class="wcm-kpi__label">Live isolations</div>
+              <div class="wcm-kpi__value" id="kpiIso">1</div>
+              <div class="wcm-kpi__trend"><span class="material-symbols-rounded" aria-hidden="true">place</span> Pump room 2</div>
+            </div>
+            <div class="card wcm-card">
+              <div class="wcm-kpi__label">Authorised today</div>
+              <div class="wcm-kpi__value" id="kpiAuth">3</div>
+              <div class="wcm-kpi__trend wcm-kpi__trend--up"><span class="material-symbols-rounded" aria-hidden="true">trending_up</span> On pace</div>
+            </div>
+            <div class="card wcm-card">
+              <div class="wcm-kpi__label">Average cycle time</div>
+              <div class="wcm-kpi__value">4.2h</div>
+              <div class="wcm-kpi__trend wcm-kpi__trend--up"><span class="material-symbols-rounded" aria-hidden="true">trending_down</span> 0.6h faster than last week</div>
+            </div>
+          </div>
+
+          <button class="wcm-callout wcm-callout--btn card" type="button" id="isoCallout" data-act="open-482">
+            <span class="material-symbols-rounded" aria-hidden="true">warning</span>
+            <span class="wcm-callout__body">
+              WCM-00482 is blocked on isolation certification
+              <span class="wcm-callout__detail">P206 hot work, boiler house bay 3 — open the permit to see what it is waiting on.</span>
+            </span>
+          </button>
+
+          <div class="wcm-grid2">
+            <div class="wcm-stack">
+              <div class="card wcm-card">
+                <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">monitoring</span> Permit mix by type</h3>
+                <div class="wcm-bar">
+                  <span class="wcm-bar__key" style="background:var(--praxis-color-pink-60)"></span>
+                  <span class="wcm-bar__label">Hot work (P206)</span>
+                  <span class="wcm-bar__track"><span class="wcm-bar__fill" style="width:33%;background:var(--praxis-color-pink-60)"></span></span>
+                  <span class="wcm-bar__num">2</span>
+                </div>
+                <div class="wcm-bar">
+                  <span class="wcm-bar__key" style="background:var(--praxis-color-teal-60)"></span>
+                  <span class="wcm-bar__label">Isolation (P205)</span>
+                  <span class="wcm-bar__track"><span class="wcm-bar__fill" style="width:17%;background:var(--praxis-color-teal-60)"></span></span>
+                  <span class="wcm-bar__num">1</span>
+                </div>
+                <div class="wcm-bar">
+                  <span class="wcm-bar__key" style="background:var(--praxis-color-purple-60)"></span>
+                  <span class="wcm-bar__label">Confined space (P204)</span>
+                  <span class="wcm-bar__track"><span class="wcm-bar__fill" style="width:17%;background:var(--praxis-color-purple-60)"></span></span>
+                  <span class="wcm-bar__num">1</span>
+                </div>
+                <div class="wcm-bar">
+                  <span class="wcm-bar__key" style="background:var(--praxis-color-orange-60)"></span>
+                  <span class="wcm-bar__label">Scaffolding (P208)</span>
+                  <span class="wcm-bar__track"><span class="wcm-bar__fill" style="width:17%;background:var(--praxis-color-orange-60)"></span></span>
+                  <span class="wcm-bar__num">1</span>
+                </div>
+                <div class="wcm-bar">
+                  <span class="wcm-bar__key" style="background:var(--praxis-color-blue-60)"></span>
+                  <span class="wcm-bar__label">Work permit (P203)</span>
+                  <span class="wcm-bar__track"><span class="wcm-bar__fill" style="width:17%;background:var(--praxis-color-blue-60)"></span></span>
+                  <span class="wcm-bar__num">1</span>
+                </div>
+              </div>
+
+              <div class="card wcm-card" id="simopsCard">
+                <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">factory</span> Live activity by area</h3>
+                <div class="wcm-row"><span>Boiler house, bay 3</span><span class="wcm-muted">1 live</span></div>
+                <div class="wcm-row"><span>Pump room 2</span><span class="wcm-muted">1 live</span></div>
+                <div class="wcm-row" id="simopsClash">
+                  <span>Area 4, scaffolding</span>
+                  <span class="wcm-row__flag">1 live &middot; 20m from bay 3</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card wcm-card">
+              <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">history</span> Recent activity</h3>
+              <div id="dashFeed">
+                <div class="wcm-feed"><span class="wcm-feed__dot" aria-hidden="true"></span><div><div>WCM-00475 isolation planning started &mdash; <span class="wcm-muted">J. Müller</span></div><div class="wcm-feed__time">40 minutes ago</div></div></div>
+                <div class="wcm-feed"><span class="wcm-feed__dot" aria-hidden="true"></span><div><div>WCM-00482 submitted &mdash; <span class="wcm-muted">M. Fischer</span></div><div class="wcm-feed__time">2 hours ago</div></div></div>
+                <div class="wcm-feed"><span class="wcm-feed__dot" aria-hidden="true"></span><div><div>WCM-00471 submitted &mdash; <span class="wcm-muted">S. Heckenmueller</span></div><div class="wcm-feed__time">Yesterday</div></div></div>
+                <div class="wcm-feed"><span class="wcm-feed__dot" aria-hidden="true"></span><div><div>WCM-00460 closed out &mdash; <span class="wcm-muted">M. Fischer</span></div><div class="wcm-feed__time">3 days ago</div></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== permits list ==== -->
+        <section class="wcm-view" data-view="list" hidden>
+          <div class="admin-table-wrap">
+            <!-- .admin-table-wrap is overflow:hidden, so a seven-column table
+                 loses its right-hand columns on a phone. .admin-table-scroll
+                 is the package's own scroll container for this table. -->
+            <div class="admin-table-scroll" tabindex="0" role="region" aria-label="Permits table, scrolls sideways">
+            <table class="admin-table">
+              <caption class="visually-hidden">Permits at Urenco Deutschland, Gronau</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Permit</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Work order</th>
+                  <th scope="col">Location</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Requested by</th>
+                  <th scope="col">Updated</th>
+                </tr>
+              </thead>
+              <!-- Data rows in their own tbody so the zebra stripe counts from
+                   the first real row, not from the empty state. -->
+              <tbody id="permitRows">
+                <tr data-status="open">
+                  <td><a href="#" data-act="open-482"><strong>WCM-00482</strong></a></td>
+                  <td><span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-pink-60)" aria-hidden="true"></span>P206 hot work</span></td>
+                  <td>4471029</td>
+                  <td>Boiler house</td>
+                  <td><span class="wcm-chip wcm-chip--warning" id="rowStatus482">Isolation pending</span></td>
+                  <td>M. Fischer</td>
+                  <td>2 hours ago</td>
+                </tr>
+                <tr data-status="live">
+                  <td><a href="#" data-act="stub"><strong>WCM-00475</strong></a></td>
+                  <td><span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-teal-60)" aria-hidden="true"></span>P205 isolation</span></td>
+                  <td>4470991</td>
+                  <td>Pump room 2</td>
+                  <td><span class="wcm-chip wcm-chip--success">Live</span></td>
+                  <td>T. Wright</td>
+                  <td>40 minutes ago</td>
+                </tr>
+                <tr data-status="open">
+                  <td><a href="#" data-act="stub"><strong>WCM-00471</strong></a></td>
+                  <td><span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-purple-60)" aria-hidden="true"></span>P204 confined space</span></td>
+                  <td>4470955</td>
+                  <td>Tank farm 1</td>
+                  <td><span class="wcm-chip wcm-chip--info">Submitted</span></td>
+                  <td>S. Heckenmueller</td>
+                  <td>Yesterday</td>
+                </tr>
+                <tr data-status="draft">
+                  <td><a href="#" data-act="stub"><strong>WCM-00468</strong></a></td>
+                  <td><span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-orange-60)" aria-hidden="true"></span>P208 scaffolding</span></td>
+                  <td>4470902</td>
+                  <td>Turbine hall</td>
+                  <td><span class="wcm-chip">Draft</span></td>
+                  <td>C. Keller-Jackson</td>
+                  <td>Yesterday</td>
+                </tr>
+                <tr data-status="closed">
+                  <td><a href="#" data-act="stub"><strong>WCM-00460</strong></a></td>
+                  <td><span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-blue-60)" aria-hidden="true"></span>P203 work permit</span></td>
+                  <td>4470812</td>
+                  <td>Turbine hall</td>
+                  <td><span class="wcm-chip">Closed</span></td>
+                  <td>M. Fischer</td>
+                  <td>3 days ago</td>
+                </tr>
+                <tr data-status="open">
+                  <td><a href="#" data-act="open-459"><strong>WCM-00459</strong></a></td>
+                  <td><span class="wcm-chip wcm-chip--type"><span class="wcm-chip__key" style="background:var(--praxis-color-red-60)" aria-hidden="true"></span>P207 radiation</span></td>
+                  <td>4470799</td>
+                  <td>Enrichment area 3</td>
+                  <td><span class="wcm-chip wcm-chip--warning" id="rowStatus459">RWP pending</span></td>
+                  <td>N. Borninkhof</td>
+                  <td>4 days ago</td>
+                </tr>
+              </tbody>
+              <tbody id="permitEmpty" hidden>
+                <tr class="admin-table__empty"><td colspan="7">No permits match this status.</td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== record 482 ====== -->
+        <section class="wcm-view" data-view="record" hidden>
+          <div class="wcm-callout" id="isoBanner">
+            <span class="material-symbols-rounded" aria-hidden="true">warning</span>
+            <span class="wcm-callout__body">
+              Isolation must be certified before this permit can be authorised.
+              <span class="wcm-callout__detail">The isolating authority signs the certificate on the isolation tab.</span>
+            </span>
+          </div>
+
+          <div class="wcm-record">
+            <div class="wcm-stack">
+              <div class="card wcm-card">
+                <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">person</span> Current task</h3>
+                <div class="wcm-person">
+                  <span class="wcm-person__init" aria-hidden="true">ak</span>
+                  <div>
+                    <div class="wcm-person__nm">A. Kowalski</div>
+                    <div class="wcm-person__meta">Authorising person &middot; awaiting review</div>
+                  </div>
+                </div>
+                <p class="wcm-person__meta" style="margin:12px 0 0">Open 2h 14m</p>
+              </div>
+
+              <div class="card wcm-card">
+                <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span> Workflow</h3>
+                <ol class="wcm-flow" id="flow482">
+                  <li class="wcm-flow__step" data-step="draft" data-state="done"><span class="wcm-flow__dot"><span class="material-symbols-rounded" aria-hidden="true">check</span></span><span class="wcm-flow__label">Draft</span></li>
+                  <li class="wcm-flow__step" data-step="submitted" data-state="done"><span class="wcm-flow__dot"><span class="material-symbols-rounded" aria-hidden="true">check</span></span><span class="wcm-flow__label">Submitted</span></li>
+                  <li class="wcm-flow__step" data-step="isolation"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Isolation certified</span></li>
+                  <li class="wcm-flow__step" data-step="authorised" data-state="active"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Authorised</span></li>
+                  <li class="wcm-flow__step" data-step="live"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Live</span></li>
+                  <li class="wcm-flow__step" data-step="deiso"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">De-isolated</span></li>
+                  <li class="wcm-flow__step" data-step="closed"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Closed</span></li>
+                </ol>
+              </div>
+            </div>
+
+            <div>
+              <div class="admin-tabs" role="tablist" aria-label="Permit sections" data-tabs="482">
+                <button class="admin-tab admin-tab--active" type="button" role="tab" id="tab482-details"  aria-selected="true"  aria-controls="pane482-details">Details</button>
+                <button class="admin-tab" type="button" role="tab" id="tab482-isolation" aria-selected="false" aria-controls="pane482-isolation" tabindex="-1">Isolation</button>
+                <button class="admin-tab" type="button" role="tab" id="tab482-risk"      aria-selected="false" aria-controls="pane482-risk" tabindex="-1">Risk assessment</button>
+                <button class="admin-tab" type="button" role="tab" id="tab482-audit"     aria-selected="false" aria-controls="pane482-audit" tabindex="-1">Audit trail</button>
+              </div>
+
+              <div class="card wcm-card wcm-fields">
+                <div role="tabpanel" id="pane482-details" aria-labelledby="tab482-details" tabindex="0">
+                  <div class="admin-field">
+                    <span class="admin-field__label">Work order</span>
+                    <div class="admin-field__value"><a href="#" data-act="view" data-view="sap">4471029</a></div>
+                  </div>
+                  <div class="admin-field" id="sapSourceRow">
+                    <span class="admin-field__label">Source</span>
+                    <div class="admin-field__value wcm-val">
+                      <a href="#" data-act="view" data-view="sap">SAP PM work order 4471029</a>
+                      <span class="wcm-chip">Pulled automatically</span>
+                    </div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Permit type</span>
+                    <div class="admin-field__value">P206 — hot work</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Location</span>
+                    <div class="admin-field__value">Boiler house, bay 3</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Work window</span>
+                    <div class="admin-field__value">12 Aug 2026, 08:00–14:00</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Description</span>
+                    <div class="admin-field__value admin-field__value--tall">
+                      Hot work on boiler B2 relief valve — grinding and welding.
+                      Fire watch required for the duration plus 30 minutes after completion.
+                    </div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Isolation required</span>
+                    <div class="admin-field__value">
+                      <label class="switch">
+                        <input type="checkbox" checked disabled aria-label="Isolation required">
+                        <span class="track"></span><span class="thumb"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Contractor involved</span>
+                    <div class="admin-field__value wcm-val">
+                      ThermoServ GmbH
+                      <span class="wcm-chip wcm-chip--success"><span class="material-symbols-rounded" aria-hidden="true">verified</span>Induction verified</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div role="tabpanel" id="pane482-isolation" aria-labelledby="tab482-isolation" tabindex="0" hidden>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Isolation certificate</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">IC-0097</a></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Energy type</span>
+                    <div class="admin-field__value">Thermal, electrical (valve actuator)</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Lock and tag numbers</span>
+                    <div class="admin-field__value">A214, A215</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Isolating authority</span>
+                    <div class="admin-field__value">J. Müller</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Certified</span>
+                    <div class="admin-field__value">
+                      <label class="wcm-check">
+                        <input type="checkbox" id="isoCheck" data-act="certify-isolation">
+                        Sign to certify isolation
+                      </label>
+                    </div>
+                  </div>
+                  <div class="admin-field" id="deisoRow" hidden>
+                    <span class="admin-field__label">Isolation removal</span>
+                    <div class="admin-field__value">
+                      <button class="btn btn--primary" type="button" data-act="de-isolate">
+                        <span class="material-symbols-rounded" aria-hidden="true">lock</span> Remove isolation and sign
+                      </button>
+                    </div>
+                  </div>
+                  <div class="admin-field" id="handbackRow" hidden>
+                    <span class="admin-field__label">Hand-back to operations</span>
+                    <div class="admin-field__value">
+                      <button class="btn btn--primary" type="button" data-act="hand-back">
+                        <span class="material-symbols-rounded" aria-hidden="true">verified</span> Confirm hand-back and sign
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div role="tabpanel" id="pane482-risk" aria-labelledby="tab482-risk" tabindex="0" hidden>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Risk assessment</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">RA-1188</a></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Radiological assessment</span>
+                    <div class="admin-field__value wcm-muted">Not applicable to this permit type</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Method statement</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">MS-0231</a></div>
+                  </div>
+                </div>
+
+                <div role="tabpanel" id="pane482-audit" aria-labelledby="tab482-audit" tabindex="0" hidden>
+                  <div class="admin-field">
+                    <span class="admin-field__label" data-label-nocolon>12 Aug 09:14</span>
+                    <div class="admin-field__value">Submitted by M. Fischer</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label" data-label-nocolon>12 Aug 09:40</span>
+                    <div class="admin-field__value">Isolation planning started — J. Müller</div>
+                  </div>
+                  <div id="audit482"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card wcm-card wcm-record__tree">
+              <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span> Related records</h3>
+              <div class="wcm-tree">
+                <div class="wcm-tree__node">Work order 4471029</div>
+                <div class="wcm-tree__kids">
+                  <div class="wcm-tree__node wcm-tree__node--current">Permit WCM-00482</div>
+                  <div class="wcm-tree__kids">
+                    <div class="wcm-tree__node">Isolation certificate IC-0097</div>
+                    <div class="wcm-tree__node">Risk assessment RA-1188</div>
+                    <div class="wcm-tree__node">Method statement MS-0231</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== record 459 ====== -->
+        <section class="wcm-view" data-view="record-rad" hidden>
+          <div class="wcm-callout" id="radBanner">
+            <span class="material-symbols-rounded" aria-hidden="true">warning</span>
+            <span class="wcm-callout__body">
+              The radiation work permit must be issued and signed before this permit can be authorised.
+              <span class="wcm-callout__detail">The radiation protection supervisor signs the RWP on the radiological controls tab.</span>
+            </span>
+          </div>
+
+          <div class="wcm-record">
+            <div class="wcm-stack">
+              <div class="card wcm-card">
+                <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">person</span> Current task</h3>
+                <div class="wcm-person">
+                  <span class="wcm-person__init" aria-hidden="true">rv</span>
+                  <div>
+                    <div class="wcm-person__nm">R. Voß</div>
+                    <div class="wcm-person__meta">Radiation protection supervisor &middot; RWP pending</div>
+                  </div>
+                </div>
+                <p class="wcm-person__meta" style="margin:12px 0 0">Open 1d 4h</p>
+              </div>
+
+              <div class="card wcm-card">
+                <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span> Workflow</h3>
+                <ol class="wcm-flow" id="flow459">
+                  <li class="wcm-flow__step" data-step="draft" data-state="done"><span class="wcm-flow__dot"><span class="material-symbols-rounded" aria-hidden="true">check</span></span><span class="wcm-flow__label">Draft</span></li>
+                  <li class="wcm-flow__step" data-step="submitted" data-state="done"><span class="wcm-flow__dot"><span class="material-symbols-rounded" aria-hidden="true">check</span></span><span class="wcm-flow__label">Submitted</span></li>
+                  <li class="wcm-flow__step" data-step="rwp"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">RWP issued</span></li>
+                  <li class="wcm-flow__step" data-step="authorised" data-state="active"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Authorised</span></li>
+                  <li class="wcm-flow__step" data-step="live"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Live</span></li>
+                  <li class="wcm-flow__step" data-step="closed"><span class="wcm-flow__dot"></span><span class="wcm-flow__label">Closed</span></li>
+                </ol>
+              </div>
+            </div>
+
+            <div>
+              <div class="admin-tabs" role="tablist" aria-label="Permit sections" data-tabs="459">
+                <button class="admin-tab admin-tab--active" type="button" role="tab" id="tab459-details" aria-selected="true" aria-controls="pane459-details">Details</button>
+                <button class="admin-tab" type="button" role="tab" id="tab459-controls" aria-selected="false" aria-controls="pane459-controls" tabindex="-1">Radiological controls</button>
+                <button class="admin-tab" type="button" role="tab" id="tab459-risk" aria-selected="false" aria-controls="pane459-risk" tabindex="-1">Risk assessment</button>
+                <button class="admin-tab" type="button" role="tab" id="tab459-audit" aria-selected="false" aria-controls="pane459-audit" tabindex="-1">Audit trail</button>
+              </div>
+
+              <div class="card wcm-card wcm-fields">
+                <div role="tabpanel" id="pane459-details" aria-labelledby="tab459-details" tabindex="0">
+                  <div class="admin-field">
+                    <span class="admin-field__label">Work order</span>
+                    <div class="admin-field__value">4470799</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Permit type</span>
+                    <div class="admin-field__value">P207 — radiation protection</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Location</span>
+                    <div class="admin-field__value">Enrichment area 3, cascade hall</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Work window</span>
+                    <div class="admin-field__value">13 Aug 2026, 07:00–15:00</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Description</span>
+                    <div class="admin-field__value admin-field__value--tall">
+                      Planned valve maintenance on cascade separator train 3 — entry to a designated
+                      controlled area with potential for low-level surface contamination.
+                    </div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Area classification</span>
+                    <div class="admin-field__value wcm-val">Controlled area <span class="wcm-chip wcm-chip--warning">Zone 2</span></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Supervisor required</span>
+                    <div class="admin-field__value">
+                      <label class="switch">
+                        <input type="checkbox" checked disabled aria-label="Radiation protection supervisor required">
+                        <span class="track"></span><span class="thumb"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div role="tabpanel" id="pane459-controls" aria-labelledby="tab459-controls" tabindex="0" hidden>
+                  <div class="admin-field">
+                    <span class="admin-field__label">RWP reference</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">RWP-1142</a></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Dose constraint</span>
+                    <div class="admin-field__value wcm-val">0.3 mSv for the task <span class="wcm-chip wcm-chip--info">ALARA reviewed</span></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Personal dosimetry</span>
+                    <div class="admin-field__value">TLD badge and electronic personal dosimeter</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Contamination monitoring</span>
+                    <div class="admin-field__value admin-field__value--tall">Entry and exit swabs, hand and foot monitor on exit</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">RWP issued</span>
+                    <div class="admin-field__value">
+                      <label class="wcm-check">
+                        <input type="checkbox" id="rwpCheck" data-act="issue-rwp">
+                        Sign to issue RWP
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div role="tabpanel" id="pane459-risk" aria-labelledby="tab459-risk" tabindex="0" hidden>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Radiological risk assessment</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">RA-1204</a></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">Method statement</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">MS-0255</a></div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label">General risk assessment</span>
+                    <div class="admin-field__value"><a href="#" data-act="stub">RA-0987</a></div>
+                  </div>
+                </div>
+
+                <div role="tabpanel" id="pane459-audit" aria-labelledby="tab459-audit" tabindex="0" hidden>
+                  <div class="admin-field">
+                    <span class="admin-field__label" data-label-nocolon>09 Aug 07:50</span>
+                    <div class="admin-field__value">Submitted by N. Borninkhof</div>
+                  </div>
+                  <div class="admin-field">
+                    <span class="admin-field__label" data-label-nocolon>10 Aug 11:20</span>
+                    <div class="admin-field__value">RWP drafted — R. Voß</div>
+                  </div>
+                  <div id="audit459"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card wcm-card wcm-record__tree">
+              <h3 class="wcm-card__title"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span> Related records</h3>
+              <div class="wcm-tree">
+                <div class="wcm-tree__node">Work order 4470799</div>
+                <div class="wcm-tree__kids">
+                  <div class="wcm-tree__node wcm-tree__node--current">Permit WCM-00459</div>
+                  <div class="wcm-tree__kids">
+                    <div class="wcm-tree__node">Radiation work permit RWP-1142</div>
+                    <div class="wcm-tree__node">Risk assessment RA-1204</div>
+                    <div class="wcm-tree__node">Method statement MS-0255</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================== notification drawer -->
+<div class="wcm-scrim" id="notifScrim" hidden></div>
+<aside class="wcm-nd" id="notifDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="notifTitle">
+  <div class="wcm-nd__head">
+    <h2 id="notifTitle">Notifications</h2>
+    <button class="tbtn tbtn--icon tbtn--ghost" type="button" data-act="close-notifications" aria-label="Close notifications">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
+  </div>
+  <div class="wcm-nd__body">
+    <div class="wcm-nd__search">
+      <span class="material-symbols-rounded" aria-hidden="true">search</span>
+      <input type="search" aria-label="Search notifications" placeholder="Search notifications">
+    </div>
+    <div class="admin-tabs" role="tablist" aria-label="Notification groups" id="notifTabs">
+      <button class="admin-tab" type="button" role="tab" data-ntab="all" aria-selected="false">All</button>
+      <button class="admin-tab admin-tab--active" type="button" role="tab" data-ntab="action" aria-selected="true">Action required</button>
+      <button class="admin-tab" type="button" role="tab" data-ntab="updates" aria-selected="false">Recent updates</button>
+    </div>
+    <div id="notifList"></div>
+  </div>
+</aside>
+
+<!-- ========================================================= permit picker -->
+<div class="cn-scrim" id="cnScrim" hidden></div>
+<div class="cn-flyout" id="cnFlyout" hidden role="dialog" aria-modal="true" aria-labelledby="cnTitle">
+  <div class="cn-head">
+    <p class="cn-head__title" id="cnTitle">
+      <span class="material-symbols-rounded" aria-hidden="true">add</span> New permit
+    </p>
+    <button class="cn-close" type="button" data-act="close-new-permit" aria-label="Close">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
+  </div>
+  <div class="cn-body">
+    <div class="cn-group cn-group--pink">
+      <div class="cn-group__head">
+        <span class="cn-group__icon" aria-hidden="true"><span class="material-symbols-rounded">local_fire_department</span></span>
+        <span class="cn-group__title">Configured in this build</span>
+      </div>
+      <div class="cn-tpl-list">
+        <button class="cn-tpl" type="button" data-act="open-482">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">local_fire_department</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P206 &middot; hot work</span>
+            <span class="cn-tpl__meta">Grinding, welding or other open-flame and spark-producing work.</span>
+          </span>
+          <span class="wcm-cn__tag wcm-cn__tag--ready">Open example</span>
+        </button>
+        <button class="cn-tpl" type="button" data-act="open-459">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">science</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P207 &middot; radiation protection</span>
+            <span class="cn-tpl__meta">Work in or near a designated radiological controlled area.</span>
+          </span>
+          <span class="wcm-cn__tag wcm-cn__tag--ready">Open example</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="cn-group cn-group--teal">
+      <div class="cn-group__head">
+        <span class="cn-group__icon" aria-hidden="true"><span class="material-symbols-rounded">schedule</span></span>
+        <span class="cn-group__title">On the configuration roadmap</span>
+      </div>
+      <div class="cn-tpl-list">
+        <button class="cn-tpl" type="button" data-act="soon">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">door_front</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P204 &middot; confined space</span>
+            <span class="cn-tpl__meta">Entry into tanks, vessels or other confined spaces.</span>
+          </span>
+          <span class="wcm-cn__tag">Roadmap</span>
+        </button>
+        <button class="cn-tpl" type="button" data-act="soon">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">bolt</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P205 &middot; energy isolation (LoToTo)</span>
+            <span class="cn-tpl__meta">Locking out and tagging energy sources ahead of other work.</span>
+          </span>
+          <span class="wcm-cn__tag">Roadmap</span>
+        </button>
+        <button class="cn-tpl" type="button" data-act="soon">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">construction</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P208 &middot; scaffolding</span>
+            <span class="cn-tpl__meta">Erecting, altering or dismantling scaffolding.</span>
+          </span>
+          <span class="wcm-cn__tag">Roadmap</span>
+        </button>
+        <button class="cn-tpl" type="button" data-act="soon">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">assignment</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P203 &middot; work permit</span>
+            <span class="cn-tpl__meta">General work permit for lower-risk maintenance tasks.</span>
+          </span>
+          <span class="wcm-cn__tag">Roadmap</span>
+        </button>
+        <button class="cn-tpl" type="button" data-act="soon">
+          <span class="cn-tpl__icon" aria-hidden="true"><span class="material-symbols-rounded">inventory_2</span></span>
+          <span class="cn-tpl__body">
+            <span class="cn-tpl__name">P202 &middot; installation plan</span>
+            <span class="cn-tpl__meta">Planned installation or modification of plant and equipment.</span>
+          </span>
+          <span class="wcm-cn__tag">Roadmap</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= signature dialog -->
+<div class="cn-overlay" id="sigOverlay" hidden>
+  <div class="cn-modal wcm-dialog" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
+    <div class="cn-head">
+      <p class="cn-head__title" id="sigTitle">
+        <span class="material-symbols-rounded" aria-hidden="true">draw</span> Sign to confirm
+      </p>
+      <button class="cn-close" type="button" data-act="sig-cancel" aria-label="Close">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div class="wcm-dialog__body">
+      <p class="wcm-dialog__who" id="sigWho"></p>
+      <canvas class="wcm-sig" id="sigCanvas" width="420" height="150"
+              aria-label="Signature area. Draw your signature with a mouse, pen or finger."></canvas>
+      <p class="wcm-sig__hint">Draw your signature above. It is recorded against your name, role and the time.</p>
+    </div>
+    <div class="cn-footer cn-footer--end">
+      <button class="btn btn--ghost" type="button" data-act="sig-clear">Clear</button>
+      <button class="btn btn--ghost" type="button" data-act="sig-cancel">Cancel</button>
+      <button class="btn btn--primary" type="button" id="sigConfirm" data-act="sig-confirm" disabled>Sign and confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== phone overlay -->
+<div class="wcm-phone-scrim" id="phoneScrim" hidden>
+  <div class="wcm-phone" role="dialog" aria-modal="true" aria-label="Technician view on a phone">
+    <div class="wcm-phone__notch" aria-hidden="true"></div>
+    <div class="wcm-phone__screen">
+
+      <section class="wcm-mscreen wcm-mscreen--lock" data-mscreen="push">
+        <p class="wcm-mclock">08:42</p>
+        <p class="wcm-mdate">Wednesday, 12 August</p>
+        <button class="wcm-mpush" type="button" data-act="m-show" data-mscreen="worklist">
+          <span class="wcm-mpush__app">
+            <span class="mazlan-mark mazlan-mark--sm" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+            Ideagen EHSQ
+          </span>
+          <span class="wcm-mpush__t">New job assigned</span>
+          <span class="wcm-mpush__d">WCM-00482 &middot; hot work &middot; boiler house bay 3 &middot; authorised, ready to start</span>
+        </button>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--ghost btn--block" type="button" data-act="close-phone" style="color:#fff">Close technician view</button>
+      </section>
+
+      <section class="wcm-mscreen" data-mscreen="worklist" hidden>
+        <div class="wcm-mtop">
+          <button class="wcm-mback" type="button" data-act="m-show" data-mscreen="push" aria-label="Back">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <h3>My jobs — T. Wright</h3>
+        </div>
+        <button class="wcm-mitem wcm-mitem--next" type="button" data-act="m-show" data-mscreen="permit">
+          <span class="wcm-mitem__t">WCM-00482 &middot; hot work</span>
+          <span class="wcm-mitem__d">Boiler house, bay 3 &middot; authorised, ready to start</span>
+        </button>
+        <div class="wcm-mitem wcm-mitem--past">
+          <span class="wcm-mitem__t">WCM-00475 &middot; isolation</span>
+          <span class="wcm-mitem__d">Pump room 2 &middot; live</span>
+        </div>
+        <div class="wcm-mitem wcm-mitem--past">
+          <span class="wcm-mitem__t">WCM-00468 &middot; scaffolding</span>
+          <span class="wcm-mitem__d">Turbine hall &middot; draft</span>
+        </div>
+      </section>
+
+      <section class="wcm-mscreen" data-mscreen="permit" hidden>
+        <div class="wcm-mtop">
+          <button class="wcm-mback" type="button" data-act="m-show" data-mscreen="worklist" aria-label="Back">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <h3>WCM-00482</h3>
+        </div>
+        <dl class="wcm-mcard" id="mPermitCard">
+          <div class="wcm-mrow"><dt>Type</dt><dd>P206 hot work</dd></div>
+          <div class="wcm-mrow"><dt>Location</dt><dd>Boiler house, bay 3</dd></div>
+          <div class="wcm-mrow"><dt>Window</dt><dd>08:00–14:00</dd></div>
+          <div class="wcm-mrow"><dt>Isolation certificate</dt><dd>IC-0097</dd></div>
+          <div class="wcm-mrow"><dt>Lock and tag</dt><dd>A214, A215</dd></div>
+          <div class="wcm-mrow"><dt>PPE</dt><dd>Face shield, FR coveralls</dd></div>
+        </dl>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--primary btn--block" type="button" data-act="m-show" data-mscreen="brief">Start pre-job brief</button>
+      </section>
+
+      <section class="wcm-mscreen" data-mscreen="brief" hidden>
+        <div class="wcm-mtop">
+          <button class="wcm-mback" type="button" data-act="m-show" data-mscreen="permit" aria-label="Back">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <h3>Pre-job brief</h3>
+        </div>
+        <div class="wcm-mchecks" id="briefList">
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Reviewed method statement MS-0231</label>
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Reviewed hazards and required PPE</label>
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Confirmed isolation certificate IC-0097</label>
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Fire watch briefed and in position</label>
+        </div>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--primary btn--block" type="button" id="briefBtn" data-act="m-show" data-mscreen="iso" disabled>
+          Acknowledge and continue
+        </button>
+      </section>
+
+      <section class="wcm-mscreen" data-mscreen="iso" hidden>
+        <div class="wcm-mtop">
+          <button class="wcm-mback" type="button" data-act="m-show" data-mscreen="brief" aria-label="Back">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <h3>Verify isolation</h3>
+        </div>
+        <div class="wcm-callout">
+          <span class="material-symbols-rounded" aria-hidden="true">warning</span>
+          <span class="wcm-callout__body">Prove dead before starting hot work.</span>
+        </div>
+        <div class="wcm-mchecks" id="isoList">
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Visual check — locks and tags A214, A215 in place</label>
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Test point 1 — electrical, zero energy confirmed</label>
+          <label class="wcm-mchk"><input type="checkbox" data-act="m-check">Test point 2 — thermal and valve, isolation confirmed</label>
+        </div>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--primary btn--block" type="button" id="isoConfirmBtn" data-act="m-iso-confirm" disabled>
+          Confirm zero energy and start work
+        </button>
+      </section>
+
+      <section class="wcm-mscreen" data-mscreen="active" hidden>
+        <div class="wcm-mtop"><h3>WCM-00482 &middot; active</h3></div>
+        <p class="wcm-mtimer" id="fireWatch">
+          <span class="material-symbols-rounded" aria-hidden="true">local_fire_department</span> Fire watch active
+        </p>
+        <dl class="wcm-mcard">
+          <div class="wcm-mrow"><dt>Status</dt><dd>Work in progress</dd></div>
+          <div class="wcm-mrow"><dt>Started</dt><dd>09:52</dd></div>
+          <div class="wcm-mrow"><dt>Isolation</dt><dd>Verified, zero energy</dd></div>
+        </dl>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--primary btn--block" type="button" data-act="m-show" data-mscreen="close">Complete job</button>
+      </section>
+
+      <section class="wcm-mscreen" data-mscreen="close" hidden>
+        <div class="wcm-mtop">
+          <button class="wcm-mback" type="button" data-act="m-show" data-mscreen="active" aria-label="Back">
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+          </button>
+          <h3>Close out</h3>
+        </div>
+        <div class="wcm-mchecks">
+          <label class="wcm-mchk" data-done="true"><input type="checkbox" checked disabled>Work area made safe</label>
+          <label class="wcm-mchk" data-done="true"><input type="checkbox" checked disabled>Tools and equipment cleared</label>
+          <label class="wcm-mchk" data-done="true"><input type="checkbox" checked disabled>Fire watch stood down, 30 minutes after work</label>
+        </div>
+        <p class="wcm-mcard">Notes: relief valve reseated and pressure-tested. No further action required.</p>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--primary btn--block" type="button" data-act="m-close-out">Submit close-out</button>
+      </section>
+
+      <section class="wcm-mscreen wcm-mcentre" data-mscreen="confirm" hidden>
+        <div class="wcm-mdone" aria-hidden="true"><span class="material-symbols-rounded">check</span></div>
+        <h3>Job closed</h3>
+        <p class="wcm-muted">
+          Permit WCM-00482 is marked closed in work clearance management, and work order
+          4471029 is updated to complete in SAP PM.
+        </p>
+        <div class="wcm-mspacer"></div>
+        <button class="btn btn--block" type="button" data-act="close-phone">Return to office view</button>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="wcm-toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<!-- Praxis behaviour: icons, and the phone nav drawer derived from the rail. -->
+<script src="node_modules/@ideagen-ax/praxis/dist/praxis-lucide.js"></script>
+<script src="node_modules/@ideagen-ax/praxis/dist/praxis-navdrawer.js"></script>
+<script src="wcm-praxis.js"></script>
+</body>
+</html>

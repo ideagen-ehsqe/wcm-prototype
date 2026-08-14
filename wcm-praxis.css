@@ -1,0 +1,758 @@
+/* =====================================================================
+   WCM prototype — page-local stylesheet.
+
+   Everything Praxis defines is used from the package, not restated here.
+   This file only carries the pieces Praxis deliberately leaves to the
+   host page, per PRAXIS-FOR-AGENTS.md § "What Praxis does not define":
+
+     .page-body        the scrolling content column (Praxis owns the bands,
+                       the page owns this)
+     .btn              no base exists in the package; .btn--primary styles
+                       the fill only
+     .wcm-*            prototype-specific surfaces with no Praxis component:
+                       status chips, callouts, KPI tiles, workflow rail,
+                       record tree, the SAP mirror, the phone frame, the
+                       notification drawer and the guided-demo chrome
+
+   Rules:
+     - no --praxis-* / --px-* token is redefined here, and no token is ever
+       set to var() of itself
+     - no colour literal where a token exists; the few literals that remain
+       are non-Praxis surfaces (the SAP mirror deliberately looks foreign,
+       and the phone bezel is hardware)
+     - no uppercase text and no text-transform anywhere
+   ===================================================================== */
+
+[hidden]{display:none !important;}
+
+/* --------------------------------------------------------- content column
+   Praxis: ".app is height:100vh; overflow:hidden, so the page does not
+   scroll — the content column does." --px-toolbar-gutter is the canonical
+   gap between the toolbar band and the first card. */
+.page-body{
+  flex:1; min-height:0; overflow:auto;
+  padding:var(--px-toolbar-gutter) var(--ph-pad-x, 24px) var(--praxis-space-32);
+}
+
+/* ------------------------------------------------------------ .btn base
+   Supplied by the host; .btn--primary from praxis-core.css sits on top. */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  height:40px; padding:0 18px; border:0; border-radius:10px;
+  background:var(--px-tool); box-shadow:var(--px-tool-shadow);
+  color:var(--praxis-color-text-primary);
+  font:inherit; font-size:var(--praxis-type-size-base); font-weight:600;
+  cursor:pointer; white-space:nowrap;
+  transition:box-shadow var(--praxis-motion-fast), background var(--praxis-motion-fast);
+}
+.btn:hover{box-shadow:var(--px-tool-shadow-hover);}
+.btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:var(--px-tool-shadow);}
+.btn .material-symbols-rounded{font-size:20px; color:var(--praxis-color-text-secondary);}
+.btn--primary .material-symbols-rounded{color:inherit;}
+.btn--ghost{background:transparent; box-shadow:none; color:var(--praxis-color-text-secondary);}
+.btn--ghost:hover{background:var(--px-hover-btn); box-shadow:none; color:var(--praxis-color-text-primary);}
+.btn--danger{background:var(--praxis-tone-danger-bg); box-shadow:none; color:var(--praxis-tone-danger-fg);}
+.btn--danger:hover{box-shadow:var(--px-tool-shadow-hover);}
+.btn--block{width:100%;}
+
+/* toolbar variants Praxis does not ship */
+.tbtn--danger{background:var(--praxis-tone-danger-bg); color:var(--praxis-tone-danger-fg); box-shadow:none;}
+.tbtn--danger:hover{box-shadow:var(--px-tool-shadow-hover); color:var(--praxis-tone-danger-fg);}
+.tbtn:disabled{opacity:.45; cursor:not-allowed; box-shadow:var(--px-tool-shadow);}
+
+/* ---------------------------------------------------------- app bar bits */
+.wcm-bell{position:relative;}
+.wcm-bell__badge{
+  position:absolute; top:4px; right:4px; min-width:16px; height:16px; padding:0 4px;
+  display:grid; place-items:center; border-radius:var(--praxis-radius-full);
+  background:var(--praxis-color-pink-60); color:var(--praxis-color-white);
+  font-size:10px; font-weight:700; line-height:1;
+}
+.wcm-role{position:relative;}
+.wcm-role__pop{top:calc(100% + 6px); right:0; width:300px;}
+.wcm-role__head{display:flex; align-items:center; gap:10px; padding:10px;}
+.wcm-role__opt{
+  display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px;
+  border:0; border-radius:var(--praxis-radius-sm); background:transparent;
+  font:inherit; text-align:left; cursor:pointer; color:var(--praxis-color-text-primary);
+}
+.wcm-role__opt:hover{background:var(--px-hover-btn);}
+.wcm-role__opt[aria-checked="true"]{background:var(--px-chip);}
+.wcm-role__init{
+  width:30px; height:30px; flex-shrink:0; display:grid; place-items:center;
+  border-radius:50%; background:var(--praxis-color-teal-60);
+  color:var(--praxis-color-white); font-size:11px; font-weight:700;
+}
+.wcm-role__who{min-width:0;}
+.wcm-role__nm{font-size:var(--praxis-type-size-base); font-weight:600;}
+.wcm-role__rl{font-size:var(--praxis-type-size-xs); font-weight:500; color:var(--praxis-color-text-secondary);}
+.wcm-pop__label{
+  padding:10px 10px 4px; font-size:var(--praxis-type-size-xs); font-weight:700;
+  color:var(--praxis-color-text-tertiary, var(--praxis-color-text-secondary));
+}
+.wcm-pop__rule{height:1px; margin:6px 4px; background:var(--praxis-color-border-default);}
+.wcm-pop__row{
+  display:flex; align-items:center; gap:10px; padding:8px 10px;
+  font-size:var(--praxis-type-size-base); font-weight:600;
+}
+.wcm-pop__row .wcm-pop__spacer{flex:1;}
+
+/* --------------------------------------------------- per-view chrome slots
+   The page header and the toolbar are fixed bands (Praxis owns their height
+   and hairlines); each view supplies the contents of both. */
+.wcm-head{min-width:0;}
+.wcm-tools{display:flex; align-items:center; flex-wrap:wrap; gap:var(--praxis-space-8); flex:1; min-width:0;}
+
+/* ------------------------------------------------------------ page header */
+.pageheader__status .wcm-chip{flex-shrink:0;}
+/* .pageheader__title already truncates in the component, so nothing to add.
+   The status cluster does not wrap, though — it is flex-shrink:0 with no
+   min-width, so at phone widths the third chip ran off the right edge. The
+   band's height is a floor, so letting the cluster wrap under the title is
+   the cheap fix. */
+@media (max-width:768px){
+  .pageheader__titlerow{flex-wrap:wrap;}
+  /* a full-width basis so the chips take their own line and the icon and
+     title stay together on the first one */
+  .pageheader__status{flex:1 1 100%; margin-left:0; flex-wrap:wrap; min-width:0;}
+}
+
+/* ----------------------------------------------------- direct Lucide icons
+   praxis-lucide.js sizes converted .material-symbols-rounded spans from the
+   existing font-size convention, but an <i data-lucide> renders at Lucide's
+   own 24px. These two icons have no Material ligature in the map, so they are
+   authored as Lucide names and sized here. */
+.wcm-ico{display:inline-grid; place-items:center;}
+.wcm-ico svg{width:20px; height:20px;}
+.wcm-theme__sun{display:none;}
+body[data-theme="dark"] .wcm-theme__moon{display:none;}
+body[data-theme="dark"] .wcm-theme__sun{display:inline-grid;}
+
+/* ------------------------------------------------- stacked static fields
+   praxis-rfield.css gives .rfield--locked rows a -1px overlap so two
+   adjacent rules land on the same pixel, and notes that the .admin-field
+   read-out rows "would want the same 1px overlap" but do not have it —
+   they are only ever laid out side by side on the admin pages. This record
+   stacks them in one column, so the host applies the overlap. */
+.wcm-fields .admin-field:has(> .admin-field__value) + .admin-field:has(> .admin-field__value){margin-top:-1px;}
+
+/* --------------------------------------------------- measured corrections
+   Two page-local names, not redefinitions of Praxis tokens. Both come from
+   measuring the rendered page rather than from taste:
+
+   --wcm-warning-ink: the light-mode --praxis-tone-warning pair measures
+   3.3:1 (#cb6e00 on #fdf2e6), and tone-warning-fg on --px-surface measures
+   3.64:1. Both are used for 12–14px semibold status text, which needs 4.5:1
+   (WCAG 1.4.3). orange-90 on the same washes clears it. The dark pair
+   already passes, so dark keeps the shipped value. Worth raising with the
+   Praxis maintainers — the pair is documented for exactly this use. */
+:root{ --wcm-warning-ink:var(--praxis-color-orange-90); }
+body[data-theme="dark"]{ --wcm-warning-ink:var(--praxis-tone-warning-fg); }
+
+/* ------------------------------------------------------- status chips
+   Built on the Praxis tone pairs, always both halves of a pair. */
+.wcm-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 10px; border-radius:var(--praxis-radius-full);
+  background:var(--praxis-tone-neutral-bg); color:var(--praxis-tone-neutral-fg);
+  font-size:var(--praxis-type-size-xs); font-weight:700; white-space:nowrap;
+}
+.wcm-chip .material-symbols-rounded{font-size:14px;}
+.wcm-chip--info{background:var(--praxis-tone-info-bg); color:var(--praxis-tone-info-fg);}
+.wcm-chip--success{background:var(--praxis-tone-success-bg); color:var(--praxis-tone-success-fg);}
+.wcm-chip--warning{background:var(--praxis-tone-warning-bg); color:var(--wcm-warning-ink);}
+.wcm-chip--danger{background:var(--praxis-tone-danger-bg); color:var(--praxis-tone-danger-fg);}
+.wcm-chip--square{border-radius:var(--praxis-radius-sm);}
+
+/* Permit-type chip. The type colour is a key marker, not the label ink:
+   tinted 12px semibold text in the solution hues measured 2.3–4.2:1 in one
+   theme or the other, and there is no per-solution tone pair to fall back on
+   (the Create New tones are built for 24–32px icons). So the label takes the
+   neutral pair, which passes in both themes, and the hue rides alongside it
+   as a 8px block — which also stops colour being the only carrier of the
+   type (WCAG 1.4.1). The same keys are used by the dashboard mix bars. */
+.wcm-chip--type{border-radius:var(--praxis-radius-sm); padding-left:7px;}
+.wcm-chip__key{width:8px; height:8px; border-radius:2px; flex-shrink:0;}
+
+/* --------------------------------------------------------------- callout
+   Praxis defines no .callout, so this is host-owned. Tone pairs only. */
+.wcm-callout{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px; border-radius:var(--praxis-radius-md);
+  background:var(--praxis-tone-warning-bg); color:var(--praxis-color-text-primary);
+  font-size:var(--praxis-type-size-base); font-weight:600;
+  margin-bottom:var(--praxis-space-16);
+}
+.wcm-callout .material-symbols-rounded{font-size:20px; flex-shrink:0; color:var(--wcm-warning-ink);}
+.wcm-callout--success{background:var(--praxis-tone-success-bg);}
+.wcm-callout--success .material-symbols-rounded{color:var(--praxis-tone-success-fg);}
+.wcm-callout--info{background:var(--praxis-tone-info-bg);}
+.wcm-callout--info .material-symbols-rounded{color:var(--praxis-tone-info-fg);}
+.wcm-callout--btn{width:100%; border:0; font:inherit; font-weight:600; text-align:left; cursor:pointer;}
+.wcm-callout--btn:hover{box-shadow:var(--px-tool-shadow-hover);}
+.wcm-callout__body{min-width:0; flex:1;}
+.wcm-callout__detail{font-weight:500; color:var(--praxis-color-text-secondary); margin-top:2px;}
+
+/* ------------------------------------------------------------- cards
+   .card is the Praxis elevation; in light mode it has no background, so
+   the host sets the fill and the padding (documented). */
+.wcm-card{background:var(--px-surface); padding:var(--praxis-space-16);}
+.wcm-card--flush{padding:0; overflow:hidden;}
+/* Component header — Groom Lake's .card__title: icon chip, then the label,
+   then a divider that stops at the card padding (which a block child's
+   border-bottom does for free, so no inset is needed here). */
+.wcm-card__title{
+  display:flex; align-items:center; gap:12px;
+  font-size:var(--praxis-type-size-base); font-weight:700; line-height:1.2;
+  color:var(--praxis-color-text-primary);
+  margin:0 0 var(--praxis-space-16);
+  padding-bottom:var(--praxis-space-12);
+  border-bottom:1px solid var(--praxis-color-border-default);
+}
+.wcm-card__title--sub{margin-top:var(--praxis-space-24);}
+
+/* Component-header icon — the same enclosure in both themes: a chip one step
+   off the card surface, holding the glyph. It's a background for the icon, not
+   a raised control, so it stays flat and only the ink changes — light recesses
+   it against white, dark lifts it off the card.
+
+   Sized with padding rather than width because praxis-lucide.js replaces the
+   ligature span with a 1em SVG: the box has to grow from the glyph outwards.
+   Direct-child selector so card bodies keep their own icon sizing. */
+:is(.wcm-card__title, .wcm-tile) > .material-symbols-rounded{
+  box-sizing:content-box; width:20px; height:20px; padding:7px;
+  border-radius:10px; font-size:20px;
+  background:var(--px-surface-2); color:var(--praxis-color-neutral-90);
+}
+body[data-theme="dark"] :is(.wcm-card__title, .wcm-tile) > .material-symbols-rounded{
+  color:var(--praxis-color-white);
+}
+.wcm-muted{color:var(--praxis-color-text-secondary); font-weight:500;}
+.wcm-stack{display:flex; flex-direction:column; gap:var(--praxis-space-16);}
+
+/* ------------------------------------------------------- segmented filter */
+.wcm-seg{display:flex; gap:2px; padding:3px; background:var(--px-chip); border-radius:12px;}
+.wcm-seg__btn{
+  height:30px; padding:0 12px; border:0; background:transparent; border-radius:9px;
+  font:inherit; font-size:var(--praxis-type-size-sm); font-weight:600;
+  color:var(--praxis-color-text-secondary); cursor:pointer;
+}
+.wcm-seg__btn:hover{color:var(--praxis-color-text-primary);}
+.wcm-seg__btn[aria-pressed="true"]{
+  background:var(--px-surface); color:var(--praxis-color-text-primary);
+  box-shadow:var(--px-tool-shadow);
+}
+
+/* --------------------------------------------------------- required fields */
+.wcm-req{position:relative;}
+.wcm-req__pill{
+  display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 12px;
+  border:0; border-radius:10px; background:var(--px-tool); box-shadow:var(--px-tool-shadow);
+  font:inherit; font-size:var(--praxis-type-size-sm); font-weight:600;
+  color:var(--praxis-color-text-secondary); cursor:pointer;
+}
+.wcm-req__pill:hover{box-shadow:var(--px-tool-shadow-hover);}
+.wcm-req__track{width:44px; height:4px; border-radius:2px; background:var(--px-chip); overflow:hidden;}
+.wcm-req__fill{display:block; height:100%; background:var(--praxis-color-interactive-default);}
+.wcm-req__pop{top:calc(100% + 6px); right:0; width:250px; padding:12px;}
+.wcm-req__pop p{margin:0 0 6px; font-size:var(--praxis-type-size-base); font-weight:600;}
+/* list-style stated back: praxis-reset.css clears markers on every ul/ol */
+.wcm-req__pop ul{margin:0; padding-left:18px; list-style:disc; color:var(--praxis-color-text-secondary); font-size:var(--praxis-type-size-base);}
+
+/* ------------------------------------------------------------- dashboard */
+.wcm-kpis{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+  gap:var(--praxis-space-16); margin-bottom:var(--praxis-space-20);
+}
+.wcm-kpi__label{font-size:var(--praxis-type-size-xs); font-weight:600; color:var(--praxis-color-text-secondary);}
+.wcm-kpi__value{font-size:var(--praxis-type-size-3xl); font-weight:700; line-height:1.1; margin-top:6px; letter-spacing:-.02em;}
+.wcm-kpi__trend{
+  display:flex; align-items:center; gap:5px; margin-top:8px;
+  font-size:var(--praxis-type-size-xs); font-weight:600; color:var(--praxis-color-text-secondary);
+}
+.wcm-kpi__trend .material-symbols-rounded{font-size:16px;}
+.wcm-kpi__trend--up{color:var(--praxis-tone-success-fg);}
+.wcm-kpi__trend--warn{color:var(--wcm-warning-ink);}
+.wcm-grid2{display:grid; grid-template-columns:1.25fr 1fr; gap:var(--praxis-space-20); align-items:start;}
+@media (max-width:1100px){.wcm-grid2{grid-template-columns:1fr;}}
+
+.wcm-bar{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:var(--praxis-type-size-base);}
+.wcm-bar__key{width:10px; height:10px; border-radius:3px; flex-shrink:0;}
+.wcm-bar__label{width:160px; color:var(--praxis-color-text-secondary); font-weight:500;}
+.wcm-bar__track{flex:1; height:8px; border-radius:4px; background:var(--px-chip); overflow:hidden;}
+.wcm-bar__fill{display:block; height:100%; border-radius:4px;}
+.wcm-bar__num{width:22px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums;}
+
+.wcm-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--praxis-color-border-default);
+  font-size:var(--praxis-type-size-base);
+}
+.wcm-row:last-child{border-bottom:0;}
+.wcm-row__flag{color:var(--wcm-warning-ink); font-weight:700;}
+.wcm-feed{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--praxis-color-border-default); font-size:var(--praxis-type-size-base);}
+.wcm-feed:last-child{border-bottom:0;}
+.wcm-feed__dot{width:8px; height:8px; border-radius:50%; background:var(--praxis-color-teal-60); margin-top:6px; flex-shrink:0;}
+.wcm-feed__dot--new{background:var(--praxis-color-pink-60);}
+.wcm-feed__time{font-size:var(--praxis-type-size-xs); font-weight:500; color:var(--praxis-color-text-secondary); margin-top:2px;}
+
+/* ------------------------------------------------------------ Mazlan home */
+/* Greeting — text on the page, not a panel. Groom Lake's .ws-greet: the
+   heading carries the moment and the line under it the context, and nothing
+   frames them, so the first component is the top of the board rather than the
+   second thing on it. No background means no contrast pairing to defend
+   either — both lines sit on the page surface and take the standard ink. */
+.wcm-hero{margin-bottom:var(--praxis-space-24);}
+.wcm-hero h2{
+  margin:0; font-size:var(--praxis-type-size-2xl); font-weight:700;
+  line-height:1.15; letter-spacing:-.01em;
+  color:var(--praxis-color-text-primary);
+}
+.wcm-hero p{
+  margin:var(--praxis-space-8) 0 0; font-size:var(--praxis-type-size-base);
+  font-weight:500; color:var(--praxis-color-text-secondary);
+}
+.wcm-tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--praxis-space-16); margin-bottom:var(--praxis-space-20);}
+.wcm-tile{
+  display:flex; align-items:center; gap:12px; width:100%; padding:var(--praxis-space-16);
+  border:0; background:var(--px-surface); font:inherit; text-align:left; cursor:pointer;
+}
+/* Tile head reads as a component header: chip (above), 700 label, count in the
+   aux slot on the right — Groom Lake's .card__title / .card__aux split. */
+.wcm-tile__label{flex:1; font-size:var(--praxis-type-size-base); font-weight:700; line-height:1.2;}
+.wcm-tile__count{
+  min-width:26px; height:26px; padding:0 7px; display:grid; place-items:center;
+  border-radius:var(--praxis-radius-full); background:var(--px-chip);
+  color:var(--praxis-color-text-secondary); font-size:var(--praxis-type-size-sm); font-weight:700;
+}
+.wcm-tile__count--live{background:var(--praxis-color-pink-60); color:var(--praxis-color-white);}
+.wcm-apps{display:grid; grid-template-columns:repeat(auto-fit, minmax(96px, 1fr)); gap:var(--praxis-space-12);}
+.wcm-app{
+  display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px 4px;
+  border:0; background:transparent; border-radius:var(--praxis-radius-md);
+  font:inherit; font-size:var(--praxis-type-size-xs); font-weight:600;
+  color:var(--praxis-color-text-secondary); cursor:pointer; text-align:center;
+}
+.wcm-app:hover{background:var(--px-hover-btn); color:var(--praxis-color-text-primary);}
+/* Shortcut icons take the primary CTA treatment — the package's own
+   --px-primary-* set, the same fill the .btn--primary rule in praxis.css
+   paints. Each shortcut is a way into another part of the app, so the icon is
+   the call to action; the label under it is just naming the destination.
+   Both themes come free: the tokens are redeclared under [data-theme="dark"]
+   (teal-80→teal-70 gradient with white ink in light, bright cyan with dark
+   ink in dark). */
+.wcm-app__icon{
+  width:44px; height:44px; display:grid; place-items:center; border-radius:var(--praxis-radius-md);
+  background:var(--px-primary-grad); color:var(--px-primary-fg);
+  box-shadow:var(--px-primary-shadow);
+  transition:filter var(--praxis-motion-fast);
+}
+.wcm-app:hover .wcm-app__icon{filter:brightness(1.06);}
+.wcm-app__icon .material-symbols-rounded{font-size:20px;}
+
+/* Mazlan dock — the teal→magenta signature, reserved for agentic moments */
+.wcm-maz{
+  border-radius:var(--praxis-radius-lg); padding:2px;
+  background:linear-gradient(140deg, #29d2d7, #e30072);
+  box-shadow:var(--px-card-raised);
+}
+.wcm-maz__in{
+  border-radius:14px; padding:var(--praxis-space-16); height:100%;
+  background:var(--px-surface);
+}
+.wcm-maz__head{display:flex; align-items:center; gap:8px; font-size:var(--praxis-type-size-base); font-weight:700;}
+.wcm-maz__lede{margin:6px 0 12px; font-size:var(--praxis-type-size-sm); font-weight:500; color:var(--praxis-color-text-secondary);}
+/* Suggested prompts are the package's .mazlan-sugg cards — the same component
+   praxis-mazlan.js renders into the drawer — so nothing is restated here. The
+   one deviation: the drawer's prompts are short title-case labels, which is
+   why .mazlan-sugg__title truncates on one line. These are full questions in a
+   column roughly half the drawer's width, so let them wrap instead of
+   ellipsing away the part that carries the meaning. */
+.wcm-maz .mazlan-sugg__title{white-space:normal; overflow:visible;}
+
+/* --------------------------------------------------------- record page */
+.wcm-record{
+  display:grid;
+  grid-template-columns:var(--praxis-record-rail-w) minmax(0,1fr) var(--praxis-record-rail-w);
+  gap:var(--praxis-space-20); align-items:start;
+}
+@media (max-width:1400px){.wcm-record{grid-template-columns:260px minmax(0,1fr);} .wcm-record__tree{grid-column:1 / -1;}}
+@media (max-width:960px){.wcm-record{grid-template-columns:1fr;} .wcm-record__tree{grid-column:auto;}}
+
+.wcm-person{display:flex; align-items:center; gap:10px;}
+/* Solid teal with white ink, the same treatment as .appbar__avatar: initials
+   on a 16% wash measured 4.06:1 light and 2.86:1 dark at 11px semibold.
+   teal-60 is #1b838b in both themes, so white on it clears 4.5:1 in both —
+   this is not the light-cyan interactive fill the Praxis docs warn about. */
+.wcm-person__init{
+  width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; border-radius:50%;
+  background:var(--praxis-color-teal-60);
+  color:var(--praxis-color-white); font-size:11px; font-weight:700;
+}
+.wcm-person__nm{font-size:var(--praxis-type-size-base); font-weight:600;}
+.wcm-person__meta{font-size:var(--praxis-type-size-xs); font-weight:500; color:var(--praxis-color-text-secondary);}
+
+/* workflow rail */
+.wcm-flow{display:flex; flex-direction:column;}
+.wcm-flow__step{position:relative; display:flex; align-items:center; gap:10px; padding:6px 0;}
+.wcm-flow__dot{
+  position:relative; z-index:1; width:16px; height:16px; flex-shrink:0;
+  display:grid; place-items:center; border-radius:50%;
+  border:2px solid var(--praxis-color-border-strong); background:var(--px-surface);
+  color:var(--praxis-color-white);
+}
+.wcm-flow__dot .material-symbols-rounded{font-size:10px;}
+.wcm-flow__step:not(:last-child)::before{
+  content:""; position:absolute; left:7px; top:22px; bottom:-6px; width:2px;
+  background:var(--praxis-color-border-default);
+}
+.wcm-flow__label{font-size:var(--praxis-type-size-base); font-weight:500; color:var(--praxis-color-text-secondary);}
+.wcm-flow__step[data-state="done"] .wcm-flow__dot{background:var(--praxis-color-teal-60); border-color:var(--praxis-color-teal-60);}
+.wcm-flow__step[data-state="done"]::before{background:var(--praxis-color-teal-60);}
+.wcm-flow__step[data-state="done"] .wcm-flow__label{color:var(--praxis-color-text-primary);}
+.wcm-flow__step[data-state="active"] .wcm-flow__dot{
+  border-color:var(--praxis-color-teal-60);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--praxis-color-teal-60) 18%, transparent);
+}
+.wcm-flow__step[data-state="active"] .wcm-flow__label{color:var(--praxis-color-text-primary); font-weight:700;}
+
+/* related records tree */
+.wcm-tree{font-size:var(--praxis-type-size-base);}
+.wcm-tree__node{padding:8px 10px; border-radius:var(--praxis-radius-sm); color:var(--praxis-color-text-secondary); font-weight:500;}
+.wcm-tree__node--current{background:var(--praxis-tone-warning-bg); color:var(--praxis-color-text-primary); font-weight:700;}
+.wcm-tree__kids{margin-left:14px; padding-left:10px; border-left:1px solid var(--praxis-color-border-default);}
+
+/* value cells inside .admin-field static rows */
+.wcm-val{display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0;}
+.admin-field__value--tall{height:auto; min-height:34px; align-items:flex-start; padding:6px 0; line-height:1.5; font-weight:500;}
+.wcm-check{display:inline-flex; align-items:center; gap:8px; font-size:var(--praxis-type-size-base); font-weight:600; cursor:pointer;}
+.wcm-check input[disabled]{cursor:not-allowed;}
+.wcm-check--muted{font-weight:500; color:var(--praxis-color-text-secondary); cursor:default;}
+
+/* ------------------------------------------------------------- SAP mirror
+   Deliberately not Praxis: this is a read-only window onto another vendor's
+   system, and it should not read as part of the product. */
+.wcm-sap{border-radius:var(--praxis-radius-lg); overflow:hidden; box-shadow:var(--px-card-raised);}
+.wcm-sap__bar{
+  display:flex; align-items:center; gap:10px; padding:12px 18px;
+  background:#1b2a38; color:#fff;
+  font-family:Consolas, "SF Mono", ui-monospace, monospace; font-size:13px;
+}
+.wcm-sap__tag{
+  padding:3px 8px; border-radius:4px; background:#3d6ea5; color:#fff;
+  font-size:11px; font-weight:700;
+}
+.wcm-sap__body{
+  background:var(--px-surface); padding:var(--praxis-space-20);
+  font-family:Consolas, "SF Mono", ui-monospace, monospace;
+}
+.wcm-sap__grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:0 var(--praxis-space-32);}
+.wcm-sap__row{
+  display:grid; grid-template-columns:160px 1fr; gap:12px; padding:7px 0;
+  border-bottom:1px dashed var(--praxis-color-border-default); font-size:13px;
+}
+.wcm-sap__row dt{color:var(--praxis-color-text-secondary);}
+.wcm-sap__row dd{margin:0; font-weight:700;}
+.wcm-sap__desc{
+  margin:6px 0 0; font-family:var(--praxis-type-font-sans);
+  font-size:var(--praxis-type-size-base); font-weight:500; color:var(--praxis-color-text-secondary);
+}
+.wcm-sap__foot{margin-top:var(--praxis-space-16); font-family:var(--praxis-type-font-sans);}
+.wcm-sap__actions{display:flex; gap:10px; margin-top:var(--praxis-space-16); font-family:var(--praxis-type-font-sans);}
+
+/* --------------------------------------------------- notification drawer
+   Right-hand drawer on the Praxis glass material. (The original opened on
+   the left, where the nav rail and the phone nav drawer already live.) */
+/* same scrim value as the shipped .cn-overlay / .cn-scrim, so every dimmed
+   surface in the prototype dims by the same amount */
+.wcm-scrim{position:fixed; inset:0; z-index:110; background:rgba(16,36,58,.18);}
+.wcm-scrim[hidden]{display:none;}
+.wcm-nd{
+  position:fixed; top:0; right:0; bottom:0; z-index:111; width:min(430px, 94vw);
+  display:flex; flex-direction:column;
+  background:var(--praxis-glass-drawer, var(--px-drawer)); color:var(--praxis-color-text-primary);
+  -webkit-backdrop-filter:var(--praxis-glass-blur, blur(16px)); backdrop-filter:var(--praxis-glass-blur, blur(16px));
+  box-shadow:var(--px-overlay);
+  transition:transform var(--praxis-motion-drawer) var(--praxis-ease-default);
+}
+.wcm-nd[hidden]{display:none;}
+.wcm-nd__head{
+  display:flex; align-items:center; gap:10px; flex-shrink:0;
+  padding:var(--praxis-space-16) var(--praxis-space-20);
+  border-bottom:1px solid var(--praxis-color-border-default);
+}
+.wcm-nd__head h2{flex:1; margin:0; font-size:var(--praxis-type-size-lg); font-weight:700;}
+.wcm-nd__body{flex:1; min-height:0; overflow:auto; padding:var(--praxis-space-16) var(--praxis-space-20);}
+.wcm-nd__search{
+  display:flex; align-items:center; gap:8px; height:40px; padding:0 12px;
+  border-radius:var(--praxis-radius-md); background:var(--px-field);
+  margin-bottom:var(--praxis-space-12); color:var(--praxis-color-text-secondary);
+}
+.wcm-nd__search .material-symbols-rounded{font-size:18px;}
+.wcm-nd__search input{
+  flex:1; min-width:0; border:0; outline:0; background:transparent;
+  font:inherit; font-size:var(--praxis-type-size-base); color:var(--praxis-color-text-primary);
+}
+.wcm-ncard{
+  display:flex; gap:12px; width:100%; margin-bottom:10px; padding:14px;
+  border:0; border-radius:var(--praxis-radius-md); background:var(--px-surface);
+  box-shadow:var(--px-tool-shadow); font:inherit; text-align:left; cursor:pointer;
+}
+.wcm-ncard:hover{box-shadow:var(--px-tool-shadow-hover);}
+.wcm-ncard__icon{
+  width:32px; height:32px; flex-shrink:0; display:grid; place-items:center;
+  border-radius:var(--praxis-radius-sm);
+  background:color-mix(in srgb, var(--praxis-color-pink-60) 12%, transparent);
+  color:var(--praxis-color-pink-70);
+}
+.wcm-ncard__icon .material-symbols-rounded{font-size:18px;}
+.wcm-ncard__title{font-size:var(--praxis-type-size-base); font-weight:700;}
+.wcm-ncard__desc{margin-top:3px; font-size:var(--praxis-type-size-sm); font-weight:500; color:var(--praxis-color-text-secondary); line-height:1.45;}
+.wcm-ncard__time{margin-top:6px; font-size:var(--praxis-type-size-xs); font-weight:500; color:var(--praxis-color-text-secondary);}
+.wcm-empty{padding:32px 12px; text-align:center; color:var(--praxis-color-text-secondary); font-weight:500;}
+
+/* -------------------------------------------------------------- dialogs
+   Built on the shipped .cn-overlay / .cn-modal / .cn-head / .cn-footer
+   dialog material; only the body contents are local. */
+.wcm-dialog{width:min(460px, 100%);}
+.wcm-dialog__body{padding:4px 16px 12px;}
+.wcm-sig{
+  width:100%; height:150px; display:block; border-radius:var(--praxis-radius-md);
+  background:var(--px-field); border:1.5px dashed var(--praxis-color-border-strong);
+  cursor:crosshair; touch-action:none;
+}
+.wcm-sig__hint{margin:6px 0 0; font-size:var(--praxis-type-size-xs); font-weight:500; color:var(--praxis-color-text-secondary);}
+.wcm-dialog__who{margin:0 0 12px; font-size:var(--praxis-type-size-sm); font-weight:500; color:var(--praxis-color-text-secondary);}
+.cn-footer--end{justify-content:flex-end; gap:8px;}
+
+/* permit picker (Create New flyout material) */
+.wcm-cn__tag{
+  margin-left:auto; flex-shrink:0; padding:2px 8px; border-radius:var(--praxis-radius-full);
+  background:var(--px-chip); color:var(--praxis-color-text-secondary);
+  font-size:var(--praxis-type-size-2xs); font-weight:700;
+}
+.wcm-cn__tag--ready{background:var(--praxis-tone-success-bg); color:var(--praxis-tone-success-fg);}
+
+/* ---------------------------------------------------------- phone overlay */
+.wcm-phone-scrim{
+  position:fixed; inset:0; z-index:115; display:grid; place-items:center;
+  background:rgba(16,36,58,.45); padding:var(--praxis-space-24);
+}
+.wcm-phone-scrim[hidden]{display:none;}
+.wcm-phone{
+  position:relative; width:340px; height:min(700px, 92vh); padding:12px;
+  border-radius:40px; background:#0b0d0f; box-shadow:var(--px-overlay);
+}
+.wcm-phone__notch{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:2;
+  width:120px; height:22px; border-radius:0 0 14px 14px; background:#0b0d0f;
+}
+.wcm-phone__screen{
+  position:relative; width:100%; height:100%; overflow:hidden;
+  border-radius:30px; background:var(--px-page);
+}
+.wcm-mscreen{
+  position:absolute; inset:34px 0 0; display:flex; flex-direction:column;
+  padding:var(--praxis-space-16); overflow-y:auto;
+}
+.wcm-mscreen[hidden]{display:none;}
+.wcm-mscreen--lock{inset:0; background:#12151f; color:#fff; justify-content:center;}
+.wcm-mtop{display:flex; align-items:center; gap:8px; margin-bottom:var(--praxis-space-12);}
+.wcm-mtop h3{flex:1; margin:0; font-size:var(--praxis-type-size-lg); font-weight:700;}
+.wcm-mback{
+  width:30px; height:30px; flex-shrink:0; display:grid; place-items:center;
+  border:0; border-radius:50%; background:var(--px-tool); box-shadow:var(--px-tool-shadow);
+  color:var(--praxis-color-text-secondary); cursor:pointer;
+}
+.wcm-mback .material-symbols-rounded{font-size:16px;}
+.wcm-mitem{
+  display:block; width:100%; margin-bottom:10px; padding:12px; border:0;
+  border-radius:var(--praxis-radius-md); background:var(--px-surface);
+  box-shadow:var(--px-tool-shadow); font:inherit; text-align:left; cursor:pointer;
+}
+.wcm-mitem--next{box-shadow:0 0 0 1.5px var(--praxis-color-pink-60), var(--px-tool-shadow);}
+.wcm-mitem--past{opacity:.55;}
+.wcm-mitem__t{font-size:var(--praxis-type-size-base); font-weight:700;}
+.wcm-mitem__d{margin-top:3px; font-size:var(--praxis-type-size-xs); font-weight:500; color:var(--praxis-color-text-secondary);}
+.wcm-mcard{
+  padding:14px; border-radius:var(--praxis-radius-md); background:var(--px-surface);
+  box-shadow:var(--px-tool-shadow); font-size:var(--praxis-type-size-sm); margin-bottom:10px;
+}
+.wcm-mrow{
+  display:flex; justify-content:space-between; gap:10px; padding:6px 0;
+  border-bottom:1px solid var(--praxis-color-border-default);
+  font-size:var(--praxis-type-size-sm); font-weight:600;
+}
+.wcm-mrow:last-child{border-bottom:0;}
+.wcm-mrow dt{color:var(--praxis-color-text-secondary); font-weight:500;}
+.wcm-mrow dd{margin:0; text-align:right;}
+.wcm-mchecks{display:flex; flex-direction:column; gap:8px; margin:8px 0 var(--praxis-space-16);}
+.wcm-mchk{
+  display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+  border-radius:var(--praxis-radius-md); background:var(--px-surface);
+  box-shadow:var(--px-tool-shadow); font-size:var(--praxis-type-size-sm); font-weight:600;
+  cursor:pointer;
+}
+.wcm-mchk input{margin-top:1px; flex-shrink:0;}
+.wcm-mchk[data-done="true"]{background:var(--praxis-tone-success-bg);}
+.wcm-mspacer{flex:1; min-height:var(--praxis-space-16);}
+.wcm-mclock{margin:0; text-align:center; font-size:52px; font-weight:300;}
+.wcm-mdate{margin:6px 0 40px; text-align:center; font-size:var(--praxis-type-size-base); font-weight:500; color:rgba(255,255,255,.7);}
+.wcm-mpush{
+  display:block; width:100%; padding:14px; border:0; border-radius:var(--praxis-radius-lg);
+  background:rgba(255,255,255,.94); box-shadow:var(--px-overlay);
+  font:inherit; text-align:left; cursor:pointer;
+}
+.wcm-mpush__app{display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:#5d6977;}
+.wcm-mpush__t{margin-top:4px; font-size:13px; font-weight:700; color:#2f4051;}
+.wcm-mpush__d{font-size:12px; font-weight:500; color:#5d6977;}
+.wcm-mdone{
+  width:56px; height:56px; margin:20px auto 16px; display:grid; place-items:center;
+  border-radius:50%; background:var(--praxis-tone-success-bg); color:var(--praxis-tone-success-fg);
+}
+.wcm-mdone .material-symbols-rounded{font-size:28px;}
+.wcm-mtimer{
+  display:inline-flex; align-items:center; gap:6px; margin-bottom:12px; padding:5px 10px;
+  border-radius:var(--praxis-radius-full); background:var(--praxis-tone-danger-bg);
+  color:var(--praxis-tone-danger-fg); font-size:var(--praxis-type-size-xs); font-weight:700;
+}
+.wcm-mtimer .material-symbols-rounded{font-size:14px;}
+.wcm-mcentre{text-align:center;}
+
+/* ---------------------------------------------------------------- toasts */
+.wcm-toasts{
+  position:fixed; right:20px; bottom:20px; z-index:400;
+  display:flex; flex-direction:column; gap:8px; pointer-events:none;
+  transition:bottom var(--praxis-motion-normal) var(--praxis-ease-default);
+}
+/* clear the demo bar rather than stacking on top of its captions */
+body.wcm-demo-on .wcm-toasts{bottom:96px;}
+/* A surface card rather than an inverted slab: an inverted toast has to
+   define its own ink and its own success colour, and both then have to be
+   re-checked per theme. On --px-surface the popover material and the tone
+   pairs already theme themselves. */
+.wcm-toast{
+  display:flex; align-items:center; gap:10px; padding:11px 16px;
+  border-radius:var(--praxis-radius-md); background:var(--px-surface);
+  border-left:3px solid var(--praxis-color-teal-60);
+  color:var(--praxis-color-text-primary); box-shadow:var(--px-overlay);
+  font-size:var(--praxis-type-size-base); font-weight:600; max-width:min(460px, 90vw);
+}
+.wcm-toast__dot{width:8px; height:8px; flex-shrink:0; border-radius:50%; background:var(--praxis-tone-success-fg);}
+
+/* ------------------------------------------------------------ start card */
+.wcm-sov{
+  position:fixed; inset:0; z-index:500; display:grid; place-items:center;
+  padding:var(--praxis-space-24); color:#fff;
+  background:linear-gradient(128deg, #0a3b3f 0%, #135d63 46%, #1c4e63 100%);
+  transition:opacity .4s, visibility .4s;
+}
+.wcm-sov--gone{opacity:0; visibility:hidden; pointer-events:none;}
+.wcm-sov__in{max-width:660px;}
+.wcm-sov__eyebrow{
+  display:inline-flex; align-items:center; gap:8px; margin-bottom:18px; padding:6px 14px;
+  border-radius:var(--praxis-radius-full); background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.3);
+  font-size:var(--praxis-type-size-xs); font-weight:700;
+}
+.wcm-sov h1{margin:0 0 14px; font-size:36px; font-weight:700; letter-spacing:-.02em; line-height:1.1;}
+.wcm-sov p{margin:0 0 24px; font-size:var(--praxis-type-size-md); font-weight:500; line-height:1.6; opacity:.92;}
+.wcm-sov__btns{display:flex; flex-wrap:wrap; gap:12px;}
+.wcm-sov__btn{
+  display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 22px;
+  border:0; border-radius:var(--praxis-radius-full); font:inherit;
+  font-size:var(--praxis-type-size-base); font-weight:700; cursor:pointer;
+}
+.wcm-sov__btn--pri{background:#fff; color:#0a3b3f;}
+.wcm-sov__btn--sec{background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.4);}
+
+/* ------------------------------------------------------------ guided demo */
+.wcm-dmtitle{
+  position:fixed; inset:0; z-index:390; display:grid; place-items:center;
+  padding:var(--praxis-space-24); text-align:center; color:#fff;
+  background:linear-gradient(135deg, #0a3b3f, #135d63 55%, #1c4e63);
+  opacity:0; pointer-events:none; transition:opacity .5s;
+}
+.wcm-dmtitle--on{opacity:1;}
+.wcm-dmtitle h2{margin:16px 0 10px; font-size:32px; font-weight:700; letter-spacing:-.02em;}
+.wcm-dmtitle p{margin:0; max-width:560px; font-size:var(--praxis-type-size-base); font-weight:500; opacity:.9;}
+.wcm-dmb{
+  position:fixed; left:0; right:0; bottom:0; z-index:300;
+  background:rgba(15,20,26,.96); color:#fff;
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  border-top:2px solid var(--praxis-color-pink-60);
+  transform:translateY(102%); transition:transform var(--praxis-motion-slow) var(--praxis-ease-default);
+}
+.wcm-dmb--on{transform:translateY(0);}
+.wcm-dmb__prog{height:3px; background:rgba(255,255,255,.16);}
+.wcm-dmb__prog span{display:block; height:100%; width:0; background:linear-gradient(90deg, #e30072, #29d2d7); transition:width .4s linear;}
+.wcm-dmb__in{display:flex; align-items:center; gap:16px; padding:12px 20px;}
+.wcm-dmb__n{
+  width:26px; height:26px; flex-shrink:0; display:grid; place-items:center; border-radius:50%;
+  background:var(--praxis-color-pink-60); font-size:11px; font-weight:700;
+}
+.wcm-dmb__lbl{font-size:10px; font-weight:700; opacity:.6;}
+.wcm-dmb__scene{font-size:var(--praxis-type-size-xs); font-weight:700; white-space:nowrap;}
+.wcm-dmb__cap{flex:1; min-width:0; font-size:var(--praxis-type-size-base); font-weight:500; line-height:1.4;}
+.wcm-dmb__ctl{display:flex; align-items:center; gap:4px; flex-shrink:0;}
+.wcm-dmb__ctl button{
+  width:32px; height:32px; display:grid; place-items:center; border:0; border-radius:var(--praxis-radius-sm);
+  background:transparent; color:#fff; opacity:.8; cursor:pointer;
+}
+.wcm-dmb__ctl button:hover{background:rgba(255,255,255,.15); opacity:1;}
+.wcm-dmb__ctl .material-symbols-rounded{font-size:18px;}
+.wcm-dmb__time{margin-right:6px; font-size:var(--praxis-type-size-xs); font-weight:600; opacity:.6; font-variant-numeric:tabular-nums;}
+.wcm-spot{position:relative; z-index:2; border-radius:var(--praxis-radius-lg); animation:wcm-spot 1.9s ease-in-out infinite;}
+@keyframes wcm-spot{
+  0%,100%{box-shadow:0 0 0 0 rgba(227,0,114,.55);}
+  50%{box-shadow:0 0 0 7px rgba(227,0,114,0);}
+}
+@media (prefers-reduced-motion:reduce){
+  .wcm-spot{animation:none; box-shadow:0 0 0 3px rgba(227,0,114,.5);}
+}
+
+/* ------------------------------------------------------------- narrow
+   Below 768px praxis-appbar.css takes the centred search pill in-flow and
+   drops the Mazlan pill, and it hides the module selector (.msel) so the
+   input keeps a usable width. This page uses .appbar__module rather than
+   .msel, and carries two extra icon buttons, so it has to make the same
+   call for its own controls — measured at 390px, where the bar otherwise
+   overlaps itself. The theme toggle is not lost: it is also a row in the
+   avatar popover. */
+@media (max-width:768px){
+  .appbar__module{display:none;}
+  .appbar [data-act="demo"]{display:none;}
+  #themeBtn{display:none;}
+}
+@media (max-width:760px){
+  .wcm-record{grid-template-columns:1fr;}
+  .wcm-sap__row{grid-template-columns:130px 1fr;}
+}
+
+/* Explicit striping for the filtered list; the id beats the package's
+   nth-child rule in both directions, so an odd row is left unpainted. */
+#permitRows tr[data-stripe="0"]{background:transparent;}
+#permitRows tr[data-stripe="1"]{background:var(--px-hover-btn);}
+#permitRows tr[data-stripe]:hover{background:var(--px-hover);}
+
+/* Keep the columns readable rather than crushing seven of them into 390px;
+   the scroll container above takes over from here. Its 440px max-height is
+   dropped at these widths: a nested vertical scroll region inside a page
+   that already scrolls is two scrollbars fighting on a phone, and only the
+   sideways one is wanted here. */
+@media (max-width:900px){
+  .admin-table{min-width:760px;}
+  .admin-table th, .admin-table td{white-space:nowrap;}
+  .admin-table-scroll{max-height:none;}
+}
+
+/* ------------------------------------------------ stacked spans in buttons
+   A <button> cannot hold block-level children in every host, so every
+   two-line control on this page is built from spans — which then need to be
+   told to stack. praxis-create-new.css's own .cn-tpl__name / .cn-tpl__meta
+   set no display either, because the package's markup used divs. */
+.cn-tpl__name, .cn-tpl__meta,
+.wcm-ncard__title, .wcm-ncard__desc, .wcm-ncard__time,
+.wcm-mitem__t, .wcm-mitem__d,
+.wcm-mpush__t, .wcm-mpush__d,
+.wcm-role__nm, .wcm-role__rl{display:block;}

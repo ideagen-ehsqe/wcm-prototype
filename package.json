@@ -1,0 +1,13 @@
+{
+  "name": "wcm-prototype",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Work clearance management prototype, rebuilt on the Praxis design system",
+  "scripts": {
+    "build": "bash scripts/build-static.sh",
+    "bundle": "bash scripts/bundle-zip.sh"
+  },
+  "dependencies": {
+    "@ideagen-ax/praxis": "0.1.2"
+  }
+}
