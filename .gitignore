@@ -2,6 +2,9 @@ node_modules/
 
 # Build outputs — `npm run build` stages the deploy, `npm run bundle` writes the zip.
 public/
-.vercel/
+
+# Vercel link metadata and the OIDC token it downloads.
+.vercel
+.env*
 
 .DS_Store
