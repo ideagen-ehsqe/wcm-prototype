@@ -15,7 +15,7 @@ Praxis from `node_modules`, so keep the folder together (or swap in the CDN, bel
 ```sh
 npm install     # pins @ideagen-ax/praxis at 0.1.2
 npm run build   # stages public/ — what Vercel serves
-npm run bundle  # rewrites wcm-praxis-prototype.zip — the offline copy
+npm run bundle  # writes an offline zip, if someone ever needs one again
 ```
 
 `npm run build` copies the rebuild plus the Praxis package into `public/`, as
@@ -27,8 +27,10 @@ Copying the whole Praxis package rather than picking out the four files the mark
 is on purpose — the first hand-built bundle silently shipped without
 `praxis-navdrawer.js`, and copying the package makes that class of omission impossible.
 
-The zip is a build artifact and **does not refresh itself** — run `npm run bundle` after
-changing the prototype or you will hand out the previous version.
+The offline zip is generated on demand and is not kept in the repo — the deployment is the
+way to share this now. `npm run bundle` is still here for the case it isn't reachable, but
+whatever it writes goes stale the moment the prototype changes, so generate it when you
+need it rather than keeping one around.
 
 ## Consuming Praxis
 

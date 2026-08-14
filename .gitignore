@@ -2,6 +2,7 @@ node_modules/
 
 # Build outputs — `npm run build` stages the deploy, `npm run bundle` writes the zip.
 public/
+wcm-praxis-prototype.zip
 
 # Vercel link metadata and the OIDC token it downloads.
 .vercel
