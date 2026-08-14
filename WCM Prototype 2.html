@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-variant="praxis">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Clearance Management — Praxis prototype</title>
+<style>
+/* NOTE: font-family below uses system fallbacks only. Swap in real Gilroy
+   webfont files (per Groom Lake constraint: "always real Gilroy files —
+   never substitute") before this leaves prototype stage. */
+:root{
+  --n05:#FAFBFC;--n10:#F4F6F7;--n20:#C8CFD7;--n30:#B9C1C9;--n40:#9AA5AE;--n50:#7C8892;--n60:#5C6773;--n70:#46505A;--n80:#313940;--n90:#1C2126;--n100:#0B0D0F;
+  --teal10:#E6F4F5;--teal20:#C7E8EA;--teal30:#9FD6DA;--teal40:#6EC0C6;--teal50:#3FA8AF;--teal60:#1B838B;--teal70:#146970;--teal80:#0E4F54;--teal90:#0A3B3F;
+  --pink10:#FDE6F0;--pink20:#FAC2DE;--pink30:#F594C4;--pink40:#EE5FA5;--pink50:#E63690;--pink60:#E30072;--pink70:#B8005D;--pink80:#8C0046;
+  --orange60:#C77700;--orange10:#FFF3E0;
+  --success:#1E8E5A;--success-subtle:#E6F7EE;--warning:#C77700;--warning-subtle:#FFF3E0;--danger:#D2333B;--danger-subtle:#FCE8E9;--info:#2E7BDB;--info-subtle:#E8F1FC;
+  --text-primary:var(--n90);--text-secondary:var(--n60);--text-disabled:var(--n40);--text-link:var(--teal60);
+  --surface-default:#fff;--surface-subtle:var(--n10);--surface-muted:var(--n20);--surface-inverse:var(--n100);
+  --border-default:#E2E5E9;--border-strong:var(--n40);--border-focus:var(--teal50);
+  --interactive-default:var(--teal60);--interactive-hover:var(--teal70);--interactive-active:var(--teal80);
+  --px-page:#F6F7F9;--px-surface:#fff;--px-surface-2:#FBFCFD;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-full:999px;
+  --shadow-1:0 1px 2px rgba(30,41,59,.07),0 1px 1px rgba(30,41,59,.04);
+  --shadow-3:0 4px 12px rgba(30,41,59,.10),0 2px 4px rgba(30,41,59,.06);
+  --shadow-5:0 16px 32px rgba(30,41,59,.18),0 4px 10px rgba(30,41,59,.08);
+  --font-sans:'Gilroy','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+[data-theme="dark"]{
+  --px-page:#0E1420;--px-surface:#161D2B;--px-surface-2:#1C2434;
+  --border-default:#2A3346;--border-strong:#3A4458;
+  --text-primary:#EDF1F5;--text-secondary:#9AA7BD;--text-disabled:#5C6773;
+  --interactive-default:#29D2D7;--interactive-hover:#4FDEE2;--interactive-active:#6BE6E9;
+  --surface-default:#161D2B;--surface-subtle:#1C2434;--surface-muted:#232C3F;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;font-family:var(--font-sans);color:var(--text-primary);background:var(--px-page);
+  background-image:radial-gradient(circle,rgba(0,0,0,.045) 1px,transparent 1px);background-size:16px 16px;
+  font-size:16px;line-height:1.5;
+}
+[data-theme="dark"] body{background-image:radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px);}
+h1,h2,h3,h4{margin:0;font-weight:600;}
+button{font-family:inherit;cursor:pointer;}
+.hidden{display:none!important;}
+
+/* ---- App bar ---- */
+.appbar{height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;position:sticky;top:0;z-index:20;background:var(--px-page);}
+.brandmark{display:flex;gap:3px;flex-shrink:0;}
+.brandmark span{width:8px;height:8px;border-radius:2px;}
+.brandmark span:nth-child(1){background:var(--teal60);}
+.brandmark span:nth-child(2){background:var(--pink60);}
+.appbar .protolabel{font-size:12px;color:var(--text-secondary);white-space:nowrap;}
+.search-pill{flex:1;max-width:520px;display:flex;align-items:center;gap:8px;background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-full);padding:0 14px;height:38px;box-shadow:var(--shadow-1);}
+.search-pill input{border:none;outline:none;flex:1;font-size:14px;background:transparent;color:var(--text-primary);}
+.module-chip{font-size:12px;color:var(--text-secondary);border-right:1px solid var(--border-default);padding-right:8px;white-space:nowrap;}
+.mazlan-pill{display:flex;align-items:center;gap:6px;border-radius:var(--radius-full);padding:6px 12px;background:linear-gradient(90deg,var(--teal60),var(--pink60));color:#fff;font-size:13px;font-weight:500;border:none;}
+.mazlan-dots{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.mazlan-dots span{width:4px;height:4px;border-radius:50%;background:#fff;}
+.appbar-spacer{flex:1;}
+.iconbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border-default);background:var(--px-surface);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-secondary);}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--teal20);color:var(--teal80);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
+
+/* ---- Shell ---- */
+.shell{display:flex;min-height:calc(100vh - 56px);}
+.navrail{width:56px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0;}
+.rail-btn{width:40px;height:40px;border-radius:var(--radius-md);border:none;background:transparent;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-secondary);}
+.rail-btn.active{background:var(--px-surface);box-shadow:var(--shadow-1),inset 0 1px 0 rgba(255,255,255,.6);color:var(--teal70);}
+.rail-btn.create{background:linear-gradient(160deg,var(--teal50),var(--teal70));color:#fff;box-shadow:var(--shadow-3);margin-bottom:4px;}
+.railgap{flex:1;}
+
+.main{flex:1;padding:0 32px 40px;min-width:0;}
+.crumb{font-size:13px;color:var(--text-secondary);margin-bottom:4px;}
+.crumb a{color:var(--text-secondary);text-decoration:none;cursor:pointer;}
+.crumb a:hover{color:var(--teal70);text-decoration:underline;}
+.pageheader{display:flex;align-items:center;gap:12px;padding:16px 0;}
+.pageheader .picon{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--teal10);color:var(--teal70);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.pageheader h1{font-size:24px;}
+.pageheader .sub{font-size:13px;color:var(--text-secondary);margin-top:2px;}
+
+.toolbar{display:flex;align-items:center;gap:10px;padding:8px 0 16px;flex-wrap:wrap;}
+.btn{border-radius:var(--radius-sm);border:1px solid var(--border-default);background:var(--px-surface);padding:8px 14px;font-size:13px;font-weight:500;color:var(--text-primary);}
+.btn.primary{background:var(--interactive-default);border-color:var(--interactive-default);color:#fff;}
+.btn.primary:hover{background:var(--interactive-hover);}
+.btn.danger{color:var(--danger);border-color:var(--danger-subtle);background:var(--danger-subtle);}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-secondary);}
+.chip{border-radius:var(--radius-full);border:1px solid var(--border-default);background:var(--px-surface);padding:6px 12px;font-size:12px;color:var(--text-secondary);}
+.chip.active{background:var(--teal60);border-color:var(--teal60);color:#fff;}
+.toolbar-spacer{flex:1;}
+.rfg{position:relative;}
+.rfg-pill{display:flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--border-default);border-radius:var(--radius-full);padding:6px 10px;background:var(--px-surface);color:var(--text-secondary);}
+.rfg-track{width:44px;height:4px;border-radius:2px;background:var(--n20);overflow:hidden;}
+.rfg-fill{height:100%;background:var(--teal60);}
+.rfg-pop{position:absolute;top:38px;right:0;width:220px;background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);box-shadow:var(--shadow-5);padding:12px;z-index:10;font-size:13px;}
+.rfg-pop p{margin:0 0 8px;font-weight:500;}
+.rfg-pop ul{margin:0;padding-left:16px;color:var(--text-secondary);}
+
+/* ---- Content card / data table ---- */
+.content-card{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-lg);overflow:hidden;}
+table.dtable{width:100%;border-collapse:collapse;font-size:13px;}
+table.dtable th{text-align:left;font-weight:600;color:var(--text-secondary);font-size:12px;padding:12px 16px;border-bottom:1px solid var(--border-default);background:var(--px-surface-2);}
+table.dtable td{padding:12px 16px;border-bottom:1px solid var(--border-default);}
+table.dtable tbody tr{cursor:pointer;}
+table.dtable tbody tr:hover{background:var(--teal10);}
+table.dtable tbody tr:nth-child(even){background:var(--px-surface-2);}
+table.dtable tbody tr:nth-child(even):hover{background:var(--teal10);}
+.type-chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:var(--radius-sm);white-space:nowrap;}
+.status-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full);white-space:nowrap;}
+.status-draft{background:var(--n10);color:var(--n60);}
+.status-submitted{background:var(--warning-subtle);color:var(--warning);}
+.status-isolation{background:var(--pink10);color:var(--pink70);}
+.status-authorised{background:var(--info-subtle);color:var(--info);}
+.status-live{background:var(--success-subtle);color:var(--success);}
+.status-closed{background:var(--n10);color:var(--n60);}
+
+/* ---- Status banner / callout ---- */
+.status-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px;}
+.status-banner.warning{background:var(--warning-subtle);color:#7A4A00;border:1px solid #F0C674;}
+.status-banner.success{background:var(--success-subtle);color:#0F5C39;border:1px solid #9BDDBB;}
+
+/* ---- Record page 3-col layout ---- */
+.record-layout{display:grid;grid-template-columns:280px 1fr 280px;gap:20px;align-items:start;}
+.guide-card{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;}
+.guide-card h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:12px;}
+.task-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.task-row .avatar{width:28px;height:28px;font-size:11px;}
+.task-meta{font-size:12px;color:var(--text-secondary);}
+.workflow-step{display:flex;align-items:center;gap:10px;padding:6px 0;position:relative;}
+.workflow-step .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--n30);background:var(--px-surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
+.workflow-step.done .dot{background:var(--teal60);border-color:var(--teal60);}
+.workflow-step.active .dot{border-color:var(--teal60);box-shadow:0 0 0 3px var(--teal10);}
+.workflow-step .label{font-size:13px;color:var(--text-secondary);}
+.workflow-step.active .label{color:var(--text-primary);font-weight:600;}
+.workflow-step.done .label{color:var(--text-primary);}
+.workflow-line{position:absolute;left:7px;top:22px;bottom:-6px;width:2px;background:var(--n20);}
+.workflow-step.done .workflow-line{background:var(--teal60);}
+
+.tabgroup{display:flex;gap:4px;border-bottom:1px solid var(--border-default);margin-bottom:16px;}
+.tab{padding:10px 14px;font-size:13px;color:var(--text-secondary);border-bottom:2px solid transparent;cursor:pointer;}
+.tab.active{color:var(--teal70);border-color:var(--teal60);font-weight:600;}
+
+.field-row{display:grid;grid-template-columns:160px 1fr;gap:16px;padding:10px 0;border-bottom:1px solid var(--border-default);align-items:center;}
+.field-row .flabel{font-size:13px;color:var(--text-secondary);}
+.field-row .fval{font-size:14px;}
+.fval a{color:var(--text-link);text-decoration:none;}
+.fval.large{white-space:pre-line;color:var(--text-secondary);font-size:13px;}
+.toggle{position:relative;width:36px;height:20px;border-radius:var(--radius-full);background:var(--n30);display:inline-block;flex-shrink:0;}
+.toggle.on{background:var(--teal60);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;}
+.toggle.on::after{left:18px;}
+.checkline{display:flex;align-items:center;gap:8px;font-size:14px;}
+.checkline input{width:16px;height:16px;accent-color:var(--teal60);}
+
+.process-tree h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:12px;}
+.tree-node{font-size:13px;padding:8px 10px;border-radius:var(--radius-sm);margin-bottom:4px;color:var(--text-secondary);}
+.tree-node.current{background:var(--orange10);color:#8A4B00;font-weight:600;}
+.tree-child{margin-left:16px;border-left:1px solid var(--border-default);padding-left:10px;}
+
+/* ---- Toast ---- */
+.toast-region{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:50;}
+.toast{background:var(--n100);color:#fff;padding:10px 16px;border-radius:var(--radius-md);font-size:13px;box-shadow:var(--shadow-5);display:flex;align-items:center;gap:8px;}
+.toast .dotok{width:8px;height:8px;border-radius:50%;background:var(--success);}
+
+/* ---- Dashboard ---- */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:20px;}
+.kpi-card{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;}
+.kpi-card .kl{font-size:12px;color:var(--text-secondary);font-weight:500;margin-bottom:8px;}
+.kpi-card .kv{font-size:28px;font-weight:600;letter-spacing:-.5px;}
+.kpi-card .kt{font-size:12px;margin-top:8px;display:flex;align-items:center;gap:5px;}
+.kpi-card .kt.up{color:var(--success);}
+.kpi-card .kt.down{color:var(--danger);}
+.kpi-card .kt.warn{color:var(--warning);}
+.dash-row{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-bottom:20px;}
+.dash-card{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:18px;}
+.dash-card h3{font-size:14px;font-weight:600;margin-bottom:14px;}
+.mixrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;}
+.mixrow .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.mixrow .lbl{width:150px;color:var(--text-secondary);}
+.mixrow .track{flex:1;height:8px;border-radius:4px;background:var(--n10);overflow:hidden;}
+.mixrow .fill{height:100%;border-radius:4px;}
+.mixrow .num{width:20px;text-align:right;font-weight:600;}
+.simops-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-default);font-size:13px;}
+.simops-row:last-child{border-bottom:none;}
+.simops-row .loc{font-weight:500;}
+.simops-row .flag{font-size:11px;color:var(--warning);font-weight:600;}
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-default);font-size:13px;}
+.feed-item:last-child{border-bottom:none;}
+.feed-dot{width:8px;height:8px;border-radius:50%;background:var(--teal60);margin-top:5px;flex-shrink:0;}
+.feed-dot.new{background:var(--pink60);}
+.feed-txt .who{color:var(--text-secondary);}
+.feed-time{font-size:11px;color:var(--text-disabled);margin-top:2px;}
+.dash-callout{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-md);background:var(--warning-subtle);color:#7A4A00;border:1px solid #F0C674;font-size:13px;margin-bottom:20px;cursor:pointer;}
+
+/* ---- Start overlay ---- */
+.sov{position:fixed;inset:0;z-index:400;display:grid;place-items:center;
+ background:linear-gradient(128deg,#0A3B3F 0%,#135D63 46%,#1C4E63 100%);color:#fff;
+ transition:opacity .4s,visibility .4s;}
+.sov.gone{opacity:0;visibility:hidden;pointer-events:none;}
+.sov-in{max-width:640px;padding:36px;text-align:left;}
+.sov-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:18px;}
+.sov h1{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:14px;}
+.sov p.lede{font-size:15px;line-height:1.6;opacity:.92;margin-bottom:24px;max-width:540px;}
+.sov-btns{display:flex;gap:12px;}
+.sov-btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 22px;font-size:14px;font-weight:600;border:none;}
+.sov-btn.pri{background:#fff;color:var(--teal90);}
+.sov-btn.sec{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4);}
+
+/* ---- Demo bar ---- */
+.dmb{position:fixed;left:0;right:0;bottom:0;z-index:300;background:rgba(15,20,26,.96);color:#fff;
+ backdrop-filter:blur(10px);transform:translateY(102%);transition:transform .3s;border-top:2px solid var(--pink60);}
+.dmb.on{transform:translateY(0);}
+.dmb-p{height:3px;background:rgba(255,255,255,.16);}
+.dmb-p i{display:block;height:100%;background:linear-gradient(90deg,var(--pink60),var(--teal50));width:0;transition:width .4s linear;}
+.dmb-i{display:flex;align-items:center;gap:16px;padding:12px 20px;}
+.dmb-n{width:26px;height:26px;border-radius:50%;background:var(--pink60);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.dmb-lb{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.6;}
+.dmb-t{font-size:12px;font-weight:600;white-space:nowrap;}
+.dmb-cap{flex:1;font-size:13px;line-height:1.4;min-width:0;}
+.dmb-ct{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.dmb-ct button{width:30px;height:30px;border-radius:var(--radius-sm);color:#fff;opacity:.8;border:none;background:transparent;font-size:13px;}
+.dmb-ct button:hover{background:rgba(255,255,255,.15);opacity:1;}
+.dmb-ct .tm{font-size:11px;opacity:.6;margin-right:6px;}
+.dmtitle{position:fixed;inset:0;z-index:390;display:grid;place-items:center;
+ background:linear-gradient(135deg,#0A3B3F,#135D63 55%,#1C4E63);color:#fff;opacity:0;pointer-events:none;transition:opacity .5s;}
+.dmtitle.on{opacity:1;pointer-events:auto;}
+.dmtitle .in{text-align:center;max-width:560px;padding:30px;}
+.dmtitle h1{font-size:32px;font-weight:700;letter-spacing:-1px;margin:16px 0 10px;}
+.dmtitle p{font-size:14px;opacity:.9;line-height:1.5;}
+.dmspot{position:relative;z-index:2;animation:spot 1.9s ease-in-out infinite;border-radius:var(--radius-lg);}
+@keyframes spot{0%,100%{box-shadow:0 0 0 0 rgba(227,0,114,.55);}50%{box-shadow:0 0 0 7px rgba(227,0,114,0);}}
+
+/* ---- Mazlan Home ---- */
+.mh-greet{border-radius:var(--radius-lg);padding:28px 30px;margin-bottom:20px;background:linear-gradient(120deg,var(--teal80),var(--teal60) 65%,var(--pink60));color:#fff;}
+.mh-greet h1{font-size:24px;font-weight:600;color:#fff;}
+.mh-greet .sub{font-size:13px;opacity:.85;margin-top:6px;}
+.mh-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+.mh-tile{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.mh-tile:hover{border-color:var(--border-strong);}
+.mh-tile .ic{font-size:18px;}
+.mh-tile .tt{flex:1;font-size:13px;font-weight:500;}
+.mh-tile .badge{min-width:26px;height:26px;border-radius:50%;background:var(--n20);color:var(--text-secondary);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 6px;}
+.mh-tile .badge.pink{background:var(--pink60);color:#fff;}
+.mh-row2{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;}
+.mh-apps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.mh-app{text-align:center;font-size:11px;color:var(--text-secondary);}
+.mh-app .hx{width:48px;height:48px;border-radius:var(--radius-md);background:var(--teal10);color:var(--teal70);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:18px;}
+.mz-dock{border-radius:var(--radius-lg);background:linear-gradient(160deg,#12151f,#1a1e2b);color:#fff;padding:18px;height:100%;}
+.mz-dock h4{font-size:14px;font-weight:600;margin-bottom:10px;}
+.mz-sugg{display:block;width:100%;text-align:left;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:var(--radius-md);padding:10px 12px;font-size:12px;margin-bottom:8px;}
+
+/* ---- Notification bell + drawer ---- */
+.bell-wrap{position:relative;}
+.bell-badge{position:absolute;top:-3px;right:-3px;background:var(--pink60);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.nscrim{position:fixed;inset:0;background:rgba(10,14,20,.5);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;}
+.nscrim.on{opacity:1;pointer-events:auto;}
+.ndrawer{position:fixed;left:0;top:0;bottom:0;width:min(420px,92vw);background:var(--px-surface);z-index:81;transform:translateX(-100%);transition:transform .25s;display:flex;flex-direction:column;box-shadow:2px 0 24px rgba(0,0,0,.18);}
+.ndrawer.on{transform:translateX(0);}
+.ndrawer-hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border-default);}
+.ndrawer-hd h3{font-size:15px;flex:1;}
+.ndrawer-hd button{border:none;background:transparent;font-size:14px;color:var(--text-secondary);}
+.ndrawer-body{padding:16px 18px;overflow-y:auto;flex:1;}
+.nsearch{display:flex;align-items:center;gap:8px;border:1px solid var(--border-default);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:14px;color:var(--text-secondary);font-size:13px;}
+.nsearch input{border:none;outline:none;flex:1;font-family:inherit;font-size:13px;background:transparent;color:var(--text-primary);}
+.ntabs{display:flex;gap:18px;border-bottom:1px solid var(--border-default);margin-bottom:14px;}
+.ntab{font-size:12px;font-weight:500;color:var(--text-secondary);padding-bottom:9px;border-bottom:2px solid transparent;cursor:pointer;}
+.ntab.on{color:var(--teal70);border-color:var(--teal60);}
+.ncard{border:1px solid var(--border-default);border-radius:var(--radius-md);padding:14px;display:flex;gap:12px;cursor:pointer;margin-bottom:10px;}
+.ncard:hover{border-color:var(--pink60);background:var(--pink10);}
+.ncard .ic{width:32px;height:32px;border-radius:var(--radius-sm);background:var(--pink10);color:var(--pink70);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+.ncard .tt{font-size:13px;font-weight:600;margin-bottom:3px;}
+.ncard .ds{font-size:12px;color:var(--text-secondary);line-height:1.4;}
+.ncard .tm{font-size:11px;color:var(--text-disabled);margin-top:6px;}
+.nempty{text-align:center;padding:30px 10px;color:var(--text-secondary);font-size:13px;}
+
+/* ---- SAP work order mirror ---- */
+.sap-topbar{background:#1B2A38;color:#fff;padding:12px 18px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;align-items:center;gap:10px;font-family:Consolas,'SF Mono',monospace;font-size:13px;}
+.sap-topbar .tag{background:#3D6EA5;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.06em;}
+.sap-body{background:var(--px-surface);border:1px solid var(--border-default);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:20px;font-family:Consolas,'SF Mono',monospace;}
+.sap-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;}
+.sap-frow{display:grid;grid-template-columns:150px 1fr;padding:7px 0;border-bottom:1px dashed var(--border-default);font-size:13px;}
+.sap-frow .fl{color:var(--text-secondary);}
+.sap-frow .fv{font-weight:600;}
+.sap-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin:2px 0 4px;font-family:var(--font-sans);}
+.sap-note{margin-top:16px;padding:12px 14px;border-radius:var(--radius-md);background:var(--warning-subtle);color:#7A4A00;border:1px solid #F0C674;font-size:13px;font-family:var(--font-sans);}
+.sap-actions{margin-top:20px;display:flex;gap:10px;font-family:var(--font-sans);}
+
+/* ---- Technician phone overlay ---- */
+.phone-scrim{position:fixed;inset:0;background:rgba(10,14,20,.6);z-index:90;opacity:0;pointer-events:none;transition:opacity .2s;display:flex;align-items:center;justify-content:center;}
+.phone-scrim.on{opacity:1;pointer-events:auto;}
+.phone-frame{width:340px;height:700px;background:#0B0D0F;border-radius:40px;padding:12px;box-shadow:var(--shadow-5);position:relative;transform:translateY(20px) scale(.96);transition:transform .25s;}
+.phone-scrim.on .phone-frame{transform:translateY(0) scale(1);}
+.phone-notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:22px;background:#0B0D0F;border-radius:0 0 14px 14px;z-index:2;}
+.phone-screen{width:100%;height:100%;background:var(--px-page);border-radius:30px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.mstatusbar{height:34px;flex-shrink:0;}
+.mscreen{position:absolute;inset:0;top:34px;display:none;flex-direction:column;padding:16px;overflow-y:auto;}
+.mscreen.on{display:flex;}
+.mscreen.dark{background:#12151f;color:#fff;}
+.mtopbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.mtopbar .mback{width:28px;height:28px;border-radius:50%;background:var(--px-surface);border:1px solid var(--border-default);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-secondary);flex-shrink:0;}
+.mtopbar h4{font-size:15px;flex:1;}
+.mlistitem{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:12px;margin-bottom:10px;}
+.mlistitem.hl{border-color:var(--pink60);background:var(--pink10);}
+.mlistitem .tt{font-size:13px;font-weight:600;margin-bottom:4px;}
+.mlistitem .ds{font-size:11px;color:var(--text-secondary);}
+.mcard{background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;font-size:12px;}
+.mfrow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border-default);font-size:12px;}
+.mfrow:last-child{border-bottom:none;}
+.mfrow .fl{color:var(--text-secondary);}
+.mchecklist{display:flex;flex-direction:column;gap:10px;margin:8px 0 16px;}
+.mchk{display:flex;align-items:flex-start;gap:10px;font-size:12px;background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:10px 12px;}
+.mchk input{margin-top:2px;width:16px;height:16px;accent-color:var(--teal60);flex-shrink:0;}
+.mchk.done{border-color:var(--success);background:var(--success-subtle);}
+.mspacer{flex:1;}
+.mbtn{width:100%;border-radius:var(--radius-md);border:none;padding:13px;font-size:13px;font-weight:600;}
+.mbtn.primary{background:var(--interactive-default);color:#fff;}
+.mbtn.primary:disabled{background:var(--n20);color:var(--text-disabled);}
+.mbtn.ghost{background:var(--px-surface);border:1px solid var(--border-default);color:var(--text-primary);margin-top:8px;}
+.mpush{margin:auto;background:rgba(255,255,255,.94);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow-3);cursor:pointer;}
+.mpush .app{font-size:10px;color:#5C6773;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.mpush .tt{font-size:13px;font-weight:700;color:#1C2126;}
+.mpush .ds{font-size:12px;color:#5C6773;}
+.mclock{text-align:center;font-size:52px;font-weight:300;margin:60px 0 6px;}
+.mdate{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-bottom:40px;}
+.mconfirm-ic{width:56px;height:56px;border-radius:50%;background:var(--success-subtle);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:26px;margin:20px auto 16px;}
+.mtimerbadge{display:inline-flex;align-items:center;gap:6px;background:var(--danger-subtle);color:var(--danger);font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius-full);margin-bottom:12px;}
+
+/* ---- Role switcher (segregation of duties) ---- */
+.role-switch{position:relative;}
+.role-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--border-default);background:var(--px-surface);border-radius:var(--radius-full);padding:4px 10px 4px 4px;font-size:12px;color:var(--text-primary);}
+.role-pill .avatar{width:28px;height:28px;font-size:11px;}
+.role-pill .role-name{font-weight:600;white-space:nowrap;}
+.role-pill .role-tag{font-size:10px;color:var(--text-secondary);background:var(--px-surface-2);padding:2px 7px;border-radius:var(--radius-full);white-space:nowrap;}
+.role-menu{position:absolute;top:44px;right:0;width:230px;background:var(--px-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);box-shadow:var(--shadow-5);padding:6px;z-index:60;}
+.role-opt{padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;display:flex;flex-direction:column;}
+.role-opt:hover{background:var(--teal10);}
+.role-opt span{font-size:11px;color:var(--text-secondary);}
+.btn[disabled],.mbtn[disabled],input[type="checkbox"][disabled]{opacity:.45;cursor:not-allowed;}
+
+/* ---- Digital signature modal ---- */
+.sigscrim{position:fixed;inset:0;background:rgba(10,14,20,.55);z-index:110;opacity:0;pointer-events:none;transition:opacity .2s;}
+.sigscrim.on{opacity:1;pointer-events:auto;}
+.sigmodal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);width:420px;background:var(--px-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-5);padding:22px;z-index:111;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+.sigmodal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%);}
+.sigmodal h3{font-size:16px;margin-bottom:4px;}
+.sig-who{font-size:12px;color:var(--text-secondary);margin-bottom:14px;}
+.sigmodal canvas{width:100%;height:140px;border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);background:var(--px-surface-2);cursor:crosshair;touch-action:none;display:block;}
+.sig-hint{font-size:11px;color:var(--text-disabled);margin-top:6px;}
+.sig-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+
+/* ---- De-isolation / hand-back action rows ---- */
+.action-row-btn{background:linear-gradient(90deg,var(--teal60),var(--teal70));color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;}
+
+/* ---- Permit type picker ---- */
+.ptscrim{position:fixed;inset:0;background:rgba(10,14,20,.55);z-index:95;opacity:0;pointer-events:none;transition:opacity .2s;}
+.ptscrim.on{opacity:1;pointer-events:auto;}
+.ptmodal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(680px,92vw);max-height:80vh;overflow-y:auto;background:var(--px-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-5);padding:20px;z-index:96;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+.ptmodal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%);}
+.pt-hd{display:flex;align-items:center;margin-bottom:14px;}
+.pt-hd h3{font-size:16px;flex:1;}
+.pt-hd button{border:none;background:transparent;font-size:14px;color:var(--text-secondary);}
+.pt-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.pt-card{border:1px solid var(--border-default);border-radius:var(--radius-md);padding:14px;cursor:pointer;}
+.pt-card:hover{border-color:var(--teal60);background:var(--teal10);}
+.pt-card.soon:hover{border-color:var(--border-strong);background:var(--px-surface-2);}
+.pt-ic{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;}
+.pt-tt{font-size:13px;font-weight:600;margin-bottom:4px;}
+.pt-ds{font-size:12px;color:var(--text-secondary);line-height:1.4;margin-bottom:10px;}
+.pt-tag{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 8px;border-radius:var(--radius-full);background:var(--n10);color:var(--text-secondary);}
+.pt-tag.ready{background:var(--success-subtle);color:var(--success);}
+</style>
+</head>
+<body>
+
+<div class="sov" id="startOv">
+  <div class="sov-in">
+    <div class="sov-eyebrow">&#9679;&#9679; Groom Lake / Praxis prototype</div>
+    <h1>Work clearance management</h1>
+    <p class="lede">A guided, narrated walkthrough of the full work clearance management lifecycle for Urenco Deutschland &mdash; from the SAP work order that triggers it, through digitally signed isolation certification and authorisation with segregation of duties enforced by role, out to the technician's phone on site, and back through de-isolation and hand-back to close-out. Turn your sound on.</p>
+    <div class="sov-btns">
+      <button class="sov-btn pri" onclick="beginDemo()">&#9654; Play guided demo</button>
+      <button class="sov-btn sec" onclick="beginExplore()">Explore freely</button>
+    </div>
+  </div>
+</div>
+
+<div class="dmtitle" id="dmTitle">
+  <div class="in">
+    <div class="sov-eyebrow">&#9679;&#9679; GROOM LAKE / PRAXIS</div>
+    <h1>Work clearance management</h1>
+    <p>SAP work order &rarr; signed isolation &amp; authorisation &rarr; technician on site &rarr; de-isolation &amp; hand-back, narrated end to end.</p>
+  </div>
+</div>
+
+<div class="dmb" id="dmb">
+  <div class="dmb-p"><i id="dmbP"></i></div>
+  <div class="dmb-i">
+    <div class="dmb-n" id="dmbN">1</div>
+    <div><div class="dmb-lb">Guided demo</div><div class="dmb-t" id="dmbT">Opening</div></div>
+    <div class="dmb-cap" id="dmbC"></div>
+    <div class="dmb-ct">
+      <span class="tm" id="dmbTm">0:00 / 0:00</span>
+      <button onclick="dmMute()" id="dmbM" title="Mute narration">&#128266;</button>
+      <button onclick="dmPause()" id="dmbPB" title="Pause">&#10074;&#10074;</button>
+      <button onclick="dmSkip()" title="Next scene">&#9193;</button>
+      <button onclick="dmExit()" title="Exit demo">&#10005;</button>
+    </div>
+  </div>
+</div>
+
+<div class="appbar">
+  <div class="brandmark" aria-hidden="true"><span></span><span></span></div>
+  <span class="protolabel">Groom Lake / Praxis prototype</span>
+  <div class="search-pill">
+    <span class="module-chip">All modules</span>
+    <span>&#128269;</span>
+    <input placeholder="Search records, people, help..." />
+  </div>
+  <button class="mazlan-pill" onclick="toast('Mazlan is a prototype stub in this build')"><span class="mazlan-dots"><span></span><span></span><span></span><span></span></span>Mazlan</button>
+  <div class="appbar-spacer"></div>
+  <button class="btn ghost" title="Play guided demo" onclick="dmStart()" style="border:1px solid var(--border-default);background:var(--px-surface);">&#9654; Play demo</button>
+  <button class="iconbtn bell-wrap" id="bellbtn" title="Notifications" onclick="openNotifModal('action')">&#128276;<span class="bell-badge" id="bellBadge">1</span></button>
+  <button class="iconbtn" title="Toggle dark theme" onclick="toggleTheme()">&#9680;</button>
+  <div class="role-switch">
+    <button class="role-pill" onclick="toggleRoleMenu()">
+      <span class="avatar" id="curAvatar">JO</span>
+      <span class="role-name" id="curRoleName">Julia O&rsquo;Connell</span>
+      <span class="role-tag" id="curRoleTag">Planner</span>
+      <span>&#9662;</span>
+    </button>
+    <div class="role-menu hidden" id="roleMenu">
+      <div class="role-opt" onclick="setRole('planner')"><b>Julia O&rsquo;Connell</b><span>Planner</span></div>
+      <div class="role-opt" onclick="setRole('iso')"><b>J. Müller</b><span>Isolating authority</span></div>
+      <div class="role-opt" onclick="setRole('auth')"><b>A. Kowalski</b><span>Authorising person</span></div>
+      <div class="role-opt" onclick="setRole('tech')"><b>T. Wright</b><span>Technician</span></div>
+      <div class="role-opt" onclick="setRole('rps')"><b>R. Voß</b><span>Radiation protection supervisor</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="navrail">
+    <button class="rail-btn create" title="Create new" onclick="openPermitPicker()">+</button>
+    <button class="rail-btn" id="rail-sap" title="SAP work orders" onclick="showView('sap')">&#128196;</button>
+    <button class="rail-btn active" id="rail-home" title="Mazlan Home" onclick="showView('home')">&#8962;</button>
+    <button class="rail-btn" id="rail-dash" title="Dashboard" onclick="showView('dashboard')">&#128202;</button>
+    <button class="rail-btn" id="rail-permits" title="Permits" onclick="showView('list')">&#9776;</button>
+    <button class="rail-btn" title="Search">&#128269;</button>
+    <div class="railgap"></div>
+    <button class="rail-btn" title="Admin">&#9881;</button>
+  </nav>
+
+  <main class="main">
+
+    <section id="view-sap" class="hidden">
+      <div class="crumb">External systems / SAP PM</div>
+      <div class="pageheader">
+        <div class="picon" style="background:#1B2A38;color:#fff;">&#128196;</div>
+        <div>
+          <h1>SAP Plant Maintenance</h1>
+          <div class="sub">Read-only mirror &middot; Urenco Deutschland ERP</div>
+        </div>
+      </div>
+      <div class="sap-topbar"><span class="tag">ORDER</span>&nbsp;4471029 &middot; PM01 Corrective maintenance &middot; Priority 2 &mdash; High</div>
+      <div class="sap-body">
+        <div class="sap-grid">
+          <div>
+            <div class="sap-frow"><span class="fl">Functional location</span><span class="fv">UD-GRO-BLR-B02</span></div>
+            <div class="sap-frow"><span class="fl">Equipment</span><span class="fv">Boiler B2 relief valve</span></div>
+            <div class="sap-frow"><span class="fl">Notification</span><span class="fv">10004821</span></div>
+            <div class="sap-frow"><span class="fl">Planner group</span><span class="fv">MECH-GRO</span></div>
+          </div>
+          <div>
+            <div class="sap-frow"><span class="fl">Work center</span><span class="fv">GRO-MECH-01</span></div>
+            <div class="sap-frow"><span class="fl">Basic start</span><span class="fv">12.08.2026 08:00</span></div>
+            <div class="sap-frow"><span class="fl">Basic finish</span><span class="fv">12.08.2026 14:00</span></div>
+            <div class="sap-frow"><span class="fl">System status</span><span class="fv" id="sapStatus">REL &mdash; Released</span></div>
+          </div>
+        </div>
+        <div class="sap-frow" style="margin-top:6px;border-bottom:none;"><span class="fl">Description</span></div>
+        <div class="sap-desc">Relief valve on boiler B2 seeping at flange &mdash; grinding and re-weld required. EHS clearance flag set: hot work + isolation.</div>
+        <div class="sap-note">&#9888; This order carries an EHS clearance flag. Work cannot be scheduled from SAP alone &mdash; it needs a permit in work clearance management first.</div>
+        <div class="sap-actions">
+          <button class="btn primary" id="sapPullBtn" onclick="pullFromSap()">Pull into Work Clearance Management</button>
+          <button class="btn ghost" onclick="showView('home')">Back to Mazlan Home</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-home">
+      <div class="mh-greet">
+        <h1>Good morning, Julia O&rsquo;Connell</h1>
+        <div class="sub">Urenco Deutschland &middot; Gronau &middot; Ideagen EHSQ Enterprise</div>
+      </div>
+
+      <div class="mh-tiles">
+        <div class="mh-tile" id="actionTile" onclick="openNotifModal('action')">
+          <span class="ic">&#9989;</span>
+          <span class="tt">Action required</span>
+          <span class="badge pink" id="tileBadge">1</span>
+        </div>
+        <div class="mh-tile" onclick="openNotifModal('updates')">
+          <span class="ic">&#128276;</span>
+          <span class="tt">Recent updates</span>
+          <span class="badge">0</span>
+        </div>
+        <div class="mh-tile">
+          <span class="ic">&#128197;</span>
+          <span class="tt">Upcoming events</span>
+          <span class="badge">4</span>
+        </div>
+      </div>
+
+      <div class="mh-row2">
+        <div class="dash-card">
+          <h3>Shortcuts</h3>
+          <div class="mh-apps">
+            <div class="mh-app"><div class="hx">&#128220;</div>Work clearance mgmt</div>
+            <div class="mh-app"><div class="hx">&#128737;</div>Ideagen EHSQ</div>
+            <div class="mh-app"><div class="hx">&#127959;</div>Ideagen Workplace</div>
+            <div class="mh-app"><div class="hx">&#128203;</div>Audit &amp; assurance</div>
+          </div>
+        </div>
+        <div class="mz-dock">
+          <h4>&#9679;&#9679; Mazlan</h4>
+          <p style="font-size:12px;opacity:.7;margin-bottom:12px;">What do you need today?</p>
+          <button class="mz-sugg" onclick="toast('Mazlan is a prototype stub in this build')">Summarise open permits for Gronau</button>
+          <button class="mz-sugg" onclick="toast('Mazlan is a prototype stub in this build')">Draft a toolbox talk for hot work</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-dashboard" class="hidden">
+      <div class="crumb">Work Clearance Management</div>
+      <div class="pageheader">
+        <div class="picon">&#128202;</div>
+        <div>
+          <h1>Dashboard</h1>
+          <div class="sub">Urenco Deutschland &middot; Gronau &middot; updated just now</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kl">Open permits</div>
+          <div class="kv" id="kpi-open">6</div>
+          <div class="kt up">&#8599; +2 vs last week</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kl">Awaiting authorisation</div>
+          <div class="kv" id="kpi-await">1</div>
+          <div class="kt warn">Blocked on isolation</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kl">Live isolations</div>
+          <div class="kv" id="kpi-iso">1</div>
+          <div class="kt">Pump room 2</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kl">Authorised today</div>
+          <div class="kv" id="kpi-auth">3</div>
+          <div class="kt up">&#8599; on pace</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kl">Avg permit cycle time</div>
+          <div class="kv">4.2h</div>
+          <div class="kt up">&#8595; 0.6h vs last week</div>
+        </div>
+      </div>
+
+      <div class="dash-callout" id="isoCallout" onclick="showView('list')">
+        &#9888; WCM-00482 (P206 Hot work) is blocked on isolation certification &mdash; click to open the permits queue.
+      </div>
+
+      <div class="dash-row">
+        <div class="dash-card">
+          <h3>Permit mix by type</h3>
+          <div class="mixrow"><span class="dot" style="background:var(--pink60);"></span><span class="lbl">Hot work (P206)</span><span class="track"><span class="fill" style="width:33%;background:var(--pink60);"></span></span><span class="num">2</span></div>
+          <div class="mixrow"><span class="dot" style="background:var(--teal60);"></span><span class="lbl">Isolation (P205)</span><span class="track"><span class="fill" style="width:17%;background:var(--teal60);"></span></span><span class="num">1</span></div>
+          <div class="mixrow"><span class="dot" style="background:#5B3A9E;"></span><span class="lbl">Confined space (P204)</span><span class="track"><span class="fill" style="width:17%;background:#5B3A9E;"></span></span><span class="num">1</span></div>
+          <div class="mixrow"><span class="dot" style="background:#8A4B00;"></span><span class="lbl">Scaffolding (P208)</span><span class="track"><span class="fill" style="width:17%;background:#8A4B00;"></span></span><span class="num">1</span></div>
+          <div class="mixrow"><span class="dot" style="background:var(--info);"></span><span class="lbl">Work permit (P203)</span><span class="track"><span class="fill" style="width:17%;background:var(--info);"></span></span><span class="num">1</span></div>
+
+          <h3 style="margin-top:20px;">Live activity by area (SIMOPS)</h3>
+          <div class="simops-row"><span class="loc">Boiler house, Bay 3</span><span>1 live</span></div>
+          <div class="simops-row"><span class="loc">Pump room 2</span><span>1 live</span></div>
+          <div class="simops-row"><span class="loc">Area 4 &mdash; scaffolding</span><span class="flag">1 live &middot; 20m from Bay 3</span></div>
+        </div>
+
+        <div class="dash-card">
+          <h3>Recent activity</h3>
+          <div class="feed" id="feed" style="max-height:none;">
+            <div class="feed-item"><span class="feed-dot"></span><div class="feed-txt"><div>WCM-00475 isolation planning started &mdash; <span class="who">J. Müller</span></div><div class="feed-time">40m ago</div></div></div>
+            <div class="feed-item"><span class="feed-dot"></span><div class="feed-txt"><div>WCM-00482 submitted &mdash; <span class="who">M. Fischer</span></div><div class="feed-time">2h ago</div></div></div>
+            <div class="feed-item"><span class="feed-dot"></span><div class="feed-txt"><div>WCM-00471 submitted &mdash; <span class="who">S. Heckenmueller</span></div><div class="feed-time">1d ago</div></div></div>
+            <div class="feed-item"><span class="feed-dot"></span><div class="feed-txt"><div>WCM-00460 closed out &mdash; <span class="who">M. Fischer</span></div><div class="feed-time">3d ago</div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-list" class="hidden">
+      <div class="crumb">Work Clearance Management</div>
+      <div class="pageheader">
+        <div class="picon">&#128220;</div>
+        <div>
+          <h1>Permits</h1>
+          <div class="sub">Urenco Deutschland &middot; Gronau</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="openPermitPicker()">+ New permit</button>
+        <span class="chip active">All</span>
+        <span class="chip">Draft</span>
+        <span class="chip">Submitted</span>
+        <span class="chip">Authorised</span>
+        <span class="chip">Live</span>
+        <span class="chip">Closed</span>
+        <div class="toolbar-spacer"></div>
+        <span style="font-size:12px;color:var(--text-secondary);">6 records</span>
+      </div>
+      <div class="content-card">
+        <table class="dtable">
+          <thead><tr><th>Permit</th><th>Type</th><th>Work order</th><th>Location</th><th>Status</th><th>Requested by</th><th>Updated</th></tr></thead>
+          <tbody>
+            <tr onclick="openRecord()">
+              <td><strong>WCM-00482</strong></td>
+              <td><span class="type-chip" style="background:var(--pink10);color:var(--pink70);">P206 Hot work</span></td>
+              <td>4471029</td><td>Boiler house</td>
+              <td><span class="status-badge status-isolation" id="row482status">Isolation pending</span></td>
+              <td>M. Fischer</td><td>2h ago</td>
+            </tr>
+            <tr>
+              <td><strong>WCM-00475</strong></td>
+              <td><span class="type-chip" style="background:var(--teal10);color:var(--teal70);">P205 Isolation</span></td>
+              <td>4470991</td><td>Pump room 2</td>
+              <td><span class="status-badge status-live">Live</span></td>
+              <td>T. Wright</td><td>40m ago</td>
+            </tr>
+            <tr>
+              <td><strong>WCM-00471</strong></td>
+              <td><span class="type-chip" style="background:#EFE6FA;color:#5B3A9E;">P204 Confined space</span></td>
+              <td>4470955</td><td>Tank farm 1</td>
+              <td><span class="status-badge status-submitted">Submitted</span></td>
+              <td>S. Heckenmueller</td><td>1d ago</td>
+            </tr>
+            <tr>
+              <td><strong>WCM-00468</strong></td>
+              <td><span class="type-chip" style="background:var(--orange10);color:#8A4B00;">P208 Scaffolding</span></td>
+              <td>4470902</td><td>Turbine hall</td>
+              <td><span class="status-badge status-draft">Draft</span></td>
+              <td>C. Keller-Jackson</td><td>1d ago</td>
+            </tr>
+            <tr>
+              <td><strong>WCM-00460</strong></td>
+              <td><span class="type-chip" style="background:var(--info-subtle);color:var(--info);">P203 Work permit</span></td>
+              <td>4470812</td><td>Turbine hall</td>
+              <td><span class="status-badge status-closed">Closed</span></td>
+              <td>M. Fischer</td><td>3d ago</td>
+            </tr>
+            <tr onclick="openRecordRad()">
+              <td><strong>WCM-00459</strong></td>
+              <td><span class="type-chip" style="background:#FDE9E9;color:#A3282E;">P207 Radiation</span></td>
+              <td>4470799</td><td>Enrichment area 3</td>
+              <td><span class="status-badge status-isolation" id="rowRadStatus">RWP pending</span></td>
+              <td>N. Borninkhof</td><td>4d ago</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-record" class="hidden">
+      <div class="crumb"><a onclick="showView('dashboard')">Work Clearance Management</a> / <a onclick="closeRecord()">Permits</a> / WCM-00482</div>
+      <div class="pageheader">
+        <div class="picon" style="background:var(--pink10);color:var(--pink70);">&#128293;</div>
+        <div>
+          <h1>WCM-00482 &middot; P206 Hot work</h1>
+          <div class="sub">Boiler house, Bay 3 &middot; Work order 4471029</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn danger">Reject</button>
+        <button class="btn primary" id="authbtn" onclick="tryAuthorise()">Authorise</button>
+        <button class="btn ghost" onclick="openPhone()">&#128241; Technician view</button>
+        <div class="toolbar-spacer"></div>
+        <div class="rfg">
+          <button class="rfg-pill" onclick="document.getElementById('rfgpop').classList.toggle('hidden')">
+            <span class="rfg-track"><span class="rfg-fill" style="width:83%;"></span></span>
+            5/6 fields &#9662;
+          </button>
+          <div class="rfg-pop hidden" id="rfgpop">
+            <p>Remaining required field</p>
+            <ul><li>Isolation certificate reference</li></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-banner warning" id="isobanner">
+        &#9888; Isolation must be certified before this permit can be authorised.
+      </div>
+
+      <div class="record-layout">
+        <div class="guide-col">
+          <div class="guide-card">
+            <h3>Current task</h3>
+            <div class="task-row">
+              <div class="avatar">AK</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;">A. Kowalski</div>
+                <div class="task-meta">Safety officer &middot; awaiting review</div>
+              </div>
+            </div>
+            <div class="task-meta">Open 2h 14m</div>
+          </div>
+          <div class="guide-card">
+            <h3>Workflow</h3>
+            <div class="workflow-step done"><div class="workflow-line"></div><div class="dot">&#10003;</div><div class="label">Draft</div></div>
+            <div class="workflow-step done"><div class="workflow-line"></div><div class="dot">&#10003;</div><div class="label">Submitted</div></div>
+            <div class="workflow-step" id="step-isolation"><div class="workflow-line"></div><div class="dot"></div><div class="label">Isolation certified</div></div>
+            <div class="workflow-step active" id="step-authorised"><div class="workflow-line"></div><div class="dot"></div><div class="label">Authorised</div></div>
+            <div class="workflow-step" id="step-live"><div class="workflow-line"></div><div class="dot"></div><div class="label">Live</div></div>
+            <div class="workflow-step" id="step-deiso"><div class="workflow-line"></div><div class="dot"></div><div class="label">De-isolated</div></div>
+            <div class="workflow-step" id="step-closed"><div class="dot"></div><div class="label">Closed</div></div>
+          </div>
+        </div>
+
+        <div class="content-col">
+          <div class="tabgroup">
+            <div class="tab active" data-tab="details" onclick="showTab('details')">Details</div>
+            <div class="tab" data-tab="isolation" onclick="showTab('isolation')">Isolation</div>
+            <div class="tab" data-tab="risk" onclick="showTab('risk')">Risk assessment</div>
+            <div class="tab" data-tab="audit" onclick="showTab('audit')">Audit trail</div>
+          </div>
+
+          <div class="content-card" style="padding:8px 20px;">
+            <div class="tabpane" data-pane="details">
+              <div class="field-row"><div class="flabel">Work order</div><div class="fval"><a onclick="showView('sap')">4471029</a></div></div>
+              <div class="field-row" id="sapSourceRow"><div class="flabel">Source</div><div class="fval"><a onclick="showView('sap')">SAP PM work order 4471029</a> &middot; pulled automatically</div></div>
+              <div class="field-row"><div class="flabel">Permit type</div><div class="fval">P206 &mdash; Hot work</div></div>
+              <div class="field-row"><div class="flabel">Location</div><div class="fval">Boiler house, Bay 3</div></div>
+              <div class="field-row"><div class="flabel">Window</div><div class="fval">12 Aug 2026, 08:00&ndash;14:00</div></div>
+              <div class="field-row"><div class="flabel">Description</div><div class="fval large">Hot work on boiler B2 relief valve — grinding and welding, fire watch required for duration plus 30 min after completion.</div></div>
+              <div class="field-row"><div class="flabel">Isolation required</div><div class="fval"><span class="toggle on"></span></div></div>
+              <div class="field-row"><div class="flabel">Contractor involved</div><div class="fval"><label class="checkline"><input type="checkbox" checked disabled />ThermoServ GmbH &mdash; induction verified</label></div></div>
+            </div>
+            <div class="tabpane hidden" data-pane="isolation">
+              <div class="field-row"><div class="flabel">Isolation certificate</div><div class="fval"><a href="#">IC-0097</a></div></div>
+              <div class="field-row"><div class="flabel">Energy type</div><div class="fval">Thermal &middot; Electrical (valve actuator)</div></div>
+              <div class="field-row"><div class="flabel">Lock / tag numbers</div><div class="fval">A214, A215</div></div>
+              <div class="field-row"><div class="flabel">Isolating authority</div><div class="fval">J. Müller</div></div>
+              <div class="field-row"><div class="flabel">Certified</div><div class="fval"><label class="checkline"><input type="checkbox" id="isocheck" onchange="tryCertifyIsolation(this)" />Sign to certify isolation</label></div></div>
+              <div class="field-row hidden" id="deisoActionRow"><div class="flabel">Isolation removal</div><div class="fval"><button class="action-row-btn" onclick="tryDeIsolate()">Remove isolation &amp; sign</button></div></div>
+              <div class="field-row hidden" id="handbackActionRow"><div class="flabel">Hand-back to operations</div><div class="fval"><button class="action-row-btn" onclick="tryHandBack()">Confirm hand-back &amp; sign</button></div></div>
+            </div>
+            <div class="tabpane hidden" data-pane="risk">
+              <div class="field-row"><div class="flabel">Risk assessment</div><div class="fval"><a href="#">RA-1188</a></div></div>
+              <div class="field-row"><div class="flabel">Radiological RA</div><div class="fval">Not applicable to this permit type</div></div>
+              <div class="field-row"><div class="flabel">Method statement</div><div class="fval"><a href="#">MS-0231</a></div></div>
+            </div>
+            <div class="tabpane hidden" data-pane="audit">
+              <div class="field-row"><div class="flabel">12 Aug 09:14</div><div class="fval">Submitted by M. Fischer</div></div>
+              <div class="field-row"><div class="flabel">12 Aug 09:40</div><div class="fval">Isolation planning started &mdash; J. Müller</div></div>
+              <div id="auditExtra"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card process-tree">
+          <h3>Related records</h3>
+          <div class="tree-node">Work order 4471029</div>
+          <div class="tree-child">
+            <div class="tree-node current">Permit WCM-00482</div>
+            <div class="tree-child">
+              <div class="tree-node">Isolation certificate IC-0097</div>
+              <div class="tree-node">Risk assessment RA-1188</div>
+              <div class="tree-node">Method statement MS-0231</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-record-rad" class="hidden">
+      <div class="crumb"><a onclick="showView('dashboard')">Work Clearance Management</a> / <a onclick="showView('list')">Permits</a> / WCM-00459</div>
+      <div class="pageheader">
+        <div class="picon" style="background:#FDE9E9;color:#A3282E;">&#9762;&#65039;</div>
+        <div>
+          <h1>WCM-00459 &middot; P207 Radiation protection</h1>
+          <div class="sub">Enrichment area 3, Cascade hall &middot; Work order 4470799</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn danger">Reject</button>
+        <button class="btn primary" id="authbtn2" onclick="tryAuthoriseRad()">Authorise</button>
+        <div class="toolbar-spacer"></div>
+        <div class="rfg">
+          <button class="rfg-pill" onclick="document.getElementById('rfgpop2').classList.toggle('hidden')">
+            <span class="rfg-track"><span class="rfg-fill" style="width:80%;"></span></span>
+            4/5 fields &#9662;
+          </button>
+          <div class="rfg-pop hidden" id="rfgpop2">
+            <p>Remaining required field</p>
+            <ul><li>RWP reference sign-off</li></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-banner warning" id="radbanner">
+        &#9888; The radiation work permit (RWP) must be issued and signed before this permit can be authorised.
+      </div>
+
+      <div class="record-layout">
+        <div class="guide-col">
+          <div class="guide-card">
+            <h3>Current task</h3>
+            <div class="task-row">
+              <div class="avatar">RV</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;">R. Voß</div>
+                <div class="task-meta">Radiation protection supervisor &middot; RWP pending</div>
+              </div>
+            </div>
+            <div class="task-meta">Open 1d 4h</div>
+          </div>
+          <div class="guide-card">
+            <h3>Workflow</h3>
+            <div class="workflow-step done"><div class="workflow-line"></div><div class="dot">&#10003;</div><div class="label">Draft</div></div>
+            <div class="workflow-step done"><div class="workflow-line"></div><div class="dot">&#10003;</div><div class="label">Submitted</div></div>
+            <div class="workflow-step" id="step-rwp"><div class="workflow-line"></div><div class="dot"></div><div class="label">RWP issued</div></div>
+            <div class="workflow-step active" id="step-authorised-rad"><div class="workflow-line"></div><div class="dot"></div><div class="label">Authorised</div></div>
+            <div class="workflow-step" id="step-live-rad"><div class="workflow-line"></div><div class="dot"></div><div class="label">Live</div></div>
+            <div class="workflow-step" id="step-closed-rad"><div class="dot"></div><div class="label">Closed</div></div>
+          </div>
+        </div>
+
+        <div class="content-col">
+          <div class="tabgroup">
+            <div class="tab active" data-tab="rad-details" onclick="showTab('rad-details')">Details</div>
+            <div class="tab" data-tab="rad-controls" onclick="showTab('rad-controls')">Radiological controls</div>
+            <div class="tab" data-tab="rad-risk" onclick="showTab('rad-risk')">Risk assessment</div>
+            <div class="tab" data-tab="rad-audit" onclick="showTab('rad-audit')">Audit trail</div>
+          </div>
+
+          <div class="content-card" style="padding:8px 20px;">
+            <div class="tabpane" data-pane="rad-details">
+              <div class="field-row"><div class="flabel">Work order</div><div class="fval">4470799</div></div>
+              <div class="field-row"><div class="flabel">Permit type</div><div class="fval">P207 &mdash; Radiation protection</div></div>
+              <div class="field-row"><div class="flabel">Location</div><div class="fval">Enrichment area 3, Cascade hall</div></div>
+              <div class="field-row"><div class="flabel">Window</div><div class="fval">13 Aug 2026, 07:00&ndash;15:00</div></div>
+              <div class="field-row"><div class="flabel">Description</div><div class="fval large">Planned valve maintenance on cascade separator train 3 &mdash; task requires entry to a designated controlled area with potential for low-level surface contamination.</div></div>
+              <div class="field-row"><div class="flabel">Area classification</div><div class="fval">Controlled area &middot; Zone 2</div></div>
+              <div class="field-row"><div class="flabel">RPS required</div><div class="fval"><span class="toggle on"></span></div></div>
+            </div>
+            <div class="tabpane hidden" data-pane="rad-controls">
+              <div class="field-row"><div class="flabel">RWP reference</div><div class="fval"><a href="#">RWP-1142</a></div></div>
+              <div class="field-row"><div class="flabel">Dose constraint</div><div class="fval">0.3 mSv (task) &middot; ALARA reviewed</div></div>
+              <div class="field-row"><div class="flabel">Personal dosimetry</div><div class="fval">TLD badge + electronic personal dosimeter (EPD)</div></div>
+              <div class="field-row"><div class="flabel">Contamination monitoring</div><div class="fval">Entry &amp; exit swabs, hand/foot monitor on exit</div></div>
+              <div class="field-row"><div class="flabel">RWP issued</div><div class="fval"><label class="checkline"><input type="checkbox" id="rwpcheck" onchange="tryIssueRwp(this)" />Sign to issue RWP</label></div></div>
+            </div>
+            <div class="tabpane hidden" data-pane="rad-risk">
+              <div class="field-row"><div class="flabel">Radiological risk assessment</div><div class="fval"><a href="#">RA-1204</a></div></div>
+              <div class="field-row"><div class="flabel">Method statement</div><div class="fval"><a href="#">MS-0255</a></div></div>
+              <div class="field-row"><div class="flabel">General risk assessment</div><div class="fval"><a href="#">RA-0987</a></div></div>
+            </div>
+            <div class="tabpane hidden" data-pane="rad-audit">
+              <div class="field-row"><div class="flabel">09 Aug 07:50</div><div class="fval">Submitted by N. Borninkhof</div></div>
+              <div class="field-row"><div class="flabel">10 Aug 11:20</div><div class="fval">RWP drafted &mdash; R. Voß</div></div>
+              <div id="auditExtraRad"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card process-tree">
+          <h3>Related records</h3>
+          <div class="tree-node">Work order 4470799</div>
+          <div class="tree-child">
+            <div class="tree-node current">Permit WCM-00459</div>
+            <div class="tree-child">
+              <div class="tree-node">RWP-1142</div>
+              <div class="tree-node">Risk assessment RA-1204</div>
+              <div class="tree-node">Method statement MS-0255</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast-region" id="toastregion"></div>
+
+<div class="nscrim" id="nscrim" onclick="closeNotifModal()"></div>
+<div class="ndrawer" id="ndrawer">
+  <div class="ndrawer-hd">
+    <h3>Notifications</h3>
+    <button onclick="closeNotifModal()" title="Close">&#10005;</button>
+  </div>
+  <div class="ndrawer-body">
+    <div class="nsearch"><span>&#128269;</span><input placeholder="Search notifications" /></div>
+    <div class="ntabs">
+      <div class="ntab" data-ntab="all" onclick="renderNotifList('all')">All</div>
+      <div class="ntab on" data-ntab="action" onclick="renderNotifList('action')">Action required</div>
+      <div class="ntab" data-ntab="updates" onclick="renderNotifList('updates')">Recent updates</div>
+    </div>
+    <div id="notifList"></div>
+  </div>
+</div>
+
+<div class="phone-scrim" id="phoneScrim" onclick="if(event.target===this)closePhone()">
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+      <div class="mstatusbar"></div>
+
+      <div class="mscreen dark on" id="mScreenPush">
+        <div class="mclock">08:42</div>
+        <div class="mdate">Wednesday, 12 August</div>
+        <div class="mpush" onclick="mobShow('worklist')">
+          <div class="app">&#9679;&#9679; Ideagen EHSQ</div>
+          <div class="tt">New job assigned</div>
+          <div class="ds">WCM-00482 &middot; Hot work &middot; Boiler house, Bay 3 &middot; authorised, ready to start</div>
+        </div>
+      </div>
+
+      <div class="mscreen" id="mScreenWorklist">
+        <div class="mtopbar"><div class="mback" onclick="mobShow('push')">&#8592;</div><h4>My jobs &mdash; T. Wright</h4></div>
+        <div class="mlistitem hl" onclick="mobShow('permit')">
+          <div class="tt">WCM-00482 &middot; Hot work</div>
+          <div class="ds">Boiler house, Bay 3 &middot; Authorised, ready to start</div>
+        </div>
+        <div class="mlistitem" style="opacity:.5;">
+          <div class="tt">WCM-00475 &middot; Isolation</div>
+          <div class="ds">Pump room 2 &middot; Live</div>
+        </div>
+        <div class="mlistitem" style="opacity:.5;">
+          <div class="tt">WCM-00468 &middot; Scaffolding</div>
+          <div class="ds">Turbine hall &middot; Draft</div>
+        </div>
+      </div>
+
+      <div class="mscreen" id="mScreenPermit">
+        <div class="mtopbar"><div class="mback" onclick="mobShow('worklist')">&#8592;</div><h4>WCM-00482</h4></div>
+        <div class="mcard">
+          <div class="mfrow"><span class="fl">Type</span><span>P206 Hot work</span></div>
+          <div class="mfrow"><span class="fl">Location</span><span>Boiler house, Bay 3</span></div>
+          <div class="mfrow"><span class="fl">Window</span><span>08:00&ndash;14:00</span></div>
+          <div class="mfrow"><span class="fl">Isolation cert</span><span>IC-0097</span></div>
+          <div class="mfrow"><span class="fl">Lock / tag</span><span>A214, A215</span></div>
+          <div class="mfrow"><span class="fl">PPE</span><span>Face shield, FR coveralls</span></div>
+        </div>
+        <div class="mspacer"></div>
+        <button class="mbtn primary" onclick="mobShow('brief')">Start pre-job brief</button>
+      </div>
+
+      <div class="mscreen" id="mScreenBrief">
+        <div class="mtopbar"><div class="mback" onclick="mobShow('permit')">&#8592;</div><h4>Pre-job brief</h4></div>
+        <div class="mchecklist" id="briefList">
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Reviewed method statement MS-0231</label>
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Reviewed hazards &amp; required PPE</label>
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Confirmed isolation certificate IC-0097</label>
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Fire watch briefed and in position</label>
+        </div>
+        <div class="mspacer"></div>
+        <button class="mbtn primary" onclick="mobShow('iso')">Acknowledge and continue</button>
+      </div>
+
+      <div class="mscreen" id="mScreenIso">
+        <div class="mtopbar"><div class="mback" onclick="mobShow('brief')">&#8592;</div><h4>Verify isolation</h4></div>
+        <div class="status-banner warning" style="margin-bottom:12px;">&#9888; Prove dead before starting hot work.</div>
+        <div class="mchecklist" id="isoList">
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Visual check &mdash; locks/tags A214, A215 in place</label>
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Test point 1 &mdash; electrical, confirmed zero energy</label>
+          <label class="mchk"><input type="checkbox" onchange="mobRowToggle(this)"/>Test point 2 &mdash; thermal / valve, confirmed isolated</label>
+        </div>
+        <div class="mspacer"></div>
+        <button class="mbtn primary" id="isoConfirmBtn" disabled onclick="mobIsoConfirm()">Confirm zero energy &amp; start work</button>
+      </div>
+
+      <div class="mscreen" id="mScreenActive">
+        <div class="mtopbar"><h4>WCM-00482 &middot; Active</h4></div>
+        <div class="mtimerbadge">&#128293; Fire watch active</div>
+        <div class="mcard">
+          <div class="mfrow"><span class="fl">Status</span><span>Work in progress</span></div>
+          <div class="mfrow"><span class="fl">Started</span><span>09:52</span></div>
+          <div class="mfrow"><span class="fl">Isolation</span><span>Verified &middot; zero energy confirmed</span></div>
+        </div>
+        <div class="mspacer"></div>
+        <button class="mbtn primary" onclick="mobShow('close')">Complete job</button>
+      </div>
+
+      <div class="mscreen" id="mScreenClose">
+        <div class="mtopbar"><div class="mback" onclick="mobShow('active')">&#8592;</div><h4>Close out</h4></div>
+        <div class="mchecklist">
+          <label class="mchk done"><input type="checkbox" checked disabled/>Work area made safe</label>
+          <label class="mchk done"><input type="checkbox" checked disabled/>Tools and equipment cleared</label>
+          <label class="mchk done"><input type="checkbox" checked disabled/>Fire watch stood down (30 min post-work)</label>
+        </div>
+        <div class="mcard">Notes: relief valve reseated and pressure-tested. No further action required.</div>
+        <div class="mspacer"></div>
+        <button class="mbtn primary" onclick="mobCloseOut()">Submit close-out</button>
+      </div>
+
+      <div class="mscreen" id="mScreenConfirm">
+        <div class="mconfirm-ic">&#10003;</div>
+        <h4 style="text-align:center;">Job closed</h4>
+        <p style="text-align:center;font-size:12px;color:var(--text-secondary);">Permit WCM-00482 marked closed in WCM. Work order 4471029 updated to Complete in SAP PM.</p>
+        <div class="mspacer"></div>
+        <button class="mbtn ghost" onclick="closePhone()">Return to office view</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="sigscrim" id="sigScrim" onclick="closeSigModal()"></div>
+<div class="sigmodal" id="sigModal">
+  <h3 id="sigTitle">Sign to confirm</h3>
+  <div class="sig-who" id="sigWho"></div>
+  <canvas id="sigCanvas" width="380" height="140"></canvas>
+  <div class="sig-hint">Draw your signature above.</div>
+  <div class="sig-actions">
+    <button class="btn ghost" onclick="sigClear()">Clear</button>
+    <button class="btn ghost" onclick="closeSigModal()">Cancel</button>
+    <button class="btn primary" id="sigConfirmBtn" disabled onclick="sigConfirm()">Sign &amp; confirm</button>
+  </div>
+</div>
+
+<div class="ptscrim" id="ptScrim" onclick="closePermitPicker()"></div>
+<div class="ptmodal" id="ptModal">
+  <div class="pt-hd"><h3>New permit &mdash; choose a type</h3><button onclick="closePermitPicker()" title="Close">&#10005;</button></div>
+  <div class="pt-grid">
+    <div class="pt-card" onclick="openRecord()">
+      <div class="pt-ic" style="background:var(--pink10);color:var(--pink70);">&#128293;</div>
+      <div class="pt-tt">P206 &middot; Hot work</div>
+      <div class="pt-ds">Grinding, welding, or other open-flame / spark-producing work.</div>
+      <span class="pt-tag ready">Open example</span>
+    </div>
+    <div class="pt-card" onclick="openRecordRad()">
+      <div class="pt-ic" style="background:#FDE9E9;color:#A3282E;">&#9762;&#65039;</div>
+      <div class="pt-tt">P207 &middot; Radiation protection</div>
+      <div class="pt-ds">Work in or near a designated radiological controlled area.</div>
+      <span class="pt-tag ready">Open example</span>
+    </div>
+    <div class="pt-card soon" onclick="ptSoon()">
+      <div class="pt-ic" style="background:#EFE6FA;color:#5B3A9E;">&#9954;</div>
+      <div class="pt-tt">P204 &middot; Confined space</div>
+      <div class="pt-ds">Entry into tanks, vessels, or other confined spaces.</div>
+      <span class="pt-tag">On roadmap</span>
+    </div>
+    <div class="pt-card soon" onclick="ptSoon()">
+      <div class="pt-ic" style="background:var(--teal10);color:var(--teal70);">&#128268;</div>
+      <div class="pt-tt">P205 &middot; Energy isolation / LoToTo</div>
+      <div class="pt-ds">Locking out and tagging energy sources ahead of other work.</div>
+      <span class="pt-tag">On roadmap</span>
+    </div>
+    <div class="pt-card soon" onclick="ptSoon()">
+      <div class="pt-ic" style="background:var(--orange10);color:#8A4B00;">&#127959;&#65039;</div>
+      <div class="pt-tt">P208 &middot; Scaffolding</div>
+      <div class="pt-ds">Erecting, altering, or dismantling scaffolding.</div>
+      <span class="pt-tag">On roadmap</span>
+    </div>
+    <div class="pt-card soon" onclick="ptSoon()">
+      <div class="pt-ic" style="background:var(--info-subtle);color:var(--info);">&#128203;</div>
+      <div class="pt-tt">P203 &middot; Work permit</div>
+      <div class="pt-ds">General work permit for lower-risk maintenance tasks.</div>
+      <span class="pt-tag">On roadmap</span>
+    </div>
+    <div class="pt-card soon" onclick="ptSoon()">
+      <div class="pt-ic" style="background:var(--n10);color:var(--n70);">&#128209;</div>
+      <div class="pt-tt">P202 &middot; Installation plan</div>
+      <div class="pt-ds">Planned installation or modification of plant and equipment.</div>
+      <span class="pt-tag">On roadmap</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function showView(name){
+  document.getElementById('view-sap').classList.toggle('hidden',name!=='sap');
+  document.getElementById('view-home').classList.toggle('hidden',name!=='home');
+  document.getElementById('view-dashboard').classList.toggle('hidden',name!=='dashboard');
+  document.getElementById('view-list').classList.toggle('hidden',name!=='list');
+  document.getElementById('view-record').classList.toggle('hidden',name!=='record');
+  document.getElementById('view-record-rad').classList.toggle('hidden',name!=='record-rad');
+  const rs=document.getElementById('rail-sap'),rh=document.getElementById('rail-home'),rd=document.getElementById('rail-dash'),rp=document.getElementById('rail-permits');
+  if(rs)rs.classList.toggle('active',name==='sap');
+  if(rh)rh.classList.toggle('active',name==='home');
+  if(rd)rd.classList.toggle('active',name==='dashboard');
+  if(rp)rp.classList.toggle('active',name==='list'||name==='record'||name==='record-rad');
+}
+
+/* ---------- SAP work order mirror ---------- */
+function pullFromSap(){
+  const btn=document.getElementById('sapPullBtn');
+  if(btn){btn.disabled=true;btn.textContent='✓ Pulled into WCM';}
+  const sap=document.getElementById('sapStatus');if(sap)sap.textContent='REL — Released to WCM';
+  toast('Permit WCM-00482 created from SAP work order 4471029');
+  showView('home');
+}
+
+/* ---------- technician phone overlay ---------- */
+function openPhone(){document.getElementById('phoneScrim').classList.add('on');mobShow('push');}
+function closePhone(){document.getElementById('phoneScrim').classList.remove('on');}
+function mobShow(id){
+  document.querySelectorAll('.mscreen').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('mScreen'+id.charAt(0).toUpperCase()+id.slice(1));
+  if(el)el.classList.add('on');
+}
+function mobRowToggle(cb){
+  cb.closest('.mchk').classList.toggle('done',cb.checked);
+  const isoBtn=document.getElementById('isoConfirmBtn');
+  if(isoBtn){
+    const all=[...document.querySelectorAll('#isoList input')].every(i=>i.checked);
+    isoBtn.disabled=!all;
+  }
+}
+function mobCheckAll(listId){
+  document.querySelectorAll('#'+listId+' input').forEach(i=>{i.checked=true;mobRowToggle(i);});
+}
+function mobIsoConfirm(){
+  toast('Zero energy confirmed — work started');
+  mobShow('active');
+}
+function mobCloseOut(){
+  mobShow('confirm');
+  const live=document.getElementById('step-live');
+  if(live){live.classList.remove('active');live.classList.add('done');live.querySelector('.dot').innerHTML='&#10003;';}
+  const deiso=document.getElementById('step-deiso');if(deiso)deiso.classList.add('active');
+  const rs=document.getElementById('row482status');if(rs){rs.textContent='Pending de-isolation';rs.className='status-badge status-isolation';}
+  const sap=document.getElementById('sapStatus');if(sap)sap.textContent='CONF — work complete, pending de-isolation';
+  const dr=document.getElementById('deisoActionRow');if(dr)dr.classList.remove('hidden');
+  NOTIF_STATE.deiso482='active';
+  refreshNotifChrome();
+  logAudit('Hot work completed on site — T. Wright');
+  toast('Work complete on site — isolation removal still needed before this permit can close');
+}
+
+/* ---------- roles & segregation of duties ---------- */
+const ROLES={
+  planner:{name:"Julia O’Connell",tag:'Planner',init:'JO'},
+  iso:{name:'J. Müller',tag:'Isolating authority',init:'JM'},
+  auth:{name:'A. Kowalski',tag:'Authorising person',init:'AK'},
+  tech:{name:'T. Wright',tag:'Technician',init:'TW'},
+  rps:{name:'R. Voß',tag:'Radiation protection supervisor',init:'RV'}
+};
+let CUR_ROLE='planner';
+function toggleRoleMenu(){document.getElementById('roleMenu').classList.toggle('hidden');}
+function setRole(r){
+  CUR_ROLE=r;
+  const role=ROLES[r];
+  document.getElementById('curAvatar').textContent=role.init;
+  document.getElementById('curRoleName').textContent=role.name;
+  document.getElementById('curRoleTag').textContent=role.tag;
+  document.getElementById('roleMenu').classList.add('hidden');
+  refreshRoleGates();
+  toast('Switched to '+role.name+' · '+role.tag);
+}
+function refreshRoleGates(){
+  const isoChk=document.getElementById('isocheck');if(isoChk)isoChk.disabled=(CUR_ROLE!=='iso');
+  const authBtn=document.getElementById('authbtn');if(authBtn)authBtn.disabled=(CUR_ROLE!=='auth');
+  const rwpChk=document.getElementById('rwpcheck');if(rwpChk)rwpChk.disabled=(CUR_ROLE!=='rps');
+  const authBtn2=document.getElementById('authbtn2');if(authBtn2)authBtn2.disabled=(CUR_ROLE!=='auth');
+}
+
+/* ---------- digital signature capture ---------- */
+let SIG_CB=null;
+function initSigCanvas(){
+  const cv=document.getElementById('sigCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  ctx.strokeStyle='#146970';ctx.lineWidth=2.4;ctx.lineJoin='round';ctx.lineCap='round';
+  let drawing=false;
+  const pos=e=>{const rect=cv.getBoundingClientRect();const c=(e.touches?e.touches[0]:e);
+    return {x:(c.clientX-rect.left)*(cv.width/rect.width),y:(c.clientY-rect.top)*(cv.height/rect.height)};};
+  const start=e=>{drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();};
+  const move=e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();document.getElementById('sigConfirmBtn').disabled=false;e.preventDefault();};
+  const end=()=>{drawing=false;};
+  cv.addEventListener('mousedown',start);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  cv.addEventListener('touchstart',start,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',end);
+}
+function openSigModal(title,roleKey,cb){
+  SIG_CB=cb;
+  document.getElementById('sigTitle').textContent=title;
+  const r=ROLES[roleKey];
+  document.getElementById('sigWho').textContent='Signing as '+r.name+' · '+r.tag;
+  const cv=document.getElementById('sigCanvas');cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+  document.getElementById('sigConfirmBtn').disabled=true;
+  document.getElementById('sigScrim').classList.add('on');
+  document.getElementById('sigModal').classList.add('on');
+}
+function closeSigModal(){
+  document.getElementById('sigScrim').classList.remove('on');
+  document.getElementById('sigModal').classList.remove('on');
+}
+function sigClear(){
+  const cv=document.getElementById('sigCanvas');cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+  document.getElementById('sigConfirmBtn').disabled=true;
+}
+function sigConfirm(){closeSigModal();if(SIG_CB)SIG_CB();}
+function sigAutoDraw(){
+  const cv=document.getElementById('sigCanvas');if(!cv)return;const ctx=cv.getContext('2d');
+  ctx.strokeStyle='#146970';ctx.lineWidth=2.4;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(30,90);
+  ctx.bezierCurveTo(70,40,110,130,150,80);
+  ctx.bezierCurveTo(190,40,220,110,260,70);
+  ctx.bezierCurveTo(290,50,320,90,350,60);
+  ctx.stroke();
+  const b=document.getElementById('sigConfirmBtn');if(b)b.disabled=false;
+}
+
+/* ---------- audit trail ---------- */
+function logAudit(text){
+  const el=document.getElementById('auditExtra');if(!el)return;
+  const row=document.createElement('div');
+  row.className='field-row';
+  row.innerHTML='<div class="flabel">Just now</div><div class="fval">'+text+'</div>';
+  el.appendChild(row);
+}
+
+/* ---------- notifications ---------- */
+const NOTIF_STATE={permit482:'active',deiso482:'inactive',handback482:'inactive'};
+function activeNotifCount(){return Object.values(NOTIF_STATE).filter(v=>v==='active').length;}
+function refreshNotifChrome(){
+  const n=activeNotifCount();
+  const bb=document.getElementById('bellBadge');if(bb){bb.classList.toggle('hidden',n===0);bb.textContent=String(n);}
+  const tb=document.getElementById('tileBadge');if(tb){tb.classList.toggle('hidden',n===0);tb.textContent=String(n);}
+}
+function notifCardHtml(icon,tt,ds,tm,onclick){
+  return '<div class="ncard" onclick="'+onclick+'"><div class="ic">'+icon+'</div><div><div class="tt">'+tt+'</div><div class="ds">'+ds+'</div><div class="tm">'+tm+'</div></div></div>';
+}
+function renderNotifList(tab){
+  const list=document.getElementById('notifList');if(!list)return;
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.toggle('on',t.dataset.ntab===tab));
+  const items=[];
+  if(tab==='all'||tab==='action'){
+    if(NOTIF_STATE.permit482==='active')items.push(notifCardHtml('&#128293;','Permit WCM-00482 needs your approval','P206 Hot work &middot; Boiler house, Bay 3 &middot; isolation still needs certifying before you can authorise.','2h ago &middot; M. Fischer','openNotifPermit()'));
+    if(NOTIF_STATE.deiso482==='active')items.push(notifCardHtml('&#128274;','Isolation removal needed &mdash; WCM-00482','Hot work is complete on site. Remove isolation IC-0097 and confirm zero risk of re-energisation before hand-back.','Just now &middot; T. Wright','openNotifDeiso()'));
+    if(NOTIF_STATE.handback482==='active')items.push(notifCardHtml('&#128203;','Hand-back review needed &mdash; WCM-00482','Isolation removed. Review and sign the hand-back to close the permit and update SAP.','Just now &middot; J. Müller','openNotifHandback()'));
+  }
+  list.innerHTML=items.length?items.join(''):'<div class="nempty">Nothing here right now.</div>';
+}
+function openNotifModal(tab){
+  renderNotifList(tab||'action');
+  document.getElementById('nscrim').classList.add('on');
+  document.getElementById('ndrawer').classList.add('on');
+}
+function closeNotifModal(){
+  document.getElementById('nscrim').classList.remove('on');
+  document.getElementById('ndrawer').classList.remove('on');
+}
+function openNotifPermit(){
+  NOTIF_STATE.permit482='done';
+  refreshNotifChrome();
+  closeNotifModal();
+  showView('record');
+  showTab('details');
+}
+function openNotifDeiso(){
+  closeNotifModal();
+  showView('record');
+  showTab('isolation');
+}
+function openNotifHandback(){
+  closeNotifModal();
+  showView('record');
+  showTab('isolation');
+}
+/* ---------- permit type picker ---------- */
+function openPermitPicker(){
+  document.getElementById('ptScrim').classList.add('on');
+  document.getElementById('ptModal').classList.add('on');
+}
+function closePermitPicker(){
+  document.getElementById('ptScrim').classList.remove('on');
+  document.getElementById('ptModal').classList.remove('on');
+}
+function ptSoon(){toast('This permit type is on the roadmap for a future configuration sprint.');}
+function openRecordRad(){closePermitPicker();closeNotifModal();showView('record-rad');showTab('rad-details');}
+
+/* ---------- radiation protection permit (WCM-00459) ---------- */
+function radLogAudit(text){
+  const el=document.getElementById('auditExtraRad');if(!el)return;
+  const row=document.createElement('div');
+  row.className='field-row';
+  row.innerHTML='<div class="flabel">Just now</div><div class="fval">'+text+'</div>';
+  el.appendChild(row);
+}
+function issueRwp(){
+  const checked=document.getElementById('rwpcheck').checked;
+  const banner=document.getElementById('radbanner');if(banner)banner.classList.toggle('hidden',checked);
+  const step=document.getElementById('step-rwp');
+  if(step){step.classList.toggle('done',checked);step.querySelector('.dot').innerHTML=checked?'&#10003;':'';}
+  const rs=document.getElementById('rowRadStatus');
+  if(rs){
+    if(checked){rs.textContent='Awaiting authorisation';rs.className='status-badge status-submitted';}
+    else{rs.textContent='RWP pending';rs.className='status-badge status-isolation';}
+  }
+  if(checked)radLogAudit('RWP issued &amp; signed — R. Voß');
+}
+function tryIssueRwp(cb){
+  if(!cb.checked){issueRwp();return;}
+  cb.checked=false;
+  if(CUR_ROLE!=='rps'){toast('Segregation of duties: only the radiation protection supervisor (R. Voß) can issue this RWP.');return;}
+  openSigModal('Sign to issue radiation work permit','rps',()=>{cb.checked=true;issueRwp();});
+}
+function authoriseRad(){
+  const step=document.getElementById('step-authorised-rad');
+  if(step){step.classList.remove('active');step.classList.add('done');step.querySelector('.dot').innerHTML='&#10003;';}
+  const live=document.getElementById('step-live-rad');if(live)live.classList.add('active');
+  const rs=document.getElementById('rowRadStatus');if(rs){rs.textContent='Authorised';rs.className='status-badge status-authorised';}
+  toast('Permit WCM-00459 authorised');
+  radLogAudit('Authorised &amp; signed — A. Kowalski');
+}
+function tryAuthoriseRad(){
+  if(CUR_ROLE!=='auth'){toast('Segregation of duties: only the authorising person (A. Kowalski) can authorise this permit.');return;}
+  openSigModal('Sign to authorise this permit','auth',()=>authoriseRad());
+}
+
+function openRecord(){closePermitPicker();showView('record');}
+function closeRecord(){showView('list');}
+function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');}
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('hidden',p.dataset.pane!==name));
+}
+function certifyIsolation(){
+  const checked=document.getElementById('isocheck').checked;
+  document.getElementById('isobanner').classList.toggle('hidden',checked);
+  const step=document.getElementById('step-isolation');
+  step.classList.toggle('done',checked);
+  step.querySelector('.dot').innerHTML=checked?'&#10003;':'';
+  const rs=document.getElementById('row482status');
+  if(rs){
+    if(checked){rs.textContent='Awaiting authorisation';rs.className='status-badge status-submitted';}
+    else{rs.textContent='Isolation pending';rs.className='status-badge status-isolation';}
+  }
+  if(checked)logAudit('Isolation certified &amp; signed — J. Müller');
+}
+function tryCertifyIsolation(cb){
+  if(!cb.checked){certifyIsolation();return;}
+  cb.checked=false;
+  if(CUR_ROLE!=='iso'){toast('Segregation of duties: only the isolating authority (J. Müller) can certify this isolation.');return;}
+  openSigModal('Sign to certify isolation','iso',()=>{cb.checked=true;certifyIsolation();});
+}
+function authorise(){
+  const step=document.getElementById('step-authorised');
+  step.classList.remove('active');step.classList.add('done');
+  step.querySelector('.dot').innerHTML='&#10003;';
+  const live=document.getElementById('step-live');if(live)live.classList.add('active');
+  const rs=document.getElementById('row482status');if(rs){rs.textContent='Authorised';rs.className='status-badge status-authorised';}
+  toast('Permit WCM-00482 authorised — job pushed to technician');
+  const aw=document.getElementById('kpi-await');if(aw)aw.textContent='0';
+  const au=document.getElementById('kpi-auth');if(au)au.textContent=String(parseInt(au.textContent,10)+1);
+  const cal=document.getElementById('isoCallout');if(cal)cal.classList.add('hidden');
+  logAudit('Authorised &amp; signed — A. Kowalski');
+}
+function tryAuthorise(){
+  if(CUR_ROLE!=='auth'){toast('Segregation of duties: only the authorising person (A. Kowalski) can authorise this permit.');return;}
+  openSigModal('Sign to authorise this permit','auth',()=>authorise());
+}
+function tryDeIsolate(){
+  if(CUR_ROLE!=='iso'){toast('Segregation of duties: only the isolating authority (J. Müller) can remove this isolation.');return;}
+  openSigModal('Sign to confirm isolation removed','iso',()=>deIsolate());
+}
+function tryHandBack(){
+  if(CUR_ROLE!=='auth'){toast('Segregation of duties: hand-back must be reviewed and signed by the authorising person.');return;}
+  openSigModal('Sign to confirm hand-back to operations','auth',()=>handBack());
+}
+function deIsolate(){
+  const step=document.getElementById('step-deiso');
+  if(step){step.classList.add('done');step.querySelector('.dot').innerHTML='&#10003;';}
+  const dr=document.getElementById('deisoActionRow');if(dr)dr.classList.add('hidden');
+  const hr=document.getElementById('handbackActionRow');if(hr)hr.classList.remove('hidden');
+  const rs=document.getElementById('row482status');if(rs){rs.textContent='Pending hand-back';rs.className='status-badge status-submitted';}
+  const sap=document.getElementById('sapStatus');if(sap)sap.textContent='DEISO — isolation removed, pending hand-back';
+  NOTIF_STATE.deiso482='done';NOTIF_STATE.handback482='active';
+  refreshNotifChrome();
+  logAudit('Isolation removed &amp; signed — J. Müller');
+  toast('Isolation removed — signed by J. Müller');
+}
+function handBack(){
+  const step=document.getElementById('step-closed');
+  if(step){step.classList.add('done');step.querySelector('.dot').innerHTML='&#10003;';}
+  const hr=document.getElementById('handbackActionRow');if(hr)hr.classList.add('hidden');
+  const rs=document.getElementById('row482status');if(rs){rs.textContent='Closed';rs.className='status-badge status-closed';}
+  const op=document.getElementById('kpi-open');if(op)op.textContent=String(Math.max(0,parseInt(op.textContent,10)-1));
+  const iso=document.getElementById('kpi-iso');if(iso)iso.textContent='0';
+  const sap=document.getElementById('sapStatus');if(sap)sap.textContent='TECO — Complete';
+  NOTIF_STATE.handback482='done';
+  refreshNotifChrome();
+  logAudit('Hand-back reviewed &amp; signed — A. Kowalski');
+  toast('Permit WCM-00482 closed — work order 4471029 marked complete in SAP');
+}
+function toast(msg){
+  const region=document.getElementById('toastregion');
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML='<span class="dotok"></span>'+msg;
+  region.appendChild(t);
+  setTimeout(()=>t.remove(),5000);
+}
+
+/* ---------- guided, narrated demo ---------- */
+function resetDemoState(){
+  setRole('planner');
+  const chk=document.getElementById('isocheck');if(chk)chk.checked=false;
+  certifyIsolation();
+  const step=document.getElementById('step-authorised');
+  if(step){step.classList.remove('done');step.classList.add('active');step.querySelector('.dot').innerHTML='';}
+  const live=document.getElementById('step-live');if(live){live.classList.remove('active','done');live.querySelector('.dot').innerHTML='';}
+  const deiso=document.getElementById('step-deiso');if(deiso){deiso.classList.remove('active','done');deiso.querySelector('.dot').innerHTML='';}
+  const closedStep=document.getElementById('step-closed');if(closedStep){closedStep.classList.remove('done');closedStep.querySelector('.dot').innerHTML='';}
+  const op=document.getElementById('kpi-open');if(op)op.textContent='6';
+  const aw=document.getElementById('kpi-await');if(aw)aw.textContent='1';
+  const au=document.getElementById('kpi-auth');if(au)au.textContent='3';
+  const iso=document.getElementById('kpi-iso');if(iso)iso.textContent='1';
+  const cal=document.getElementById('isoCallout');if(cal)cal.classList.remove('hidden');
+  NOTIF_STATE.permit482='active';NOTIF_STATE.deiso482='inactive';NOTIF_STATE.handback482='inactive';
+  refreshNotifChrome();
+  closeNotifModal();
+  closeSigModal();
+  const sapBtn=document.getElementById('sapPullBtn');if(sapBtn){sapBtn.disabled=false;sapBtn.textContent='Pull into Work Clearance Management';}
+  const sapSt=document.getElementById('sapStatus');if(sapSt)sapSt.textContent='REL — Released';
+  document.querySelectorAll('#briefList input,#isoList input').forEach(i=>{i.checked=false;i.closest('.mchk').classList.remove('done');});
+  const isoBtn=document.getElementById('isoConfirmBtn');if(isoBtn)isoBtn.disabled=true;
+  const dr=document.getElementById('deisoActionRow');if(dr)dr.classList.add('hidden');
+  const hr=document.getElementById('handbackActionRow');if(hr)hr.classList.add('hidden');
+  const ae=document.getElementById('auditExtra');if(ae)ae.innerHTML='';
+  closePhone();
+  mobShow('push');
+  closePermitPicker();
+  const rwpChk=document.getElementById('rwpcheck');if(rwpChk)rwpChk.checked=false;
+  issueRwp();
+  const stepAuthRad=document.getElementById('step-authorised-rad');
+  if(stepAuthRad){stepAuthRad.classList.remove('done');stepAuthRad.classList.add('active');stepAuthRad.querySelector('.dot').innerHTML='';}
+  const liveRad=document.getElementById('step-live-rad');if(liveRad){liveRad.classList.remove('active','done');liveRad.querySelector('.dot').innerHTML='';}
+  const ar=document.getElementById('auditExtraRad');if(ar)ar.innerHTML='';
+  showTab('details');
+  showView('sap');
+}
+
+const DEMO=[
+{t:13000,ttl:'It starts in SAP',spot:'.sap-body',
+ say:'Urenco already runs plant maintenance in SAP. Work order 4471029 is a corrective maintenance order on the boiler B2 relief valve, and it carries an EHS clearance flag — that is the trigger for a work clearance permit.',
+ act:()=>{showView('sap');}},
+
+{t:11000,ttl:'Pulling it into WCM',spot:'#sapPullBtn',
+ say:'Pulling that work order into work clearance management creates the permit automatically — asset, location and description carried straight across, so nobody re-keys it.',
+ act:()=>{pullFromSap();}},
+
+{t:11000,ttl:'Mazlan Home',spot:'.mh-tiles',
+ say:'That new permit lands as an action for Julia on Mazlan Home — the Action required tile picks it up immediately, and the same badge shows on the notification bell.',
+ act:()=>{showView('home');}},
+
+{t:10000,ttl:'Opening notifications',spot:'#bellbtn',
+ say:'Opening the bell shows exactly what needs attention.',
+ act:()=>{openNotifModal('action');}},
+
+{t:11000,ttl:'A permit needs approval',spot:'#notifList .ncard',
+ say:'Permit WCM-00482, a hot work permit for the boiler house, needs approval. Isolation still needs certifying before it can be authorised. Let’s click into it.',
+ act:()=>{}},
+
+{t:10000,ttl:'Into the permit record',spot:'#sapSourceRow',
+ say:'That takes us into the permit record — and notice the source field is a live link straight back to the SAP work order, so there is a full audit trail from ERP to permit.',
+ act:()=>{openNotifPermit();}},
+
+{t:14000,ttl:'Dashboard overview',spot:'.kpi-grid',
+ say:'Stepping back to the dashboard: six permits are open, one is waiting on isolation certification before it can be authorised, and one isolation is currently live in pump room two.',
+ act:()=>{showView('dashboard');}},
+
+{t:13000,ttl:'A SIMOPS conflict, visible up front',spot:'.dash-card .simops-row:last-child',
+ say:'The dashboard also tracks live activity by area. Area four’s scaffolding permit is running just twenty metres from the boiler house — the kind of overlap a safety officer needs to see before authorising anything nearby.',
+ act:()=>{showView('dashboard');}},
+
+{t:8000,ttl:'Back into the permit',spot:'.content-card',
+ say:'Let’s go back into that permit and get it ready.',
+ act:()=>{showView('list');}},
+
+{t:8000,ttl:'WCM-00482, a hot work permit',spot:'.guide-col',
+ say:'WCM-00482 — a hot work permit for the boiler house.',
+ act:()=>{showView('record');}},
+
+{t:12000,ttl:'Checking the isolation status',spot:'.tabgroup',
+ say:'Switching to the isolation tab. This permit needs its energy isolation certified — lock and tag numbers, verified by the isolating authority — before it can move any further.',
+ act:()=>{showTab('isolation');}},
+
+{t:12000,ttl:'Signing to certify the isolation',spot:'#isocheck',
+ say:'Switching to the isolating authority’s role to certify this isolation. Lock and tag numbers, verified on site, and signed — not just ticked in a box.',
+ act:()=>{setRole('iso');openSigModal('Sign to certify isolation','iso',()=>{const c=document.getElementById('isocheck');c.checked=true;certifyIsolation();});setTimeout(sigAutoDraw,900);setTimeout(sigConfirm,2400);}},
+
+{t:10000,ttl:'Segregation of duties, enforced',spot:'#authbtn',
+ say:'Notice the authorise button is disabled — we’re still signed in as the isolating authority. The system won’t let that same login also authorise the permit it just certified. That’s what stops a permit being self-issued.',
+ act:()=>{}},
+
+{t:12000,ttl:'Signing to authorise the permit',spot:'#authbtn',
+ say:'Switching to the authorising person unlocks it. They sign to authorise — advancing the workflow to live, and pushing the job to the technician’s phone.',
+ act:()=>{setRole('auth');openSigModal('Sign to authorise this permit','auth',()=>authorise());setTimeout(sigAutoDraw,900);setTimeout(sigConfirm,2400);}},
+
+{t:9000,ttl:'The technician gets a push notification',spot:'.phone-frame',
+ say:'On site, technician Tomasz Wright gets a push notification the moment the permit is authorised.',
+ act:()=>{openPhone();mobShow('push');}},
+
+{t:9000,ttl:'Opening the worklist',spot:'.mlistitem.hl',
+ say:'Opening his worklist, WCM-00482 is right at the top, ready to start.',
+ act:()=>{mobShow('worklist');}},
+
+{t:10000,ttl:'The technician view',spot:'.phone-frame',
+ say:'The mobile view keeps it simple: what the job is, where, what is already isolated, and what PPE is required — no need to carry a paper permit pack.',
+ act:()=>{mobShow('permit');}},
+
+{t:10000,ttl:'Pre-job brief',spot:'#briefList',
+ say:'Before touching anything, he works through the pre-job brief — method statement, hazards, PPE, and confirming the fire watch is in position.',
+ act:()=>{mobShow('brief');}},
+
+{t:9000,ttl:'Brief acknowledged',spot:'#briefList',
+ say:'Once every item is reviewed, he acknowledges the brief and moves on to isolation.',
+ act:()=>{mobCheckAll('briefList');setTimeout(()=>mobShow('iso'),600);}},
+
+{t:12000,ttl:'Proving the isolation dead',spot:'#isoList',
+ say:'This is the safety-critical step: proving the isolation is actually dead on site, not just certified on paper. He checks the physical locks and tags, then tests each energy source in turn.',
+ act:()=>{mobShow('iso');}},
+
+{t:10000,ttl:'Every point verified',spot:'#isoConfirmBtn',
+ say:'With every point verified, the confirm button unlocks.',
+ act:()=>{mobCheckAll('isoList');}},
+
+{t:9000,ttl:'Zero energy confirmed, work starts',spot:'.mtimerbadge',
+ say:'Confirming zero energy starts the job — hot work, with a fire watch running for the duration.',
+ act:()=>{mobIsoConfirm();}},
+
+{t:10000,ttl:'Closing out on site',spot:'.mcard',
+ say:'When the work is done, he completes the close-out: area made safe, tools cleared, fire watch stood down, notes added.',
+ act:()=>{mobShow('close');}},
+
+{t:11000,ttl:'Submitting the close-out',spot:'.mconfirm-ic',
+ say:'Submitting the close-out finishes the technician’s part — but the permit isn’t closed yet. It flags that the isolation still needs to be formally removed before this can hand back to operations.',
+ act:()=>{mobCloseOut();}},
+
+{t:10000,ttl:'Back at the desk, a new action',spot:'#bellbtn',
+ say:'Back at her desk, a new action shows up: isolation removal needed for WCM-00482.',
+ act:()=>{closePhone();showView('dashboard');}},
+
+{t:9000,ttl:'Opening the removal notification',spot:'#notifList .ncard',
+ say:'Opening the bell shows it — the isolating authority still needs to remove the isolation before this can go any further.',
+ act:()=>{openNotifModal('action');}},
+
+{t:13000,ttl:'Removing the isolation, and signing',spot:'#deisoActionRow',
+ say:'Clicking through takes us to the isolation tab. The isolating authority removes the physical lock and tag, and signs to confirm the isolation is gone — that’s the P205 removal-of-energy step, closing the loop on the isolation itself.',
+ act:()=>{openNotifDeiso();setRole('iso');setTimeout(()=>{openSigModal('Sign to confirm isolation removed','iso',()=>deIsolate());setTimeout(sigAutoDraw,700);setTimeout(sigConfirm,2200);},500);}},
+
+{t:13000,ttl:'Hand-back, reviewed and signed',spot:'#handbackActionRow',
+ say:'Finally, the authorising person reviews and signs the hand-back to operations — a different person again, so nobody signs off their own work end to end. That closes the permit and marks the SAP work order complete.',
+ act:()=>{setRole('auth');openSigModal('Sign to confirm hand-back to operations','auth',()=>handBack());setTimeout(sigAutoDraw,700);setTimeout(sigConfirm,2200);}},
+
+{t:13000,ttl:'Back on the dashboard, fully closed',spot:'.kpi-grid',
+ say:'Back on the dashboard: the permit is closed, the isolation clears, and open permits drops by one — the same view a planner checks first thing every morning.',
+ act:()=>{showView('dashboard');}},
+
+{t:16000,ttl:'The comprehensive loop',spot:null,
+ say:'SAP work order in, permit created, isolation certified and authorised by two different signed-in roles, executed safely on site, isolation formally removed, and handed back with a second signature before the permit closes and SAP updates. Segregation of duties, digital signatures, and a full audit trail at every handoff. That is a comprehensive work clearance management lifecycle for Urenco, end to end. Explore the rest of the prototype at your own pace.',
+ act:()=>{showView('dashboard');}}
+];
+let DM_ON=false,DM_I=0,DM_T=null,DM_U=null,DM_PAUSE=false,DM_MUTE=false,DM_EL=0,DM_TICK=null,DM_VOICE=null;
+const DM_TOTAL=DEMO.reduce((a,s)=>a+s.t,0);
+
+function dmPickVoice(){
+  if(!window.speechSynthesis)return null;
+  const v=speechSynthesis.getVoices();if(!v.length)return null;
+  const pref=[/en-GB/i,/Google UK English Female/i,/Sonia/i,/Libby/i,/Daniel/i,/en-US/i,/en/i];
+  for(const p of pref){const m=v.find(x=>p.test(x.name)||p.test(x.lang));if(m)return m;}
+  return v[0];
+}
+if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{DM_VOICE=dmPickVoice();};
+
+function dmStart(){
+  if(DM_ON)return;
+  resetDemoState();
+  DM_ON=true;DM_I=0;DM_EL=0;DM_PAUSE=false;DM_MUTE=false;
+  DM_VOICE=DM_VOICE||dmPickVoice();
+  document.getElementById('dmb').classList.add('on');
+  const t=document.getElementById('dmTitle');t.classList.add('on');
+  document.body.style.paddingBottom='84px';
+  dismissStart();
+  DM_TICK=setInterval(()=>{if(!DM_PAUSE){DM_EL+=250;dmClock();}},250);
+  setTimeout(()=>{t.classList.remove('on');dmStep();},2600);
+}
+function dmStep(){
+  if(!DM_ON)return;
+  if(DM_I>=DEMO.length)return dmDone();
+  const s=DEMO[DM_I];
+  document.getElementById('dmbN').textContent=DM_I+1;
+  document.getElementById('dmbT').textContent=s.ttl;
+  document.getElementById('dmbC').textContent=s.say;
+  dmSpot(null);
+  try{s.act&&s.act();}catch(e){console.warn('demo scene',DM_I,e);}
+  if(s.spot)setTimeout(()=>dmSpot(s.spot),700);
+  const next=()=>{if(!DM_ON||DM_PAUSE)return;DM_I++;dmStep();};
+  clearTimeout(DM_T);
+  if(DM_MUTE||!window.speechSynthesis){DM_T=setTimeout(next,s.t);return;}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(s.say);
+    if(DM_VOICE)u.voice=DM_VOICE;
+    u.lang=(DM_VOICE&&DM_VOICE.lang)||'en-GB';u.rate=1.0;u.pitch=1;u.volume=1;
+    let done=false;
+    u.onend=()=>{if(done)return;done=true;setTimeout(next,700);};
+    u.onerror=()=>{if(done)return;done=true;DM_T=setTimeout(next,s.t);};
+    DM_U=u;speechSynthesis.speak(u);
+    DM_T=setTimeout(()=>{if(done)return;done=true;next();},s.t+9000);
+  }catch(e){DM_T=setTimeout(next,s.t);}
+}
+function dmSpot(sel){
+  document.querySelectorAll('.dmspot').forEach(e=>e.classList.remove('dmspot'));
+  if(!sel)return;const el=document.querySelector(sel);if(el)el.classList.add('dmspot');
+}
+function mmss(ms){const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function dmClock(){
+  const pct=Math.min(100,(DM_EL/DM_TOTAL)*100);
+  const p=document.getElementById('dmbP');if(p)p.style.width=pct+'%';
+  const tm=document.getElementById('dmbTm');
+  if(tm)tm.textContent=mmss(DM_EL)+' / '+mmss(DM_TOTAL);
+}
+function dmPause(){
+  if(!DM_ON)return;
+  DM_PAUSE=!DM_PAUSE;
+  const b=document.getElementById('dmbPB');
+  b.innerHTML=DM_PAUSE?'&#9654;':'&#10074;&#10074;';
+  b.title=DM_PAUSE?'Resume':'Pause';
+  if(window.speechSynthesis){try{DM_PAUSE?speechSynthesis.pause():speechSynthesis.resume();}catch(e){}}
+  if(DM_PAUSE){clearTimeout(DM_T);}else{if(DM_MUTE||!window.speechSynthesis)dmStep();}
+}
+function dmMute(){
+  DM_MUTE=!DM_MUTE;
+  const b=document.getElementById('dmbM');
+  b.style.opacity=DM_MUTE?'.4':'.8';b.title=DM_MUTE?'Unmute narration':'Mute narration';
+  if(DM_MUTE&&window.speechSynthesis){try{speechSynthesis.cancel();}catch(e){}
+    clearTimeout(DM_T);if(!DM_PAUSE){DM_T=setTimeout(()=>{DM_I++;dmStep();},500);}}
+}
+function dmSkip(){
+  if(!DM_ON)return;
+  if(window.speechSynthesis){try{speechSynthesis.cancel();}catch(e){}}
+  clearTimeout(DM_T);DM_PAUSE=false;
+  DM_EL=DEMO.slice(0,DM_I+1).reduce((a,s)=>a+s.t,0);
+  DM_I++;dmStep();
+}
+function dmDone(){
+  dmSpot(null);
+  document.getElementById('dmbT').textContent='Complete';
+  document.getElementById('dmbC').innerHTML='<b>End of demo.</b> Explore freely, or replay from the app bar.';
+  document.getElementById('dmbP').style.width='100%';
+  if(window.speechSynthesis){try{speechSynthesis.cancel();}catch(e){}}
+  clearInterval(DM_TICK);
+  setTimeout(()=>{if(DM_ON)dmExit();},6000);
+}
+function dmExit(){
+  DM_ON=false;DM_PAUSE=false;
+  clearTimeout(DM_T);clearInterval(DM_TICK);
+  if(window.speechSynthesis){try{speechSynthesis.cancel();}catch(e){}}
+  dmSpot(null);
+  document.getElementById('dmb').classList.remove('on');
+  document.getElementById('dmTitle').classList.remove('on');
+  document.body.style.paddingBottom='';
+}
+function dismissStart(){
+  const o=document.getElementById('startOv');
+  if(o)o.classList.add('gone');
+  if(window.speechSynthesis){try{DM_VOICE=DM_VOICE||dmPickVoice();}catch(e){}}
+}
+function beginDemo(){dismissStart();setTimeout(dmStart,350);}
+function beginExplore(){
+  dismissStart();
+  setTimeout(()=>toast('Explore freely — "Play demo" in the top bar starts the guided tour any time.'),700);
+}
+function boot(){
+  initSigCanvas();
+  refreshRoleGates();
+  if(!window.speechSynthesis)setTimeout(()=>toast('This browser has no speech synthesis, so the demo will run with captions only. Chrome or Edge gives you narration.'),1200);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+</script>
+</body>
+</html>
