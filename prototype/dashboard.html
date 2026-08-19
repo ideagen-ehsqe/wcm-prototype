@@ -1391,6 +1391,24 @@ body[data-theme="dark"] .chip-warn{ background:rgba(212,136,15,.20); color:#e6ab
 body[data-theme="dark"] .feed__dot--ok .icon{ color:#46c88a; }
 body[data-theme="dark"] .feed__dot--warn .icon{ color:#e6ab53; }
 
+/* ---- Toolbar alignment ------------------------------------------------ */
+/* In the record stylesheet .toolbar__inner is a centred max-width column with a
+   24px left padding and a 316px right reserve, so the controls line up with the
+   record page's three columns and the required-fields guide clears the content
+   column's right edge. This page has no record grid and no guide, and the only
+   thing above the band is the title — so it gives all three up. Both bands take
+   their own padding from --ph-pad-x, which means Refresh now shares a left edge
+   with the title icon exactly rather than approximately. */
+.toolbar__inner{ max-width:none; margin-inline:0; padding:0; }
+
+/* ---- Refresh ---------------------------------------------------------- */
+/* One turn of the glyph on click. The figures here are mock data and nothing is
+   re-fetched, but a control that gives no feedback at all reads as broken — and
+   the spin is the honest minimum: it says "asked", not "changed". */
+@keyframes wcm-spin{ to{ transform:rotate(360deg); } }
+#refreshBtn.is-busy .icon{ animation:wcm-spin .6s linear; }
+@media (prefers-reduced-motion:reduce){ #refreshBtn.is-busy .icon{ animation:none; } }
+
 /* ---- Blocked-permit snackbar ---------------------------------------- */
 /* Same material as the permit page's banner so the two read as one voice,
    with the action on the right: the message names the blockage, the link goes
@@ -1663,7 +1681,23 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
           <h1 class="pageheader__title">Work clearance management dashboard</h1>
           <div class="ph-chips">
             <span class="ph-chip"><i data-lucide="map-pin" class="icon" aria-hidden="true"></i>Urenco Deutschland, Gronau</span>
-            <span class="ph-chip"><i data-lucide="clock" class="icon" aria-hidden="true"></i>Updated just now</span>
+            <span class="ph-chip"><i data-lucide="clock" class="icon" aria-hidden="true"></i><span id="updatedAt">Updated just now</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================= TOOLBAR -->
+      <!-- The band under the title. .toolbar carries its own inset hairline in
+           ::after, matching the page header's, so the second rule below the
+           title is the component doing its job rather than a divider added by
+           hand. Same band the record pages use, so the two page types line up. -->
+      <div class="toolbar" role="toolbar" aria-label="Dashboard tools">
+        <div class="toolbar__inner">
+          <div class="toolbar__group">
+            <button class="tbtn" type="button" id="refreshBtn">
+              <i data-lucide="refresh-cw" class="icon" aria-hidden="true"></i>
+              <span>Refresh</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1908,6 +1942,23 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
     rfClose.addEventListener('click', function () {
       rfPop.hidden = true;
       if (rfBtn) rfBtn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  /* Refresh. Spins once, then restates when the figures were last read. */
+  var refresh = document.getElementById('refreshBtn');
+  var updated = document.getElementById('updatedAt');
+  if (refresh) {
+    refresh.addEventListener('click', function () {
+      refresh.classList.remove('is-busy');
+      /* Reflow, so clicking again mid-animation restarts it rather than doing
+         nothing — removing and re-adding a class in one frame is a no-op. */
+      void refresh.offsetWidth;
+      refresh.classList.add('is-busy');
+      if (updated) updated.textContent = 'Updated just now';
+    });
+    refresh.addEventListener('animationend', function () {
+      refresh.classList.remove('is-busy');
     });
   }
 
