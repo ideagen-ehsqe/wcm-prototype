@@ -1,0 +1,184 @@
+/* =====================================================================
+   PRAXIS SEARCH MODULE SELECTOR — the search-scope picker in the app header.
+
+   Same catalog as Create New's "All" tab (every module the user can access,
+   grouped by solution), presented as a typeable, multi-select filter. Default
+   scope is "All". Selecting one or more modules restricts search to those
+   record types. Reuses the Create New tile / group / row styling and the
+   shared CREATE_CATALOG data.
+   ===================================================================== */
+
+/* ---- Trigger — a 240px typeable field on the left of the search pill ---- */
+.msel{
+  /* relative so the inset divider (::after) anchors here; the body-level menu
+     is still positioned from the search pill (.appbar__search) in JS, so this
+     does not affect the menu's placement or width */
+  position:relative; display:flex; align-items:center; gap:2px;
+  width:240px; flex-shrink:0; height:100%; box-sizing:border-box;
+  padding:0 6px 0 14px; cursor:pointer;
+}
+/* Divider between the module selector and the search input — a hairline that
+   is inset from the top/bottom edges rather than spanning the full height. */
+.msel::after{
+  content:""; position:absolute; right:0; top:50%; transform:translateY(-50%);
+  width:1px; height:56%; background:var(--ehsq-color-border-default);
+}
+/* The trigger field only displays the current scope; it opens the menu on click
+   and is not typeable (filtering lives inside the menu). */
+.msel__input{
+  flex:1; min-width:0; border:0; outline:0; background:transparent; padding:0;
+  font:inherit; font-size:.875rem; font-weight:600; color:var(--ehsq-color-text-primary);
+  text-overflow:ellipsis; cursor:pointer;
+}
+.msel__input::placeholder{ color:var(--ehsq-color-text-secondary); font-weight:600; }
+.msel__caret{ font-size:20px !important; color:var(--ehsq-color-text-secondary); flex-shrink:0; pointer-events:none;
+  transition:transform var(--dur-fast,.18s) ease; }
+.msel.is-open .msel__caret{ transform:rotate(180deg); }
+/* Dark: the module label + dropdown arrow read too dark on the header pill;
+   lighten to neutral-20 (light palette value — the token remaps dark). */
+body[data-theme="dark"] .msel__input{ color:#c8cfd7; }
+body[data-theme="dark"] .msel__input::placeholder{ color:#c8cfd7; }
+body[data-theme="dark"] .msel__caret{ color:#c8cfd7; }
+/* "All modules" is selected by default; its teal-10 chip glares in dark — use a
+   translucent-teal chip with bright-teal glyph (the dark teal-chip convention). */
+
+/* ---- Scrim behind the menu — dims the WHOLE page including the app header
+       (the menu is rendered at body level, above the scrim, so the header can
+       dim under it). Sits above the app bar (z100) and below the menu. ---- */
+.msel__scrim{
+  position:fixed; inset:0; z-index:125;
+  background:rgba(16,36,58,.18);
+  opacity:1; transition:opacity .16s ease, display .16s allow-discrete;
+}
+.msel__scrim[hidden]{ display:none; opacity:0; }
+@starting-style{ .msel__scrim:not([hidden]){ opacity:0; } }
+
+/* ---- Menu — frosted panel (Create New flyout material). Lives at body level
+       and is positioned from the search pill in JS (left/top/width), so it
+       escapes the app bar's stacking context and paints above the scrim while
+       the header dims beneath it. ---- */
+.msel__menu{
+  position:fixed; z-index:130;
+  max-height:min(96vh, 1040px); overflow-y:auto;
+  padding:24px; display:flex; flex-direction:column;
+  /* Match the Create New flyout: more translucent (a hair darker over the page)
+     so the solid white tiles read against the surface. */
+  background:color-mix(in srgb, var(--px-surface) 60%, transparent);
+  -webkit-backdrop-filter:saturate(1.35) blur(16px); backdrop-filter:saturate(1.35) blur(16px);
+  border:0; border-radius:14px;
+  box-shadow:var(--px-overlay), inset 0 .5px 0 var(--px-edge);
+  color:var(--ehsq-color-text-primary);
+  /* open/close animation */
+  transform-origin:top left;
+  transition:opacity .16s ease, transform .2s var(--ehsq-ease-default, cubic-bezier(.32,.72,0,1)), display .2s allow-discrete;
+}
+.msel__menu[hidden]{ display:none; opacity:0; transform:translateY(-6px) scale(.99); }
+@starting-style{ .msel__menu:not([hidden]){ opacity:0; transform:translateY(-6px) scale(.99); } }
+
+/* ---- Menu title ---- */
+.msel__titlebar{ display:flex; align-items:center; margin:0 0 10px; }
+.msel__title{ font-size:16px; font-weight:700; color:var(--ehsq-color-text-primary); margin:0; }
+
+/* ---- Filter field — narrows the module list; lives inside the menu, below
+       the title (the trigger field is display-only). Reuses the Create New
+       search pill (.cn-find); only the spacing below the title is bespoke. ---- */
+/* The menu is a flex column with max-height:min(96vh,1040px). A flex item's
+   default flex-shrink:1 means the filter gets compressed below its 38px height
+   whenever the module list overflows — so on a short viewport the input looked
+   squashed, and the amount varied with the window. Pinning the fixed-height
+   chrome (title row + filter) means the list absorbs all the overflow and the
+   input is always 38px, at any viewport height. */
+.msel__filter{ margin:0 0 16px; flex:0 0 auto; }
+.msel__titlebar{ flex:0 0 auto; }
+
+/* ---- "All modules" row at the top ---- */
+
+/* ---- Groups flow into three columns (like the Create New All view); the
+       "All modules" row spans the full width above them ---- */
+.msel__groups{ column-count:3; column-gap:20px; }
+.msel__groups .cn-group{ break-inside:avoid; margin:0 0 16px; }
+
+/* Group headers read as section labels, NOT tiles — a solid tone marker + an
+   uppercase, tracked title in the solution colour, clearly distinct from the
+   pale-tinted, sentence-case tiles below. Left edge still aligns with tiles. */
+.msel__menu .cn-group__head{ padding:0 10px; gap:8px; height:32px; margin-bottom:6px; }
+.msel__menu .cn-group__icon{ width:32px; height:32px; border-radius:8px; background:var(--cn-tone); color:var(--ehsq-color-white); }
+.msel__menu .cn-group__icon .material-symbols-rounded{ font-size:20px; }
+.msel__menu .cn-group__title{ font-size:11px; font-weight:800; letter-spacing:normal; color:var(--cn-tone); }
+
+/* "All modules" checkbox sits next to the label, not pushed to the far right. */
+
+/* ---- Module tiles: single column within each group (full labels), tinted,
+       multi-selectable ---- */
+.msel__menu .cn-grid{ grid-template-columns:1fr; }
+.msel__menu .cn-item{ position:relative; }
+.msel__menu .cn-item.is-sel{ box-shadow:0 0 0 1.5px var(--ehsq-color-interactive-default), var(--px-tool-shadow); }
+.msel__menu .cn-item__check{ margin-left:auto; color:var(--ehsq-color-interactive-default); font-size:18px !important; display:none; }
+.msel__menu .cn-item.is-sel .cn-item__check{ display:inline-flex; }
+
+.msel__empty{ font-size:var(--ehsq-type-size-sm); color:var(--ehsq-color-text-secondary); padding:10px 8px; }
+
+/* =====================================================================
+   RESPONSIVE (≤768px md / ≤480px sm) — the trigger shrinks to a compact
+   scope chip and the body-level menu becomes a near-full-width sheet with a
+   single column of groups. The menu's left/top/width are set inline by JS
+   (positionMenu); these rules override with !important to reclaim the width.
+   ===================================================================== */
+@media (max-width:768px){
+  .msel{ width:auto; max-width:132px; padding:0 4px 0 10px; }
+  .msel__input{ font-size:.8125rem; }
+  .msel__menu{ left:8px !important; right:8px !important; width:auto !important;
+    max-width:none; max-height:74vh; padding:16px; }
+  .msel__groups{ column-count:1 !important; }
+}
+@media (max-width:480px){
+  .msel{ max-width:96px; }
+}
+
+/* Clear — the route back to "All" once modules are picked. Hidden while the
+   selection is already empty, since "All" is what an empty selection means. */
+.msel__clear{
+  margin-left:auto; font:inherit; font-size:13px; font-weight:600;
+  color:var(--ehsq-color-text-link); background:transparent; border:0;
+  padding:4px 8px; border-radius:var(--ehsq-radius-sm); cursor:pointer;
+}
+.msel__clear:hover{ background:var(--px-hover); }
+.msel__clear[hidden]{ display:none; }
+
+/* ============================================================================
+   PHONE — the module menu becomes a full-width sheet with collapsible groups
+   ============================================================================
+   At 390px the desktop grid squeezed each option to a couple of characters, so
+   the module names — the only information in the menu — were unreadable. The
+   options stack one per row at full width, and each group collapses so a long
+   catalogue stays navigable.
+   ========================================================================= */
+@media (max-width:640px){
+  .msel__menu{
+    left:0 !important; right:0 !important; top:auto !important; bottom:0 !important;
+    width:100% !important; max-width:100% !important; max-height:86vh;
+    border-radius:16px 16px 0 0; padding:16px;
+  }
+  /* One option per row, full width, so the whole name is readable. */
+  .msel__menu .cn-grid{ grid-template-columns:1fr !important; gap:2px; }
+  .msel__menu .cn-item{ width:100%; min-height:44px; }
+  .msel__menu .cn-item__label{ white-space:normal; }
+
+  /* Group heads become the collapse control. */
+  .msel__menu .cn-group{ margin-bottom:6px; }
+  .msel__menu .cn-group__head{
+    display:flex; align-items:center; width:100%; height:44px; padding:0 8px;
+    border:0; background:transparent; border-radius:10px; cursor:pointer;
+    font:inherit; text-align:left; color:var(--ehsq-color-text-primary);
+  }
+  .msel__menu .cn-group__head:hover{ background:var(--px-hover-btn); }
+  .msel__menu .cn-group__head::after{
+    content:""; margin-left:auto; width:9px; height:9px; flex-shrink:0;
+    border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+    transform:rotate(45deg); transition:transform 160ms var(--ehsq-ease-default);
+    color:var(--ehsq-color-text-secondary);
+  }
+  .msel__menu .cn-group.is-collapsed .cn-group__head::after{ transform:rotate(-45deg); }
+  .msel__menu .cn-group.is-collapsed .cn-grid{ display:none; }
+  .msel__menu .cn-group__title{ font-weight:700; }
+}

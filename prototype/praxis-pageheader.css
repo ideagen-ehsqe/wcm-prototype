@@ -1,0 +1,80 @@
+/* =====================================================================
+   PRAXIS MASTHEAD — the shared two-band block every page carries under the
+   app bar: the page header (breadcrumb + icon + title) and the toolbar band
+   beneath it. Both sit on a --px-page fill that covers the fixed body
+   dot-grid, and each closes with an inset hairline. Content differs per page;
+   the underpinnings — and, critically, the combined height — are shared, so
+   page content begins at the same y on every page. Each page sets --ph-pad-x
+   to its own horizontal content rhythm (workspace 32px, record 24px, search
+   20px). Header icons use the Material Symbols font (loaded on every page).
+
+   The masthead is 128px tall: 68px header + 60px toolbar band. With the 64px
+   app bar above it, page content starts at 192px. Anything that changes a
+   band's height breaks that promise on one page only — which is exactly the
+   drift this file exists to prevent, so change the tokens, not a page.
+   ===================================================================== */
+:root{
+  /* The two bands of the masthead. Held here rather than per page so the
+     content-start y is one number in one place. */
+  --ph-h:68px;
+  --px-toolbar-h:60px;
+  --px-toolbar-pad-y:10px;
+}
+
+/* No top padding: the breadcrumb sits directly under the app bar, which already
+   carries its own vertical space. --ph-pad-top is here for any page that needs
+   it back. Height is a floor, not a fix: the breadcrumb is allowed to wrap at
+   narrow widths and take the header with it. */
+.pageheader{position:relative;box-sizing:border-box;min-height:var(--ph-h,68px);
+  padding:var(--ph-pad-top,0) var(--ph-pad-x,24px) 10px;background:var(--px-page);}
+.pageheader::after{content:"";position:absolute;left:var(--ph-pad-x,24px);right:var(--ph-pad-x,24px);
+  bottom:0;height:1px;background:var(--ehsq-color-border-default);}
+
+/* =====================================================================
+   TOOLBAR BAND — the row of page-level actions directly under the header.
+   Every page has one, whatever it holds: record tools, search controls, the
+   admin actions, the history tabs, the workspace quick actions. The band owns
+   the height and the closing hairline; the page owns the contents.
+
+   The band is always full-bleed so its hairline lines up with the header's
+   directly above it. Pages whose content is a centred max-width column (the
+   record family) put their controls in .toolbar__inner and centre that
+   instead, so the controls align with the cards below while the two rules
+   still run edge to edge.
+   ===================================================================== */
+.toolbar{position:relative;box-sizing:border-box;display:flex;align-items:center;flex-wrap:wrap;
+  gap:var(--ehsq-space-8);min-height:var(--px-toolbar-h,60px);
+  padding:var(--px-toolbar-pad-y,10px) var(--ph-pad-x,24px);
+  background:linear-gradient(to bottom, var(--px-page) 0%, transparent 100%);}
+.toolbar::after{content:"";position:absolute;left:var(--ph-pad-x,24px);right:var(--ph-pad-x,24px);
+  bottom:0;height:1px;background:var(--ehsq-color-border-default);}
+/* The centred column. Pages set its max-width alongside their content column
+   so the two share one number. */
+.toolbar__inner{display:flex;align-items:center;gap:var(--ehsq-space-8);
+  width:100%;min-width:0;margin-inline:auto;}
+.toolbar__spacer{flex:1;}
+
+.breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;
+  font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-secondary);}
+.breadcrumb a{color:var(--ehsq-color-text-secondary);text-decoration:none;}
+.breadcrumb a:hover{color:var(--ehsq-color-text-primary);}
+.breadcrumb__home{display:inline-flex;align-items:center;color:var(--ehsq-color-text-disabled);}
+.breadcrumb__sep{display:inline-flex;align-items:center;color:var(--ehsq-color-text-disabled);}
+.breadcrumb__current{display:inline-flex;align-items:center;gap:6px;color:var(--ehsq-color-text-primary);}
+.breadcrumb .material-symbols-rounded{font-size:18px;line-height:1;}
+
+.pageheader__titlerow{display:flex;align-items:center;gap:12px;}
+/* Neutral, not pink: the pink read as a call to action rather than a type
+   marker. A light chip one step off the page with a slate glyph — enough to
+   separate from the background without competing with the title. */
+.pageheader__icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;background:var(--px-surface-2,#f4f6f8);color:var(--ehsq-color-neutral-90,#2f4051);
+  box-shadow:0 0 0 .5px rgba(16,36,58,.10),0 1px 2px rgba(16,36,58,.06),inset 0 1px 0 rgba(255,255,255,.9);}
+body[data-theme="dark"] .pageheader__icon{
+  background:var(--px-surface-2);color:#e7ebf1;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.08),0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.07);}
+.pageheader__icon .material-symbols-rounded{font-size:20px;}
+.pageheader__icon .icon{width:20px;height:20px;}
+.pageheader__title{margin:0;font-size:var(--ehsq-type-size-xl);font-weight:700;line-height:1.25;
+  color:var(--ehsq-color-text-primary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pageheader__status{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}

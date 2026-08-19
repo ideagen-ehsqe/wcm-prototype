@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign in — Ideagen EHSQ Enterprise</title>
+<link rel="stylesheet" href="concierge-base.css" />
+<link rel="stylesheet" href="praxis-core.css" />
+<style>
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Medium.woff2') format('woff2'); font-weight:500; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-SemiBold.woff2') format('woff2'); font-weight:600; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
+
+*{ box-sizing:border-box; }
+[hidden]{ display:none !important; }  /* author display rules would otherwise defeat the hidden attribute */
+body[data-variant="praxis"]{
+  margin:0; min-height:100vh; font-family:var(--ehsq-type-font-sans);
+  color:var(--ehsq-color-text-primary); -webkit-font-smoothing:antialiased;
+  /* solid page — the dot grid is drawn by the JS dot field (.lg-dots) so it can animate */
+  background:var(--px-page); overflow:hidden;
+}
+
+/* Animated dot field — replaces the static CSS grid so a wave can travel through it.
+   Edges fade via a radial mask so dots dissolve toward the corners. */
+.lg-dots{
+  position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; display:block;
+}
+
+/* Animation switcher — bottom-right, stacked above Skip + copyright */
+/* ambient glow + sphere ring are now drawn on the canvas by the dot-field engine
+   (lab-tunable via the Ambient glow / Sphere ring / Ring size globals). */
+
+/* copyright + skip */
+.lg-copy{ position:fixed; bottom:20px; right:32px; z-index:5; font-size:var(--ehsq-type-size-xs); color:var(--ehsq-color-text-secondary);  /* was neutral-50: 3.43:1 */ }
+.lg-skip{
+  position:fixed; bottom:52px; right:32px; z-index:5; display:inline-flex; align-items:center; gap:6px;
+  background:transparent; border:0; cursor:pointer; font:inherit; font-size:var(--ehsq-type-size-sm); font-weight:600;
+  color:var(--ehsq-color-text-secondary); padding:6px 8px; border-radius:8px; transition:color .16s, background .16s;
+}
+.lg-skip:hover{ color:var(--ehsq-color-text-link); background:var(--px-hover); }
+.lg-skip svg{ width:16px; height:16px; }
+
+/* centering */
+.lg-wrap{ position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px; }
+
+/* the card — Praxis slate surface, lit edge */
+.lg-card{
+  width:100%; max-width:432px; background:var(--px-surface); border-radius:var(--ehsq-radius-lg);
+  box-shadow:var(--praxis-card); padding:40px 40px 34px; position:relative; overflow:hidden;
+}
+/* top signature hairline */
+.lg-card::before{ content:""; position:absolute; inset:0 0 auto 0; height:2px; background:linear-gradient(90deg,#29D2D7,var(--ehsq-color-pink-60)); opacity:.9; }
+.lg-card__logo{ display:flex; justify-content:center; margin-bottom:8px; }
+.lg-card__logo img{ height:38px; width:auto; }
+/* The page's only heading, so an <h1> rather than a <p>. Weight and
+   line-height are pinned to the <p> values it replaced, because an h1 would
+   otherwise take the UA bold — this keeps the rendering identical. */
+.lg-card__sub{ text-align:center; margin:0 0 26px; font-size:var(--ehsq-type-size-sm); color:var(--ehsq-color-text-secondary);
+  font-weight:400; line-height:1.5; }
+
+/* buttons */
+.lg-btn{
+  display:inline-flex; align-items:center; justify-content:center; width:100%; height:46px; border:0; cursor:pointer;
+  border-radius:var(--ehsq-radius-md); font:inherit; font-size:var(--ehsq-type-size-base); font-weight:700; transition:box-shadow .16s, transform .04s, background .16s;
+}
+.lg-btn:active{ transform:translateY(0.5px); }
+.lg-btn--primary{ background:var(--px-primary-grad); color:var(--px-primary-fg); box-shadow:var(--px-primary-shadow); }
+.lg-btn--primary:hover{ box-shadow:var(--px-primary-shadow), 0 0 0 3px rgba(41,210,215,.18); }
+.lg-btn--ghost{ background:var(--px-tool); color:var(--ehsq-color-text-primary); box-shadow:var(--px-tool-shadow); }
+.lg-btn--ghost:hover{ box-shadow:var(--px-tool-shadow-hover); color:var(--ehsq-color-text-link); }
+
+.lg-choice{ display:flex; flex-direction:column; gap:12px; }
+
+/* credentials form */
+.lg-form{ display:flex; flex-direction:column; gap:14px; }
+.lg-field{
+  display:flex; align-items:center; gap:10px; height:50px; padding:0 14px;
+  background:var(--px-surface-2); border:1px solid var(--ehsq-color-border-default); border-radius:var(--ehsq-radius-md);
+  transition:border-color .16s, box-shadow .16s;
+}
+.lg-field:focus-within{ border-color:var(--ehsq-color-interactive-default); box-shadow:0 0 0 3px rgba(41,210,215,.18); }
+.lg-field svg{ width:19px; height:19px; color:var(--ehsq-color-text-secondary); flex-shrink:0; }
+.lg-field input{ flex:1; min-width:0; border:0; background:transparent; outline:0; font:inherit; font-size:var(--ehsq-type-size-base); color:var(--ehsq-color-text-primary); }
+.lg-field input::placeholder{ color:var(--ehsq-color-text-secondary); }
+.lg-forgot{ align-self:flex-start; font-size:var(--ehsq-type-size-sm); font-weight:600; color:var(--ehsq-color-text-link); text-decoration:none; margin-top:-2px; }
+.lg-forgot:hover{ text-decoration:underline; }
+.lg-actions{ display:flex; gap:12px; margin-top:6px; }
+.lg-actions .lg-btn{ flex:1; }
+
+/* messages pill */
+.lg-messages{
+  background:var(--ehsq-color-pink-60,var(--ehsq-color-pink-60)); color:var(--ehsq-color-white); border:0; cursor:pointer; font:inherit;
+  font-size:var(--ehsq-type-size-xs); font-weight:700; padding:6px 16px; border-radius:999px;
+  box-shadow:0 2px 10px -2px rgba(227,0,114,.5); transition:transform .12s, box-shadow .16s;
+}
+.lg-messages:hover{ transform:translateY(-1px); box-shadow:0 4px 14px -2px rgba(227,0,114,.6); }
+
+/* messages modal */
+.lg-scrim{ position:fixed; inset:0; z-index:20; background:rgba(8,12,18,.6); backdrop-filter:blur(3px); }
+.lg-scrim[hidden]{ display:none; }
+.lg-modal{
+  position:fixed; z-index:21; left:50%; top:50%; transform:translate(-50%,-50%); width:min(92vw,620px); max-height:82vh;
+  display:flex; flex-direction:column; background:var(--px-surface); border-radius:var(--ehsq-radius-lg);
+  box-shadow:var(--px-overlay); overflow:hidden;
+}
+.lg-modal[hidden]{ display:none; }
+.lg-modal__head{ display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--ehsq-color-border-default); }
+.lg-modal__head h2{ margin:0; font-size:var(--ehsq-type-size-lg); font-weight:700; }
+.lg-modal__x{ display:inline-flex; background:transparent; border:0; cursor:pointer; color:var(--ehsq-color-text-secondary); padding:6px; border-radius:8px; }
+.lg-modal__x:hover{ background:var(--px-hover); color:var(--ehsq-color-text-primary); }
+.lg-modal__x svg{ width:20px; height:20px; }
+.lg-modal__body{ padding:22px 24px; overflow-y:auto; font-size:var(--ehsq-type-size-base); line-height:1.6; color:var(--ehsq-color-text-secondary); }
+.lg-modal__body .lg-status{ color:var(--ehsq-color-text-primary); padding-bottom:16px; border-bottom:1px solid var(--ehsq-color-border-default); margin-bottom:16px; }
+.lg-modal__body ul{ margin:8px 0 0; padding-left:20px; }
+.lg-modal__body li{ margin:3px 0; }
+.lg-modal__foot{ display:flex; justify-content:flex-end; padding:14px 20px; border-top:1px solid var(--ehsq-color-border-default); }
+.lg-modal__foot .lg-btn{ width:auto; padding:0 26px; }
+
+@media (max-width:480px){ .lg-card{ padding:32px 24px 28px; } .lg-skip,.lg-copy{ right:16px; } }
+
+/* Overlay mode (?overlay=1) — the animation lab embeds this page over its own preview
+   canvas to check the UI against a background. The page keeps its real markup and
+   styling but drops anything that would occlude or duplicate the lab's canvas:
+   its own background, its own dot field, and its own animation switcher. */
+html[data-overlay]{
+  /* praxis-core sets color-scheme:dark on <body>, so the embedding <iframe> element
+     inherits "dark" while this document's ROOT stays light. On that mismatch Chrome
+     paints an opaque white color-adjust background behind the frame, which would
+     hide the lab's canvas. Declaring the scheme on the root matches the embedder
+     and lets the frame composite transparently. */
+  color-scheme:dark;
+  background:transparent;
+}
+html[data-overlay] body[data-variant="praxis"]{ background:transparent; }
+html[data-overlay] .lg-dots{ display:none; }
+</style>
+<script>
+  /* set before first paint so the opaque page background never flashes over the canvas */
+  if(/[?&]overlay=1/.test(location.search)) document.documentElement.setAttribute('data-overlay','1');
+</script>
+</head>
+<body data-variant="praxis" data-theme="dark">
+
+<canvas class="lg-dots" id="dots-canvas" aria-hidden="true"></canvas>
+
+<main class="lg-wrap">
+  <div class="lg-card">
+    <div class="lg-card__logo"><img src="assets/ideagen-logo-dark.svg" alt="Ideagen" /></div>
+    <h1 class="lg-card__sub">Sign in to EHSQ Enterprise</h1>
+
+    <!-- Choice state -->
+    <div class="lg-choice" id="choice">
+      <button type="button" class="lg-btn lg-btn--primary" id="username-btn">Sign in with Username</button>
+      <button type="button" class="lg-btn lg-btn--ghost" data-sso>Single Sign On</button>
+    </div>
+
+    <!-- Credentials state -->
+    <form class="lg-form" id="creds" hidden>
+      <label class="lg-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <input type="text" id="username" placeholder="Username" autocomplete="username" />
+      </label>
+      <label class="lg-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      </label>
+      <a href="#" class="lg-forgot" onclick="return false">Forgot Password?</a>
+      <div class="lg-actions">
+        <button type="button" class="lg-btn lg-btn--ghost" data-sso>Single Sign On</button>
+        <button type="submit" class="lg-btn lg-btn--primary" id="login-btn">Login</button>
+      </div>
+    </form>
+  </div>
+
+  <button type="button" class="lg-messages" id="msg-pill">2 Messages</button>
+</main>
+
+<button type="button" class="lg-skip" id="skip-btn">Skip
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+</button>
+<div class="lg-copy">® 2026 Ideagen plc All Rights Reserved.</div>
+
+<!-- Messages modal -->
+<div class="lg-scrim" id="msg-scrim" hidden></div>
+<div class="lg-modal" id="msg-modal" hidden role="dialog" aria-modal="true" aria-labelledby="msg-title">
+  <div class="lg-modal__head">
+    <h2 id="msg-title">Messages</h2>
+    <button type="button" class="lg-modal__x" id="msg-x" aria-label="Close messages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+    </button>
+  </div>
+  <div class="lg-modal__body">
+    <p class="lg-status">this is a status message</p>
+    <p><strong>Update 6/20/2026.</strong> This area is now running on the software platform YourWay 2.31, which includes features such as:</p>
+    <ul>
+      <li>The ability to drag saved searches to your Dashboard and view them as a "live tile"</li>
+      <li>A streamlined notifications screen</li>
+      <li>The ability to rename attachments</li>
+      <li>Push notifications to mobile devices</li>
+      <li>DevonWay BI reporting against child fields</li>
+      <li>And much more. For full details, please visit the release notes</li>
+    </ul>
+  </div>
+  <div class="lg-modal__foot">
+    <button type="button" class="lg-btn lg-btn--primary" id="msg-close">Close</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var WORKSPACE = 'index.html';
+  var OVERLAY = document.documentElement.hasAttribute('data-overlay');
+  // in the lab overlay the card is a visual reference: forms and the modal still work,
+  // but signing in must not navigate the preview away from the login screen
+  var go = OVERLAY ? function(){} : function(){ try{ sessionStorage.setItem('gl-authed','1'); }catch(e){} window.location.href = WORKSPACE; };
+
+  // SSO (both instances) — assumed available, logs straight in
+  document.querySelectorAll('[data-sso]').forEach(function(b){ b.addEventListener('click', go); });
+
+  // Skip (demo)
+  document.getElementById('skip-btn').addEventListener('click', go);
+
+  // Reveal username/password inputs
+  var choice = document.getElementById('choice');
+  var creds  = document.getElementById('creds');
+  document.getElementById('username-btn').addEventListener('click', function(){
+    choice.hidden = true; creds.hidden = false;
+    document.getElementById('username').focus();
+  });
+
+  // Login — accept anything (incl. empty), go to workspace. Submit handles click + Enter.
+  creds.addEventListener('submit', function(e){ e.preventDefault(); go(); });
+
+  // Messages modal
+  var scrim = document.getElementById('msg-scrim'), modal = document.getElementById('msg-modal');
+  function openMsg(){ scrim.hidden = false; modal.hidden = false; }
+  function closeMsg(){ scrim.hidden = true; modal.hidden = true; }
+  document.getElementById('msg-pill').addEventListener('click', openMsg);
+  document.getElementById('msg-x').addEventListener('click', closeMsg);
+  document.getElementById('msg-close').addEventListener('click', closeMsg);
+  scrim.addEventListener('click', closeMsg);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !modal.hidden) closeMsg(); });
+})();
+
+/* Animated dot field — powered by the shared single-canvas engine
+   (praxis-dotfield.js), consumed here and by the animation lab. */
+</script>
+<script src="praxis-dotfield.js"></script>
+<script>
+(function(){
+  // overlay mode: the animation lab's own canvas is the background, so don't build
+  // a second dot field (and a second rAF loop) behind a hidden canvas
+  if(document.documentElement.hasAttribute('data-overlay')) return;
+  var canvas=document.getElementById('dots-canvas');
+  var field=PraxisDotField.create(canvas);
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // A full config saved from the animation lab ("Set as login background") wins; else
+  // fall back to the last-picked mode, else the default wave.
+  /* ------------------------------------------------------------------------
+     Where the login animation comes from, in precedence order.
+
+     1. #cfg= in the URL — a portable link the animation lab generates. This
+        exists because localStorage is scoped PER ORIGIN: a config saved in the
+        lab on localhost is invisible to this page on groom-lake.vercel.app,
+        and vice versa. A link works across origins, browsers and devices, so
+        it's how you preview a spec without deploying.
+     2. localStorage — what the lab's "Set as login background" writes. Still
+        the fastest loop while iterating, but it only affects the browser and
+        origin you set it in.
+     3. DEPLOY_DEFAULT below — the committed default. This is the only one that
+        survives a deploy, because it's in the repo rather than in a browser.
+        The lab's "Copy deploy snippet" button produces exactly this object.
+     4. wave — the fallback if none of the above is set.
+     ------------------------------------------------------------------------ */
+  /* The committed login animation, from the animation lab's "Copy deploy
+     snippet" (2026-07-30). Note the mode is `wave` — the same as the built-in
+     fallback — but every tuned value differs: spacing 10 (not 18), dotRadius
+     0.5, restAlpha 0, a centred glow, a ring, edge fade and a 700ms loop.
+     That's why the deployed page looked "wrong" rather than obviously
+     different: the fallback matched the mode name and nothing else. */
+  var DEPLOY_DEFAULT = {
+    "mode": "wave",
+    "global": {
+      "spacing": 10,
+      "dotRadius": 0.5,
+      "restAlpha": 0,
+      "teal": "#29d2d7",
+      "magenta": "#e30072",
+      "originX": 0.5,
+      "originY": 0.5,
+      "glow": 0.5,
+      "glowSize": 0.3,
+      "glowSpread": 0.14,
+      "glowBalance": 0.55,
+      "ring": 0.2,
+      "ringSize": 0.86,
+      "edgeFade": true,
+      "fadeExtent": 1.05,
+      "loop": true,
+      "loopDelay": 700
+    },
+    "params": {
+      "speed": 0.3,
+      "waveWidth": 120,
+      "amp": 6,
+      "colorSpread": 0.5
+    }
+  };
+
+  function fromHash(){
+    try{
+      var m = /(?:^|[#&])cfg=([^&]+)/.exec(location.hash || '');
+      if(!m) return null;
+      var b = m[1].replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(decodeURIComponent(escape(atob(b))));
+    }catch(e){ return null; }
+  }
+
+  var cfg = fromHash();
+  var cfgSource = cfg ? 'link' : '';
+  if(!cfg){ try{ cfg=JSON.parse(localStorage.getItem('gl-login-config')||'null'); cfgSource='localStorage'; }catch(e){} }
+  if(!cfg && DEPLOY_DEFAULT){ cfg = DEPLOY_DEFAULT; cfgSource='deploy default'; }
+  /* The picker is gone — the login background is now whatever the committed
+     default (or a preview link) specifies. The animation lab is where modes get
+     chosen; it's linked from the profile menu. */
+  var mode = 'wave';
+  if(reduced){ field.setMode('static'); mode='static'; }
+  else if(cfg && cfg.mode && PraxisDotField.MODES[cfg.mode]){ field.applyConfig(cfg); mode=cfg.mode; }
+  else field.setMode(mode);
+  /* So "why is it not what I specced?" is answerable from the console rather
+     than by guessing. */
+  try{ console.info('[login] animation:', mode, cfg ? '(from ' + cfgSource + ')' : '(default)'); }catch(e){}
+
+  /* Pasting a #cfg= link into an already-open login page changes only the hash,
+     which is a same-document navigation — the script above never re-runs. Apply
+     it on hashchange too, so a link behaves the same whether it's opened fresh
+     or pasted into the address bar. */
+  window.addEventListener('hashchange', function(){
+    var next = fromHash();
+    if(!next || !next.mode || !PraxisDotField.MODES[next.mode]) return;
+    field.applyConfig(next); field.restart();
+    try{ console.info('[login] animation:', next.mode, '(from link)'); }catch(e){}
+  });
+  field.start();
+})();
+</script>

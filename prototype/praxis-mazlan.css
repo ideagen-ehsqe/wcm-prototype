@@ -1,0 +1,1051 @@
+/* ============================================================================
+   Praxis Mazlan drawer — shared component styles
+   ============================================================================
+   Extracted verbatim from index.html. Right-side overlay anchored below the
+   app header, plus its scrim. Load alongside praxis-mazlan.js. */
+
+  /* ============================================================
+     Mazlan drawer — right-side overlay anchored below the app header
+     ============================================================ */
+  .mazlan-scrim {
+    position: fixed;
+    /* Full-viewport, including the app header. The scrim used to start below
+       the header, which left the top bar undimmed and reading as still-live
+       while the drawer was open. The drawer itself stays anchored below the
+       header — only the dimming extends over it. */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(32, 42, 53, 0.25);
+    /* Above the app bar: most pages put it at 30, but the Contextual Awareness
+       workspace's is fixed at 100 (concierge-base.css), so the scrim has to
+       clear that to dim it. Still below Create New (119) and the module
+       selector (125), which are never open at the same time. */
+    z-index: 105;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-spring-soft);
+  }
+  .mazlan-scrim[hidden] { display: none; }
+  .mazlan-scrim.mazlan-scrim--open { opacity: 1; }
+
+  .mazlan-drawer {
+    /* Floats with margin from edges so all four 24px corners are visible.
+       Anchored below the top bar; calc keeps it inset from top/right/bottom. */
+    position: fixed;
+    top: calc(var(--appbar-height, var(--appbar-h, 64px)) + 16px);
+    right: 16px;
+    bottom: 16px;
+    width: min(484px, calc(100vw - 32px));
+    background: var(--ehsq-color-surface-default);
+    border: 0;
+    border-radius: 24px;
+    box-shadow: -8px 16px 40px rgba(32, 42, 53, 0.18), 0 4px 12px rgba(32, 42, 53, 0.06);
+    z-index: 106;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateX(calc(100% + 16px));
+    transition: transform var(--dur-base) var(--ease-spring);
+  }
+  .mazlan-drawer[hidden] { display: none; }
+  .mazlan-drawer.mazlan-drawer--open { transform: translateX(0); }
+
+  /* ===================================================================
+     DARK THEME — match the external Mazlan v3 prototype
+     (ideagen-workspace.vercel.app/mazlan-chatbot-v3.html):
+       drawer body = navy #0e1324, menu + composer = slate, no borders.
+     Surfaces that make up the drawer shell (head / bottom / footer) all
+     read as one navy sheet; only the composer + menu lift to slate.
+     =================================================================== */
+  body[data-theme="dark"] .mazlan-drawer,
+  body[data-theme="dark"] .mazlan-drawer__head,
+  body[data-theme="dark"] .mazlan-drawer__bottom,
+  body[data-theme="dark"] .mazlan-drawer__footer {
+    background: #0e1324;
+  }
+  body[data-theme="dark"] .mazlan-menu,
+  body[data-theme="dark"] .mazlan-menu__head {
+    background: #24303c;
+  }
+
+  /* Sliding menu sub-drawer — slides in from the left over the chat surface */
+  .mazlan-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #EDF0F2;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
+    transform: translateX(-100%);
+    transition: transform 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+  }
+  .mazlan-drawer--menu-open .mazlan-menu {
+    transform: translateX(0);
+    box-shadow: 8px 0 24px rgba(0,0,0,0.1), 2px 0 8px rgba(0,0,0,0.06);
+  }
+  .mazlan-menu__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: #EDF0F2;
+    flex-shrink: 0;
+  }
+  .mazlan-menu__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+  .mazlan-menu__brand-label {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ehsq-color-neutral-80);
+    letter-spacing: 0.02em;
+  }
+  .mazlan-menu__divider {
+    height: 1px;
+    background: rgba(55, 72, 90, 0.1);
+    margin: 0 8px;
+    flex-shrink: 0;
+  }
+  .mazlan-menu__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    flex-shrink: 0;
+  }
+  .mazlan-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ehsq-color-neutral-80);
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: 0.02em;
+    transition: background 0.2s ease-out;
+    width: 100%;
+  }
+  .mazlan-menu__item:hover { background: rgba(55, 72, 90, 0.08); }
+  .mazlan-menu__item:active { background: rgba(55, 72, 90, 0.12); }
+  .mazlan-menu__item--active { background: rgba(55, 72, 90, 0.10); }
+  .mazlan-menu__item .material-symbols-rounded {
+    flex-shrink: 0;
+    font-size: 20px;
+    color: var(--ehsq-color-neutral-80);
+  }
+  .mazlan-menu__new-cube {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--ehsq-color-pink-60, #E30072);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .mazlan-menu__new-cube .material-symbols-rounded {
+    color: var(--ehsq-color-white) !important;
+    font-size: 16px !important;
+  }
+  .mazlan-menu__shortcut {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(55, 72, 90, 0.4);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .mazlan-menu__item:hover .mazlan-menu__shortcut { opacity: 1; }
+
+  .mazlan-menu__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .mazlan-menu__section + .mazlan-menu__section { margin-top: 16px; }
+  .mazlan-menu__section-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(55, 72, 90, 0.62);
+    letter-spacing:normal;
+  }
+  .mazlan-menu__section-head:hover { color: var(--ehsq-color-neutral-80); }
+  .mazlan-menu__section-head .material-symbols-rounded {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .mazlan-menu__chev { transition: transform 0.2s ease; }
+  .mazlan-menu__section-head[aria-expanded="true"] .mazlan-menu__chev { transform: rotate(90deg); }
+  .mazlan-menu__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+  }
+  .mazlan-menu__chat {
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ehsq-color-neutral-80);
+    cursor: pointer;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .mazlan-menu__chat:hover { background: rgba(55, 72, 90, 0.08); }
+
+  /* Dark: light ink on the slate menu (base colors are dark ink for the
+     light #EDF0F2 menu, which reads as washed-out on the dark slate). */
+  body[data-theme="dark"] .mazlan-menu__brand-label { color: #e4e4e7; }
+  body[data-theme="dark"] .mazlan-menu__item { color: #e4e4e7; }
+  body[data-theme="dark"] .mazlan-menu__item .material-symbols-rounded { color: #cbd2d9; }
+  body[data-theme="dark"] .mazlan-menu__item:hover { background: rgba(255, 255, 255, 0.06); }
+  body[data-theme="dark"] .mazlan-menu__item:active { background: rgba(255, 255, 255, 0.12); }
+  body[data-theme="dark"] .mazlan-menu__item--active { background: rgba(255, 255, 255, 0.10); }
+  body[data-theme="dark"] .mazlan-menu__shortcut { color: rgba(255, 255, 255, 0.4); }
+  body[data-theme="dark"] .mazlan-menu__divider { background: rgba(255, 255, 255, 0.08); }
+  body[data-theme="dark"] .mazlan-menu__section-head { color: #9ca3af; }
+  body[data-theme="dark"] .mazlan-menu__section-head:hover { color: #e4e4e7; }
+  body[data-theme="dark"] .mazlan-menu__chat { color: #cbd2d9; }
+  body[data-theme="dark"] .mazlan-menu__chat:hover { background: rgba(255, 255, 255, 0.06); }
+
+  /* Header — v3 light-mode clean variant: white background, 16px padding,
+     no gradient hairline, no borders on the icon buttons. Three slots:
+     menu button (top-left), Mazlan brand (center-left), action icons (right). */
+  .mazlan-drawer__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: var(--ehsq-color-surface-default);
+    border-radius: 24px 24px 0 0;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .mazlan-drawer__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+  .mazlan-drawer__title {
+    margin: 0;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ehsq-color-neutral-80);
+    letter-spacing: 0.02em;
+  }
+  /* Icon-only header buttons — no border, no fill, just hover bg */
+  .mazlan-drawer__head-btn,
+  .mazlan-drawer__menu-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.15s, color 0.15s;
+    padding: 0;
+  }
+  .mazlan-drawer__head-btn:hover,
+  .mazlan-drawer__menu-btn:hover {
+    background: #F0F2F4;
+    color: #2F4051;
+  }
+  /* Dark: there was no dark hover at all, so the light #F0F2F4 applied and the
+     button flashed near-white. Matches the Mazlan prototype's dark header
+     buttons — a translucent white wash, not a fill. */
+  body[data-theme="dark"] .mazlan-drawer__head-btn:hover,
+  body[data-theme="dark"] .mazlan-drawer__menu-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e4e4e7;
+  }
+  .mazlan-drawer__head-btn .material-symbols-rounded,
+  .mazlan-drawer__menu-btn .material-symbols-rounded { font-size: 18px; }
+  .mazlan-drawer__head-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .mazlan-drawer__head-spacer { flex: 1; min-width: 0; }
+  .mazlan-drawer__brand { display: flex; align-items: center; gap: var(--ehsq-space-12); min-width: 0; }
+  .mazlan-drawer__brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .mazlan-drawer__title {
+    margin: 0;
+    font-size: var(--ehsq-type-size-md);
+    font-weight: 700;
+    color: var(--ehsq-color-text-primary);
+  }
+  .mazlan-drawer__sub {
+    margin: 0;
+    font-size: var(--ehsq-type-size-xs);
+    color: var(--ehsq-color-text-tertiary);
+  }
+  /* (Header button styling is defined later in the file under the
+     v3 light-mode clean variant — no borders, no fills, icon-only.) */
+
+  .mazlan-drawer__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--ehsq-space-24);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  /* Dot pattern background — pure CSS radial-gradient repeated on a 22px
+     grid. A second radial-gradient overlay fades the pattern toward the
+     edges (replacement for the mask approach, which wasn't rendering
+     consistently). */
+  .mazlan-drawer__dots {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      /* Edge fade overlay — same color as drawer bg, transparent in the
+         center, opaque at the edges. Centered on the greeting (50%/50%)
+         with a tighter visible ellipse (smaller halo). */
+      radial-gradient(ellipse 50% 47% at 50% 26%, transparent 0%, transparent 27%, var(--ehsq-color-surface-default) 90%),
+      /* Repeating dot pattern — 1.25px dots at 0.4 alpha */
+      radial-gradient(circle at 2px 2px, rgba(77, 101, 127, 0.4) 1.25px, transparent 1.5px);
+    background-size: 100% 100%, 20px 20px;
+    background-position: 0 0, 0 0;
+  }
+  /* Dark: the edge-fade must resolve to the navy body colour, not
+     surface-default (#192336) — otherwise the dot region reads as a lighter
+     band and seams against the navy header/footer. */
+  body[data-theme="dark"] .mazlan-drawer__dots {
+    background-image:
+      radial-gradient(ellipse 50% 47% at 50% 26%, transparent 0%, transparent 27%, #0e1324 90%),
+      radial-gradient(circle at 2px 2px, rgba(77, 101, 127, 0.4) 1.25px, transparent 1.5px);
+  }
+  /* Lift body content above the dot pattern. Excludes the dots themselves
+     so the > * rule doesn't override their position: absolute (both rules
+     have the same specificity and the descendant selector lands later in
+     source order, which was making the dot layer collapse). */
+  .mazlan-drawer__body > *:not(.mazlan-drawer__dots) { position: relative; z-index: 1; }
+
+  /* Prompts + input overlay the bottom of the drawer so the welcome block can
+     centre over the drawer's full height (greeting lands at the vertical
+     centre) rather than only the space above them. */
+  .mazlan-drawer__bottom {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    background: var(--ehsq-color-surface-default);
+  }
+  /* Conversation messages clear the overlaid bottom group. */
+  .mazlan-thread { padding-bottom: 172px; }
+
+  /* Welcome landing — centered Mazlan logo + greeting, the v3 default state */
+  .mazlan-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    /* Greeting sits near the top of the drawer (~48px below the header),
+       not vertically centred — matches the prototype's upper-weighted layout. */
+    padding: 48px 24px 24px;
+    flex: 1;
+    min-height: 240px;
+  }
+  .mazlan-welcome[aria-hidden="true"] { display: none; }
+  /* Scoped with .mazlan-drawer so the welcome mark's size is authoritative on
+     every page — otherwise a page's generic `.mazlan-mark {width:20px}` (search/
+     record inline, admin) or concierge's `.mazlan-mark--xl {40px}` (workspace)
+     would win by cascade order and the logo would differ per page. */
+  .mazlan-drawer .mazlan-welcome__logo {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 16px;
+  }
+  /* The welcome mark breathes — each dot swells slightly on its own beat so
+     the resting state reads as "listening" rather than parked. Amplitude is
+     deliberately small (8%) to stay calm in a regulated-industry context. */
+  .mazlan-welcome__logo > span {
+    animation: mazlan-breathe 3.2s ease-in-out infinite;
+  }
+  .mazlan-welcome__logo > span:nth-child(2) { animation-delay: 0.4s; }
+  .mazlan-welcome__logo > span:nth-child(3) { animation-delay: 0.8s; }
+  .mazlan-welcome__logo > span:nth-child(4) { animation-delay: 1.2s; }
+  @keyframes mazlan-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.08); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mazlan-welcome__logo > span { animation: none; }
+  }
+  .mazlan-welcome__greeting {
+    margin: 0;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--ehsq-color-text-primary);
+    line-height: 1.35;
+    max-width: 340px;
+  }
+  body[data-theme="dark"] .mazlan-welcome__greeting { color: #e4e4e7; }
+
+  /* Suggestion prompts — styled to read as siblings to the input below:
+     same border/shadow vocabulary, pill shape. Stacked vertically, each
+     pill carries a small leading icon + prompt text. */
+  .mazlan-suggestions {
+    padding: 0 var(--ehsq-space-24);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--ehsq-color-surface-default);
+  }
+  body[data-theme="dark"] .mazlan-suggestions { background: transparent; }
+  /* The class rule above sets display:flex, which overrides the [hidden]
+     attribute's UA display:none — so the grid must explicitly re-hide here
+     when the conversation starts. */
+  .mazlan-suggestions[hidden] { display: none; }
+  /* Header row above the cards — prototype's "A few ways I can help" label +
+     shuffle + "See all assistants" link (.welcome-view-all). */
+  .mazlan-suggestions__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 2px 0;
+  }
+  .mazlan-suggestions__label {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted, #6b7280);
+  }
+  body[data-theme="dark"] .mazlan-suggestions__label { color: #9ca3af; }
+  .mazlan-suggestions__shuffle {
+    display: grid;
+    place-items: center;
+    width: 24px; height: 24px;
+    border: 0; border-radius: 6px;
+    background: none;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.45s ease;
+  }
+  .mazlan-suggestions__shuffle:hover { color: #e4e4e7; background: rgba(255,255,255,0.06); }
+  .mazlan-suggestions__shuffle .material-symbols-rounded { font-size: 15px; }
+  .mazlan-suggestions__shuffle.is-spinning { transform: rotate(180deg); }
+  .mazlan-suggestions__seeall {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ehsq-color-interactive-default, var(--ehsq-color-teal-60));
+    background: none;
+    border: 0;
+    cursor: pointer;
+    transition: gap 0.15s, color 0.15s;
+  }
+  .mazlan-suggestions__seeall .material-symbols-rounded { font-size: 16px; }
+  .mazlan-suggestions__seeall:hover { gap: 6px; }
+  body[data-theme="dark"] .mazlan-suggestions__seeall { color: #29D2D7; }
+  body[data-theme="dark"] .mazlan-suggestions__seeall:hover { color: #5CE0E5; }
+  .mazlan-suggestions__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  /* Match the prototype: show three curated cards, Shuffle re-rolls the set. */
+  #mazlan-suggestions-grid > :nth-child(n + 4) { display: none; }
+  @media (max-height: 780px) {
+    #mazlan-suggestions-grid > :nth-child(n + 3) { display: none; }
+  }
+  .mazlan-sugg {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    text-align: left;
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    background: var(--ehsq-color-surface-default);
+    box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease-out, transform 0.15s ease;
+    min-width: 0;
+  }
+  .mazlan-sugg:hover { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.10); }
+  /* Dark: black-alpha border/shadow vanish on the dark surface, so the cards
+     read flat. Use an elevated slate chip with a light edge + real drop shadow
+     so they read as floating cards. */
+  /* Dark: match the prototype's .explore-card resting treatment exactly. */
+  body[data-theme="dark"] .mazlan-sugg {
+    background: rgba(36, 48, 64, 0.55);
+    border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25), 0 7px 20px -10px rgba(0,0,0,0.42);
+  }
+  body[data-theme="dark"] .mazlan-sugg:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3), 0 10px 26px -10px rgba(0,0,0,0.5);
+  }
+  .mazlan-sugg:active { transform: scale(0.99); }
+  /* Icon chip — prototype .explore-card-thumb: 48px rounded tile holding a
+     tinted glyph (our per-prompt icons stand in for its illustrations). */
+  .mazlan-sugg__icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    background: rgba(16, 36, 58, 0.05);
+    color: var(--ehsq-color-text-tertiary);
+  }
+  body[data-theme="dark"] .mazlan-sugg__icon { background: #1F2A3C; }
+  .mazlan-sugg__icon .material-symbols-rounded { font-size: 20px; }
+  /* Category accent on the leading icon */
+  .mazlan-sugg__icon--teal   { color: var(--ehsq-color-interactive-default); }
+  .mazlan-sugg__icon--pink   { color: var(--ehsq-color-pink-60, #e30072); }
+  .mazlan-sugg__icon--blue   { color: #0069cf; }
+  .mazlan-sugg__icon--orange { color: #d4880f; }
+  .mazlan-sugg__icon--green  { color: #0f8a52; }
+  .mazlan-sugg__icon--purple { color: #805ad5; }
+  .mazlan-sugg__title {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ehsq-color-text-primary);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  body[data-theme="dark"] .mazlan-sugg__title { color: #e4e4e7; }
+
+  /* Conversation thread */
+  .mazlan-thread { display: flex; flex-direction: column; gap: 18px; }
+  .mazlan-thread:empty { display: none; }
+  .mazlan-msg { display: flex; flex-direction: column; }
+  /* User turn — slate bubble, white text, no label (prototype .msg-user). */
+  .mazlan-msg--user { align-self: flex-end; align-items: flex-end; max-width: 85%; }
+  .mazlan-msg__bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    background: #ECEFF3;
+    color: var(--ehsq-color-text-primary);
+  }
+  body[data-theme="dark"] .mazlan-msg__bubble { background: #24303c; color: #e4e4e7; }
+  /* Bot turn — full width, container-less response text. */
+  .mazlan-msg--mazlan { align-self: stretch; max-width: 100%; }
+
+  /* Reasoning — collapsible activity header + timeline (prototype .reasoning). */
+  .mazlan-reasoning { margin-top: 2px; }
+  .mazlan-reasoning__header {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 4px 0; border: 0; background: none; cursor: pointer;
+    font-family: 'Gilroy', sans-serif; font-size: 13px; font-weight: 500;
+    color: #6B7785; text-align: left;
+  }
+  .mazlan-reasoning__header:hover { color: var(--ehsq-color-text-primary); }
+  body[data-theme="dark"] .mazlan-reasoning__header { color: #9ca3af; }
+  body[data-theme="dark"] .mazlan-reasoning__header:hover { color: #e4e4e7; }
+  .mazlan-reasoning__logo { width: 20px; height: 20px; flex-shrink: 0; }
+  .mazlan-reasoning__logo .mazlan-mark { width: 20px; height: 20px; }
+  .mazlan-reasoning__chev { font-size: 18px; flex-shrink: 0; transition: transform 0.25s ease; }
+  .mazlan-reasoning--open .mazlan-reasoning__chev { transform: rotate(90deg); }
+  .mazlan-reasoning__summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mazlan-reasoning__timer { margin-left: auto; flex-shrink: 0; font-size: 12px; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .mazlan-reasoning__header:hover .mazlan-reasoning__timer,
+  .mazlan-reasoning--open .mazlan-reasoning__timer { opacity: 1; }
+  .mazlan-reasoning__timeline {
+    display: grid; grid-template-rows: 0fr; opacity: 0; margin-top: 0;
+    transition: grid-template-rows 0.25s ease, opacity 0.25s ease, margin-top 0.25s ease;
+  }
+  .mazlan-reasoning--open .mazlan-reasoning__timeline { grid-template-rows: 1fr; opacity: 1; margin-top: 8px; }
+  .mazlan-reasoning__timeline > div { overflow: hidden; position: relative; padding-left: 22px; }
+  .mazlan-reasoning__timeline > div::before {
+    content: ''; position: absolute; left: 5px; top: 6px; bottom: 10px; width: 2px;
+    background: rgba(16, 36, 58, 0.12);
+  }
+  body[data-theme="dark"] .mazlan-reasoning__timeline > div::before { background: rgba(255, 255, 255, 0.10); }
+  .mazlan-reasoning__step { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 6px 0; }
+  .mazlan-reasoning__dot {
+    position: absolute; left: -21px; top: 7px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ehsq-color-interactive-default);
+    box-shadow: 0 0 0 3px var(--ehsq-color-surface-default);
+  }
+  body[data-theme="dark"] .mazlan-reasoning__dot { box-shadow: 0 0 0 3px #0e1324; }
+  .mazlan-reasoning__step-text { flex: 1; font-family: 'Gilroy', sans-serif; font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--ehsq-color-text-primary); }
+  body[data-theme="dark"] .mazlan-reasoning__step-text { color: #d1d5db; }
+  .mazlan-reasoning__dur { flex-shrink: 0; font-size: 11px; color: var(--ehsq-color-text-tertiary); font-variant-numeric: tabular-nums; }
+
+  /* Container-less response text (prototype .msg-bot-text). */
+  .mazlan-msg__text {
+    margin-top: 6px;
+    font-family: 'Gilroy', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ehsq-color-text-primary);
+  }
+  body[data-theme="dark"] .mazlan-msg__text { color: #d1d5db; }
+  .mazlan-msg__text strong { font-weight: 600; color: var(--ehsq-color-text-primary); }
+  body[data-theme="dark"] .mazlan-msg__text strong { color: #f4f4f5; }
+
+  /* Inline agentic actions (Start audit-prep, etc.) */
+  .mazlan-msg__actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .mazlan-msg__action {
+    display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px;
+    background: none; color: var(--ehsq-color-interactive-default);
+    border: 1px solid var(--ehsq-color-interactive-default); border-radius: 999px;
+    font-size: var(--ehsq-type-size-sm); font-weight: 600; cursor: pointer;
+  }
+  body[data-theme="dark"] .mazlan-msg__action { color: #29D2D7; border-color: rgba(41,210,215,.5); }
+  .mazlan-msg__action .material-symbols-rounded { font-size: 14px; }
+
+  /* Sources — collapsible, avatar stack + expandable list (prototype .msg-sources). */
+  .mazlan-sources { padding-top: 16px; }
+  .mazlan-sources__toggle {
+    display: flex; align-items: center; gap: 6px; width: 100%; padding: 0;
+    border: 0; background: none; cursor: pointer;
+    font-family: 'Gilroy', sans-serif; font-size: 13px; font-weight: 500; color: #6B7785;
+  }
+  body[data-theme="dark"] .mazlan-sources__toggle { color: #9ca3af; }
+  body[data-theme="dark"] .mazlan-sources__toggle:hover { color: #e4e4e7; }
+  .mazlan-sources__chev { font-size: 18px; color: var(--ehsq-color-text-tertiary); transition: transform 0.2s ease; }
+  .mazlan-sources--open .mazlan-sources__chev { transform: rotate(90deg); }
+  .mazlan-sources__avatars { display: flex; align-items: center; flex-shrink: 0; }
+  .mazlan-source__avatar {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--ehsq-color-surface-default);
+    background: #EDF0F2; color: var(--ehsq-color-neutral-80);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Gilroy', sans-serif; font-size: 9px; font-weight: 700;
+  }
+  body[data-theme="dark"] .mazlan-source__avatar { border-color: #0e1324; background: #24303c; color: #cbd2d9; }
+  .mazlan-sources__avatars .mazlan-source__avatar + .mazlan-source__avatar { margin-left: -8px; }
+  .mazlan-sources__label { margin-left: 2px; }
+  .mazlan-sources__list {
+    display: grid; grid-template-rows: 0fr; opacity: 0;
+    transition: grid-template-rows 0.25s ease, opacity 0.25s ease;
+  }
+  .mazlan-sources--open .mazlan-sources__list { grid-template-rows: 1fr; opacity: 1; }
+  .mazlan-sources__list > div { overflow: hidden; }
+  .mazlan-source__item {
+    display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 12px;
+    border: 0; background: none; border-radius: 12px; cursor: pointer; text-align: left;
+    margin-top: 6px;
+  }
+  .mazlan-source__item:hover { background: rgba(16, 36, 58, 0.05); }
+  body[data-theme="dark"] .mazlan-source__item:hover { background: rgba(255, 255, 255, 0.05); }
+  .mazlan-source__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .mazlan-source__title { font-family: 'Gilroy', sans-serif; font-size: 13px; font-weight: 500; color: var(--ehsq-color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body[data-theme="dark"] .mazlan-source__title { color: #d1d5db; }
+  .mazlan-source__origin { font-size: 12px; color: var(--ehsq-color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mazlan-source__arrow { font-size: 16px; color: var(--ehsq-color-text-tertiary); flex-shrink: 0; }
+
+  /* Follow-up pills (Stage 3 — prototype .followup-chip). */
+  .mazlan-followups { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 14px; }
+  .mazlan-followup {
+    display: inline-flex; align-items: center; max-width: 100%; text-align: left;
+    padding: 10px 14px; border: 0; border-radius: 999px; cursor: pointer;
+    font-family: 'Gilroy', sans-serif; font-size: 13px; font-weight: 500; line-height: 1.4;
+    background: rgba(16, 36, 58, 0.05); color: var(--ehsq-color-text-primary);
+    transition: background 0.15s;
+  }
+  .mazlan-followup span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mazlan-followup:hover { background: rgba(16, 36, 58, 0.09); }
+  body[data-theme="dark"] .mazlan-followup { background: rgba(255, 255, 255, 0.06); color: #d1d5db; }
+  body[data-theme="dark"] .mazlan-followup:hover { background: rgba(255, 255, 255, 0.12); }
+
+  /* Response tools — copy / thumbs up / thumbs down (prototype .msg-actions). */
+  .mazlan-msg__tools { display: flex; align-items: center; gap: 2px; margin-top: 12px; }
+  .mazlan-msg__tool {
+    display: grid; place-items: center; width: 30px; height: 30px;
+    border: 0; border-radius: 8px; background: none; cursor: pointer;
+    color: var(--ehsq-color-text-tertiary); transition: background 0.15s, color 0.15s;
+  }
+  .mazlan-msg__tool:hover { background: rgba(16, 36, 58, 0.06); color: var(--ehsq-color-text-primary); }
+  body[data-theme="dark"] .mazlan-msg__tool { color: #71717a; }
+  body[data-theme="dark"] .mazlan-msg__tool:hover { background: rgba(255, 255, 255, 0.08); color: #e4e4e7; }
+  .mazlan-msg__tool .material-symbols-rounded { font-size: 17px; }
+
+  /* In-chat: the dot-grid welcome canvas is retired once a chat begins. */
+  .mazlan-drawer--in-chat .mazlan-drawer__dots { display: none; }
+
+  /* Stage 4 — top fade: the conversation fades out as it scrolls under the
+     header (prototype .header-fade, #0e1324@~70%). A sticky ::before pinned
+     to the top of the scroll viewport; negative margins let content flow
+     under it instead of being pushed down. */
+  /* Drop the body's top padding in-chat so the fade sits flush against the
+     header bottom (the padding otherwise pushes it down); the thread carries
+     the top breathing room instead. */
+  .mazlan-drawer--in-chat .mazlan-drawer__body { padding-top: 0; }
+  .mazlan-drawer--in-chat .mazlan-drawer__body::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    display: block;
+    height: 40px;
+    /* full-bleed over the body's 24px side padding; -40px bottom keeps it an
+       overlay (no layout push). Sits at y=0 now the top padding is gone. */
+    margin: 0 calc(var(--ehsq-space-24) * -1) -40px;
+    background: linear-gradient(to bottom, var(--ehsq-color-surface-default) 55%, transparent);
+    pointer-events: none;
+  }
+  body[data-theme="dark"] .mazlan-drawer--in-chat .mazlan-drawer__body::before {
+    background: linear-gradient(to bottom, #0e1324 55%, transparent);
+  }
+  /* Push the first turn clear of the flush fade so nothing is dimmed at rest —
+     the fade only bites once the conversation scrolls up under the header. */
+  .mazlan-drawer--in-chat .mazlan-thread { padding-top: 44px; }
+
+  /* ===================================================================
+     STAGE 5 — in-chat header: summary title, ⋮ options menu, content panel
+     =================================================================== */
+  /* Chat-only header controls appear once a conversation starts. */
+  .mazlan-chat-only { display: none; }
+  .mazlan-drawer--in-chat .mazlan-chat-only { display: flex; }
+  /* Conversation summary (fills the header's spacer slot). */
+  .mazlan-drawer__title--convo {
+    flex: 1; min-width: 0;
+    font-family: 'Gilroy', sans-serif; font-size: 14px; font-weight: 600;
+    color: var(--ehsq-color-text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 8px;
+  }
+  body[data-theme="dark"] .mazlan-drawer__title--convo { color: #e4e4e7; }
+  .mazlan-drawer__title--editing {
+    outline: none; cursor: text; overflow-x: auto; text-overflow: clip;
+    border-radius: 6px; box-shadow: 0 0 0 2px rgba(41, 210, 215, 0.45);
+    padding: 2px 6px; margin: -2px 8px -2px -6px;
+  }
+  /* ⋮ options dropdown */
+  .mazlan-more-wrap { position: relative; }
+  .mazlan-more {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
+    min-width: 190px; padding: 6px;
+    background: var(--ehsq-color-surface-default); border-radius: 12px;
+    box-shadow: 0 0 0 .5px rgba(16,36,58,.10), 0 12px 32px -8px rgba(16,36,58,.28);
+  }
+  body[data-theme="dark"] .mazlan-more {
+    background: #24303c;
+    box-shadow: 0 0 0 .5px rgba(255,255,255,.10), 0 16px 40px -12px rgba(0,0,0,.7);
+  }
+  .mazlan-more[hidden] { display: none; }
+  .mazlan-more__item {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; text-align: left;
+    font-family: 'Gilroy', sans-serif; font-size: 13px; font-weight: 500; color: var(--ehsq-color-text-primary);
+  }
+  body[data-theme="dark"] .mazlan-more__item { color: #e4e4e7; }
+  .mazlan-more__item:hover { background: rgba(16,36,58,.06); }
+  body[data-theme="dark"] .mazlan-more__item:hover { background: rgba(255,255,255,.06); }
+  .mazlan-more__item .material-symbols-rounded { font-size: 17px; color: var(--ehsq-color-text-tertiary); }
+  body[data-theme="dark"] .mazlan-more__item .material-symbols-rounded { color: #9ca3af; }
+  .mazlan-more__item--danger,
+  .mazlan-more__item--danger .material-symbols-rounded { color: #dc2626; }
+  body[data-theme="dark"] .mazlan-more__item--danger,
+  body[data-theme="dark"] .mazlan-more__item--danger .material-symbols-rounded { color: #f87171; }
+  .mazlan-more__divider { height: 1px; margin: 6px 4px; background: rgba(16,36,58,.08); }
+  body[data-theme="dark"] .mazlan-more__divider { background: rgba(255,255,255,.08); }
+
+  /* Content panel — slides in from the right over the chat surface. */
+  .mazlan-content {
+    position: absolute; inset: 0; z-index: 55;
+    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--ehsq-color-surface-default); border-radius: 24px;
+    transform: translateX(100%);
+    transition: transform 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  body[data-theme="dark"] .mazlan-content { background: #0e1324; }
+  .mazlan-drawer--content-open .mazlan-content { transform: translateX(0); }
+  .mazlan-content__head { display: flex; align-items: center; gap: 8px; padding: 16px; flex-shrink: 0; }
+  .mazlan-content__title { flex: 1; font-family: 'Gilroy', sans-serif; font-size: 14px; font-weight: 600; color: var(--ehsq-color-text-primary); }
+  body[data-theme="dark"] .mazlan-content__title { color: #e4e4e7; }
+  .mazlan-content__body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .mazlan-content__item {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 12px; border: 0; border-radius: 12px; background: none; cursor: pointer; text-align: left;
+  }
+  .mazlan-content__item:hover { background: rgba(16,36,58,.05); }
+  body[data-theme="dark"] .mazlan-content__item:hover { background: rgba(255,255,255,.05); }
+  .mazlan-content__icon {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    display: grid; place-items: center; background: rgba(16,36,58,.05); color: var(--ehsq-color-interactive-default);
+  }
+  body[data-theme="dark"] .mazlan-content__icon { background: #1F2A3C; color: #5CE0E5; }
+  .mazlan-content__icon .material-symbols-rounded { font-size: 20px; }
+  .mazlan-content__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .mazlan-content__item-title { font-family: 'Gilroy', sans-serif; font-size: 14px; font-weight: 500; color: var(--ehsq-color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body[data-theme="dark"] .mazlan-content__item-title { color: #e4e4e7; }
+  .mazlan-content__meta { font-size: 12px; color: var(--ehsq-color-text-tertiary); }
+
+  /* Typing indicator while Mazlan is "thinking" */
+  .mazlan-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: var(--ehsq-space-12);
+    background: var(--ehsq-color-surface-subtle);
+    border: 1px solid var(--ehsq-color-border-subtle);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+  }
+  .mazlan-typing__dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ehsq-color-pink-60, #e30072);
+    animation: mazlanTypingPulse 1.2s ease-in-out infinite;
+  }
+  .mazlan-typing__dot:nth-child(2) { animation-delay: 0.15s; }
+  .mazlan-typing__dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes mazlanTypingPulse {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-2px); }
+  }
+
+  /* Footer chat input — taller, with toolbar (Mazlan mark + action icons + send).
+     Vocabulary mirrors Mazlan Builder + Ideagen Workspace + the custom widget
+     wizard: textarea on top, bottom-row toolbar with attach / settings /
+     voice-to-text / voice input on the left and a circular send button on
+     the right. */
+  .mazlan-drawer__footer {
+    padding: var(--ehsq-space-8) var(--ehsq-space-24) var(--ehsq-space-24);
+    background: var(--ehsq-color-surface-default);
+    flex-shrink: 0;
+  }
+  /* Composer edge — copies the prototype's .input-box trick: the border is
+     NOT a real border (transparent) but a box-shadow stack. A faint 0.5px
+     spread ring wraps all four edges, and an inset top-inner highlight adds a
+     brighter line along the TOP only — so the "border" reads bright at the top
+     and fades down the sides. Constant across every state (no focus ring). */
+  .mazlan-drawer__input {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--ehsq-space-16);
+    background: var(--ehsq-color-surface-default);
+    border: 1px solid transparent;
+    border-radius: 20px;
+    box-shadow:
+      0 0 0 0.5px rgba(16, 36, 58, 0.06),
+      0 2px 4px rgba(16, 36, 58, 0.05),
+      0 10px 28px -12px rgba(16, 36, 58, 0.17),
+      inset 0 0.7px 0 rgba(255, 255, 255, 0.7);
+  }
+  /* Dark: flat slate fill on the navy body; same top-down fade edge. */
+  body[data-theme="dark"] .mazlan-drawer__input {
+    background: #202b39;
+    box-shadow:
+      0 0 0 0.5px rgba(255, 255, 255, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.28),
+      0 12px 30px -12px rgba(0, 0, 0, 0.52),
+      inset 0 0.7px 0 rgba(255, 255, 255, 0.12);
+  }
+  /* Textarea — v3 typography vocabulary. No leading icon (the brand mark
+     is the dark header above). */
+  .mazlan-drawer__textarea {
+    width: 100%;
+    border: 0;
+    outline: none;
+    resize: none;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ehsq-color-text-primary);
+    line-height: 1.75;
+    background: transparent;
+    padding-left: 8px;
+    margin-bottom: 2px;
+    min-height: 28px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .mazlan-drawer__textarea::placeholder { color: #767676; }
+
+  /* Toolbar at the bottom of the input — left group (attach, settings),
+     right group (voice-to-text, voice input, send). */
+  .mazlan-drawer__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ehsq-space-8);
+  }
+  .mazlan-drawer__tools-left,
+  .mazlan-drawer__tools-right {
+    display: flex;
+    align-items: center;
+    gap: var(--ehsq-space-4);
+    min-width: 0;
+  }
+  /* Action icons — v3 sizing: 44×44 circular ghost buttons */
+  .mazlan-tool-btn {
+    width: 44px; height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    /* --ehsq-color-text-tertiary isn't defined on every page (search/record/
+       admin don't load concierge), which left the tool icons a different tint
+       per page. Use --ehsq-color-text-secondary, defined identically app-wide. */
+    color: var(--ehsq-color-text-secondary);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .mazlan-tool-btn:hover {
+    background: #f3f4f6;
+    color: var(--ehsq-color-text-primary);
+  }
+  .mazlan-tool-btn:focus-visible {
+    outline: 2px solid var(--ehsq-color-interactive-default);
+    outline-offset: 2px;
+  }
+  .mazlan-tool-btn .material-symbols-rounded { font-size: 20px; }
+
+  /* Primary button — square 44×44 with 12px radius. Used for both dictate
+     (default) and send (swapped in when textarea has content). */
+  .mazlan-drawer__primary {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--ehsq-color-interactive-default);
+    color: white;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .mazlan-drawer__primary:hover { background: var(--ehsq-color-interactive-hover, #167077); }
+  .mazlan-drawer__primary:active { transform: scale(0.93); }
+  .mazlan-drawer__primary .material-symbols-rounded { font-size: 20px; }
+  /* Dark: --ehsq-color-interactive-default brightens to cyan, and a white glyph
+     on it glares. Dark ink instead — the same --px-primary-fg the other CTAs
+     use on the bright cyan in dark. */
+  body[data-theme="dark"] .mazlan-drawer__primary { color: var(--px-primary-fg, #08313a); }
+
+  /* Scope picker — pill that names the search scope (workspace / site / network) */
+  .mazlan-scope-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #6b7785;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .mazlan-scope-btn:hover { background: #f3f4f6; color: var(--ehsq-color-text-primary); }
+
+  /* + button dropdown menu (Take photo / Attach / Record) */
+  .mazlan-plus-wrap { position: relative; }
+  .mazlan-dropdown {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 0;
+    background: var(--ehsq-color-surface-default);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    z-index: 60;
+    min-width: 220px;
+  }
+  .mazlan-dropdown[hidden] { display: none; }
+  .mazlan-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--ehsq-color-text-primary);
+    font: inherit;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .mazlan-dropdown__item:hover { background: rgba(0, 0, 0, 0.04); }
+  .mazlan-dropdown__icon {
+    color: var(--ehsq-color-text-tertiary);
+    flex-shrink: 0;
+    font-size: 20px !important;
+  }
+  .mazlan-dropdown__title {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .mazlan-drawer__send:disabled {
+    background: var(--ehsq-color-border-default);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+  }
+  .mazlan-drawer__send .material-symbols-rounded { font-size: 20px; }
+
+  /* Narrow: full-width drawer on small screens */
+  @media (max-width: 600px) {
+    .mazlan-drawer { width: 100vw; }
+    .mazlan-suggestions__grid { grid-template-columns: 1fr; }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .mazlan-drawer { transition: none; }
+    .mazlan-scrim { transition: none; }
+    .mazlan-typing__dot { animation: none; opacity: 0.6; }
+  }

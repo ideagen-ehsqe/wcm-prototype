@@ -1,0 +1,124 @@
+/* =====================================================================
+   PRAXIS PROFILE MENU — the avatar-triggered menu in the app bar.
+
+   One component for every page. It used to be redeclared per page: ten
+   admin pages via praxis-admin.css, the workspace via
+   praxis-workspace.css, and index, search and the six record pages each
+   with their own inline copy — 24 rule blocks across 10 files, drifting
+   in min-width (230 / 236 / 250), radius (12px vs the token) and which
+   parts existed at all. The record pages had the Appearance row and the
+   version switcher; admin had the nav labels and aria-current state;
+   the workspace had the persona switcher. This file is the union, so a
+   change lands once.
+
+   Contents differ per page — admin adds nav links, the record pages add
+   Appearance, the workspace adds "Viewing as" — but every part is
+   described here and a page simply uses the ones it needs.
+
+   SURFACE: the frosted panel shared with the Create New flyout
+   (praxis-create-new.css) and the module selector
+   (praxis-module-selector.css) — a translucent theme-aware fill over a
+   heavy blur, so the solid rows read against it. Previously the menu was
+   frosted in dark mode only and solid in light; it is now the same
+   material in both, which is what makes it read as the same component as
+   those two.
+
+   The base (non-praxis / miramar) rules stay solid, since that variant
+   has no frosted-surface language.
+   ===================================================================== */
+
+.profile-menu{ position:relative; }
+
+/* ---- Panel ---------------------------------------------------------- */
+.profile-menu__pop{
+  position:absolute; top:calc(100% + 8px); right:0; z-index:200;
+  /* 250px was the widest of the three values in use; the narrower ones
+     cramped the Appearance row's segmented control. */
+  min-width:250px;
+  padding:6px;
+  background:var(--ehsq-color-surface-default);
+  border:1px solid var(--ehsq-color-border-default);
+  border-radius:var(--ehsq-radius-md);
+  box-shadow:var(--ehsq-elevation-4);
+}
+.profile-menu__pop[hidden]{ display:none; }
+
+/* Praxis: the Create New / module-selector frosted surface, both themes.
+   --px-surface is theme-aware, so one color-mix covers light and dark. */
+body[data-variant="praxis"] .profile-menu__pop{
+  background:color-mix(in srgb, var(--px-surface) 60%, transparent);
+  -webkit-backdrop-filter:saturate(1.35) blur(16px); backdrop-filter:saturate(1.35) blur(16px);
+  border:0; border-radius:16px;
+  box-shadow:var(--px-overlay), inset 0 .5px 0 var(--px-edge);
+}
+/* Fallback for engines without backdrop-filter: take the opaque glass
+   token instead, so the menu never renders as unreadable transparency. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body[data-variant="praxis"] .profile-menu__pop{ background:var(--px-glass); }
+}
+
+/* ---- Header (name + role) ------------------------------------------- */
+.profile-menu__head{
+  padding:10px 12px 8px; display:flex; flex-direction:column; gap:2px;
+  border-bottom:1px solid var(--ehsq-color-border-default); margin-bottom:6px;
+}
+.profile-menu__name{ font-weight:600; font-size:.875rem; color:var(--ehsq-color-text-primary); }
+.profile-menu__role{ font-size:.75rem; color:var(--ehsq-color-text-secondary); }
+
+/* ---- Rows ----------------------------------------------------------- */
+.profile-menu__item{
+  display:flex; align-items:center; gap:10px; width:100%; height:38px; padding:0 12px;
+  border:0; background:transparent; border-radius:var(--ehsq-radius-sm);
+  font:inherit; font-size:.875rem; font-weight:500; color:var(--ehsq-color-text-primary);
+  text-align:left; text-decoration:none; cursor:pointer;
+}
+a.profile-menu__item{ text-decoration:none; color:inherit; }
+.profile-menu__item:hover{ background:var(--px-hover,var(--ehsq-color-neutral-05)); text-decoration:none; }
+body[data-theme="dark"] .profile-menu__item:hover{ background:rgba(255,255,255,.06); }
+/* Both icon systems appear in this menu: Lucide SVGs on the record and
+   search pages, Material Symbols on admin and the workspace. */
+.profile-menu__item .icon{ width:20px; height:20px; color:var(--ehsq-color-text-secondary); fill:none; flex-shrink:0; }
+.profile-menu__item .material-symbols-rounded{ font-size:20px; color:var(--ehsq-color-text-secondary); }
+/* No visual highlight for the current page. The rows are destinations, not a
+   nav state, and colouring one of them made the menu read as a navigation
+   tree with a selection.
+
+   aria-current="page" is still set on the matching row (praxis-profile-menu.js)
+   and deliberately left unstyled: it costs nothing, and it keeps the "you are
+   here" fact available to a screen reader without putting the highlight back. */
+
+.profile-menu__navlabel{
+  font-size:11px; font-weight:800; letter-spacing:normal;
+  color:var(--ehsq-color-text-secondary); padding:8px 12px 2px;
+}
+/* Read-outs, not actions — the app version and build number. Same left edge as
+   the rows above so the column stays aligned, but no hover, no pointer and no
+   menuitem role: nothing here is clickable. */
+.profile-menu__meta{
+  padding:4px 12px; font-size:.75rem; font-weight:500;
+  color:var(--ehsq-color-text-secondary); cursor:default;
+}
+.profile-menu__sep{ height:1px; background:var(--ehsq-color-border-default); margin:6px 0; }
+
+/* ---- Inline control rows (Appearance, Version, Viewing as) ---------- */
+.profile-menu__row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 12px; }
+.profile-menu__row-label{ font-size:.8125rem; font-weight:600; color:var(--ehsq-color-text-secondary); }
+.profile-menu__row .verswitch{ margin-right:0; }
+
+/* ---- Segmented control used inside the menu ------------------------- */
+.verswitch{
+  display:inline-flex; align-items:center; gap:2px; padding:3px;
+  background:rgba(16,36,58,.06); border-radius:var(--ehsq-radius-full);
+}
+.verswitch__opt{
+  height:28px; padding:0 12px; border:0; background:transparent;
+  color:var(--ehsq-color-text-secondary); font:inherit; font-size:.8125rem; font-weight:600;
+  border-radius:var(--ehsq-radius-full); cursor:pointer; white-space:nowrap;
+}
+.verswitch__opt:hover{ color:var(--ehsq-color-text-primary); }
+.verswitch__opt--active,.verswitch__opt--active:hover{
+  background:var(--ehsq-color-surface-default); color:var(--ehsq-color-text-primary);
+  box-shadow:0 1px 2px rgba(16,36,58,.14);
+}
+body[data-theme="dark"] .verswitch{ background:rgba(255,255,255,.08); }
+body[data-theme="dark"] .verswitch__opt--active{ background:rgba(255,255,255,.16); box-shadow:none; }

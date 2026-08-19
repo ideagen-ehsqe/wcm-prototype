@@ -1,0 +1,566 @@
+/* =====================================================================
+   PRAXIS CORE — shared Mazlan design-language token + material layer.
+
+   Single source of truth consumed by BOTH the record page and the
+   workspace so they read as one design system. Scoped to
+   body[data-variant="praxis"]; supports light + dark via body[data-theme].
+
+   Owns: --px-* surface/material tokens, Praxis geometry (8/12/16 radii,
+   12px cards), Praxis ink/strokes, the primary-button gradient, the
+   generic --ehsq-elevation-* → Praxis-material remaps, and the dot-grid
+   page texture. Component rules stay in each page, but both pages now share
+   the same chrome vocabulary (.appbar, .ehsq-navrail) after reconciliation.
+
+   Mazlan DNA: slate layered elevation w/ lit edges, frosted glass,
+   12px geometry, lighter strokes, teal→magenta AI signature, brighter
+   cyan accent in the dark.
+   ===================================================================== */
+
+body[data-variant="praxis"]{
+  /* ink + strokes (light) */
+  --ehsq-color-text-primary:#2F4051; --ehsq-color-text-secondary:#5D6977;
+  --ehsq-color-border-default:#E2E5E9;
+
+  /* Solution accent palette — used to tint module/record-type icons (Create New
+     groups). pink + teal already exist as brand tokens; add the rest here so
+     nothing is hardcoded. */
+  --ehsq-color-blue-60:#4361c4; --ehsq-color-orange-60:#ef8100; --ehsq-color-purple-60:#805ad5;
+
+  /* geometry + motion — Praxis 8/12/16 geometry takes primacy */
+  --ehsq-radius-sm:8px; --ehsq-radius-md:12px; --ehsq-radius-lg:16px;
+  --ehsq-radius-card:12px;
+  --ehsq-ease-default:cubic-bezier(.32,.72,0,1);
+
+  /* slate elevation */
+  --ehsq-elevation-1:0 0 0 .5px rgba(16,36,58,.05),0 1px 2px rgba(16,36,58,.04);
+
+  /* Praxis surface/material palette (LIGHT) */
+  --px-page:#F0F2F4; --px-surface:#ffffff; --px-surface-2:#F4F6F8; --px-tool:#ffffff;
+  --px-drawer:#ffffff;  /* shared drawer/panel surface (Mazlan + filter); dark deepens to navy */
+  --px-chip:#EEF1F4; --px-glass:rgba(255,255,255,.82); --px-hover:rgba(16,36,58,.025); --px-dot:rgba(16,36,58,.11);
+  /* --px-hover is 2.5% — deliberately faint for large row targets, but invisible
+     on a small raised tool. Buttons use this stronger wash instead. */
+  --px-hover-btn:rgba(16,36,58,.075);
+  --px-scroll:rgba(16,36,58,.28); --px-scroll-hover:rgba(16,36,58,.45);
+  --praxis-card:0 0 0 .5px rgba(16,36,58,.06),0 1px 1.5px rgba(16,36,58,.045),0 10px 28px -14px rgba(16,36,58,.10),inset 0 .5px 0 rgba(255,255,255,.7);
+  --px-tool-shadow:0 0 0 .5px rgba(16,36,58,.07),0 1px 2px rgba(16,36,58,.05);
+  --px-tool-shadow-hover:0 0 0 .5px rgba(16,36,58,.09),0 2px 8px -2px rgba(16,36,58,.16);
+  --px-overlay:0 0 0 .5px rgba(16,36,58,.06),0 2px 6px rgba(16,36,58,.06),0 18px 38px -16px rgba(16,36,58,.18);
+  --px-edge:rgba(255,255,255,.6);
+
+  /* Elevation TIERS — a single card shadow can't express hierarchy, so a page
+     of cards reads as one flat plane. These flank --praxis-card (unchanged, so
+     nothing that already uses it moves) to give a page a subject and a support
+     cast. Additive only; opt in per component.
+       rail   ← recedes: tighter, shallower, no long throw
+       card   ← --praxis-card, the default
+       raised ← the subject: wider spread, longer throw, brighter lit edge */
+  --px-card-rail:0 0 0 .5px rgba(16,36,58,.055),0 1px 1px rgba(16,36,58,.035),inset 0 .5px 0 rgba(255,255,255,.6);
+  --px-card-raised:0 0 0 .5px rgba(16,36,58,.07),0 1px 2px rgba(16,36,58,.05),0 2px 6px -2px rgba(16,36,58,.06),0 24px 48px -22px rgba(16,36,58,.20),inset 0 .5px 0 rgba(255,255,255,.85);
+
+  /* primary button — refined teal with lit edge (used by Submit / Create New /
+     Reassign task on the record page and the quick-actions on the workspace)
+
+     WCAG 1.4.3 — white on the whole fill, not just the bottom of it. The stops
+     were #1f8f97 → #1b838b, which put --px-primary-fg (#fff) at 3.86:1 over the
+     top of the gradient and exactly 4.50:1 over the bottom: the label failed
+     across the upper half of every primary button in the app.
+
+     Both stops moved down, not just the top one. The old bottom stop was
+     already at the 4.50 threshold, so any top lighter than it fails and any top
+     darker than it inverts the gradient — the fix has to shift the pair. The
+     original step between stops is preserved, so the lit-edge shading reads the
+     same, just a slightly deeper teal: 5.00:1 at the top, 5.88:1 at the bottom.
+
+     Not --ehsq-color-teal-60 (#1b838b): that token also carries text and
+     borders, where it is measured against a light background and is fine.
+     Only the fill needed to move. */
+  --px-primary-grad:linear-gradient(180deg,#197b83,#156f77);
+  --px-primary-fg:#fff;
+  --px-primary-shadow:0 0 0 .5px rgba(16,36,58,.2),0 1px 2px rgba(16,36,58,.15),0 8px 18px -8px rgba(25,123,131,.5),inset 0 .5px 0 rgba(255,255,255,.28);
+
+  /* Map the generic elevation tokens onto Praxis materials so any component
+     that references --ehsq-elevation-* inherits the lit-edge look. The record
+     page uses its own --ehsq-elevation-1..4 scale, so these only affect the
+     workspace's cards/popovers. */
+  --ehsq-elevation-card:var(--praxis-card);
+  --ehsq-elevation-card-raised:var(--praxis-card);
+  --ehsq-elevation-popover:var(--px-overlay);
+
+  /* dotted-grid page texture — faded at left/right edges (page-color gradient
+     over the dots). Fixed to the viewport so it reads as page material. */
+  /* Dots stop short of the top chrome: the grid running up behind the toolbar
+     and page header made them read as part of the header rather than the page.
+     Page colour is composited over the dots down to --px-dot-clear, then fades
+     out over 48px. Fixed attachment, so the stop is a viewport coordinate and
+     pages set it to their own chrome height. */
+  --px-dot-clear:192px;
+  background-color:var(--px-page);
+  background-image:
+    /* The horizontal fade is symmetric about the CONTENT area, not the
+       viewport. Left of the rail's right edge is fully covered — the Praxis
+       rail is transparent, so dots would otherwise run behind it — then the
+       fade spans the same 7% the right edge uses, measured from that edge
+       rather than from x=0. Before this, the left fade ran 0→7% of the
+       viewport, so the rail ate half of it and the visible ramp was half the
+       width of the one on the right. */
+    linear-gradient(to right,
+      var(--px-page) 0,
+      var(--px-page) var(--navrail-w, 56px),
+      transparent calc(var(--navrail-w, 56px) + 7%),
+      transparent 93%,
+      var(--px-page) 100%),
+    linear-gradient(to bottom, var(--px-page) 0, var(--px-page) var(--px-dot-clear),
+                    transparent calc(var(--px-dot-clear) + 48px)),
+    radial-gradient(circle, var(--px-dot) 1px, transparent 1px);
+  background-size:100% 100%, 100% 100%, 18px 18px;
+  background-repeat:no-repeat, no-repeat, repeat;
+  background-attachment:fixed, fixed, fixed;
+  color:var(--ehsq-color-text-primary);
+}
+
+/* ---- base DARK: recolors token-driven styles (covers Miramar too) ---- */
+body[data-theme="dark"]{
+  color-scheme:dark;
+  --ehsq-color-surface-default:#192336; --ehsq-color-surface-subtle:#161c27;
+  --ehsq-color-neutral-05:#10151e; --ehsq-color-neutral-10:#222b39;
+  --ehsq-color-neutral-15:#2a3342; --ehsq-color-neutral-20:#3a4556;
+  --ehsq-color-border-default:rgba(255,255,255,.10);
+  --ehsq-color-text-primary:#e7ebf1; --ehsq-color-text-secondary:#9aa7b4; --ehsq-color-text-disabled:#62707e;
+  --ehsq-color-text-tertiary:#8b98a6;  /* 4.6:1 on the dark card (was 3.65:1) */
+}
+
+/* ---- Praxis DARK: Mazlan dark surfaces + materials ---- */
+body[data-variant="praxis"][data-theme="dark"]{
+  --ehsq-color-text-primary:#e7ebf1; --ehsq-color-text-secondary:#9aa7b4;
+  --ehsq-color-border-default:rgba(255,255,255,.10);
+  --ehsq-color-surface-default:#192336; --ehsq-color-surface-subtle:#161c27;
+  --ehsq-color-interactive-default:#29D2D7; --ehsq-color-text-link:#5CE0E5;
+  /* Solution accents brighten on dark so they read on tinted chips */
+  --ehsq-color-blue-60:#7a93e0; --ehsq-color-orange-60:#ffa94d; --ehsq-color-purple-60:#b088e8;
+  --px-page:rgb(14,19,36); --px-surface:#192336; --px-surface-2:#232c3b; --px-tool:rgba(255,255,255,.06);
+  --px-drawer:#0e1324;  /* deep navy — matches the external Mazlan prototype */
+  --px-chip:rgba(255,255,255,.07); --px-glass:rgba(26,32,45,.72); --px-hover:rgba(255,255,255,.05); --px-dot:rgba(255,255,255,.09);
+  --px-hover-btn:rgba(255,255,255,.10);
+  --px-scroll:rgba(255,255,255,.26); --px-scroll-hover:rgba(255,255,255,.42);
+  --px-edge:rgba(255,255,255,.08);
+  --praxis-card:0 0 0 .5px rgba(255,255,255,.08),0 1px 2px rgba(0,0,0,.4),0 16px 40px -18px rgba(0,0,0,.6),inset 0 .5px 0 rgba(255,255,255,.07);
+  --px-tool-shadow:0 0 0 .5px rgba(255,255,255,.08),0 1px 2px rgba(0,0,0,.35);
+  --px-tool-shadow-hover:0 0 0 .5px rgba(255,255,255,.12),0 4px 12px -2px rgba(0,0,0,.5);
+  --px-overlay:0 0 0 .5px rgba(255,255,255,.08),0 2px 6px rgba(0,0,0,.4),0 24px 50px -20px rgba(0,0,0,.7);
+  /* Elevation tiers, dark: depth carried by shadow density + edge light, since
+     dark surfaces can't lean on a cast shadow the way light ones do. */
+  --px-card-rail:0 0 0 .5px rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.30),inset 0 .5px 0 rgba(255,255,255,.05);
+  --px-card-raised:0 0 0 .5px rgba(255,255,255,.11),0 1px 2px rgba(0,0,0,.45),0 4px 10px -3px rgba(0,0,0,.40),0 32px 60px -24px rgba(0,0,0,.75),inset 0 .5px 0 rgba(255,255,255,.10);
+  /* Dark primary CTA: subtle cyan gradient from the bright interactive color,
+     with dark ink (mirrors the light-mode teal gradient treatment). */
+  --px-primary-grad:linear-gradient(180deg,#29d2d7,#1fb4b9);
+  --px-primary-fg:#08313a;
+  /* The light --px-primary-shadow is built from navy (rgba(16,36,58,…)) and a
+     white lit edge — on a dark page the navy is invisible, so bold CTAs were
+     wearing a shadow that did nothing. Same four layers, retuned: hairline,
+     contact shadow, coloured ambient glow, lit top edge. */
+  --px-primary-shadow:0 0 0 .5px rgba(41,210,215,.30),0 1px 2px rgba(0,0,0,.45),0 8px 18px -8px rgba(41,210,215,.45),inset 0 1px 0 rgba(255,255,255,.22);
+
+  /* Soft primary — the translucent-teal treatment the quick actions and the
+     nav-rail Create button use in dark instead of the bold cyan CTA. Same
+     construction as the light primary so it reads as a raised object: a
+     top-lit gradient, a hairline border, a contact shadow and a teal glow. */
+  /* Opaque, not translucent: these sit directly on the page and the dot grid
+     was reading through them. The stops are the exact composite of the old
+     20%/10% cyan over --px-page, so the colour is unchanged — only the page
+     behind it stops showing. (Tuned for the page; a soft-primary button on a
+     card would need its own composite.) */
+  --px-primary-soft:linear-gradient(180deg,rgb(19,57,72) 0%,rgb(17,38,54) 100%);
+  --px-primary-soft-fg:#5CE0E5;
+  --px-primary-soft-shadow:0 0 0 .5px rgba(41,210,215,.32),0 1px 2px rgba(0,0,0,.40),0 8px 18px -10px rgba(41,210,215,.40),inset 0 1px 0 rgba(255,255,255,.12);
+  --px-primary-soft-hover:linear-gradient(180deg,rgb(22,72,86) 0%,rgb(18,48,63) 100%);
+  --px-primary-soft-shadow-hover:0 0 0 .5px rgba(41,210,215,.44),0 1px 2px rgba(0,0,0,.40),0 10px 22px -10px rgba(41,210,215,.55),inset 0 1px 0 rgba(255,255,255,.16);
+  /* Quieter variant for rows of soft-primary buttons — four quick actions side
+     by side against the page pooled the full ambient glow into a continuous
+     band. Same hairline and lit edge, glow reduced to a hint. */
+  --px-primary-soft-shadow-sm:0 0 0 .5px rgba(41,210,215,.28),0 1px 2px rgba(0,0,0,.28),0 4px 10px -8px rgba(41,210,215,.22),inset 0 1px 0 rgba(255,255,255,.10);
+  --px-primary-soft-shadow-sm-hover:0 0 0 .5px rgba(41,210,215,.40),0 1px 2px rgba(0,0,0,.28),0 6px 14px -8px rgba(41,210,215,.32),inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+/* Dark mode: primary CTAs use dark ink on the cyan gradient. Higher specificity
+   than the per-page color:var(--ehsq-color-white) rules, so it wins regardless of load order. */
+body[data-variant="praxis"][data-theme="dark"] .tbtn--run,
+body[data-variant="praxis"][data-theme="dark"] .tbtn--primary,
+body[data-variant="praxis"][data-theme="dark"] .pill-btn,
+body[data-variant="praxis"][data-theme="dark"] .btn--primary,
+body[data-variant="praxis"][data-theme="dark"] .qa,
+body[data-variant="praxis"][data-theme="dark"] .ehsq-navrail__btn--create,
+body[data-variant="praxis"][data-theme="dark"] .mz-input__send,
+body[data-variant="praxis"][data-theme="dark"] .tbtn--run .icon,
+body[data-variant="praxis"][data-theme="dark"] .tbtn--primary .icon,
+body[data-variant="praxis"][data-theme="dark"] .tbtn--primary .material-symbols-rounded,
+body[data-variant="praxis"][data-theme="dark"] .pill-btn .icon{
+  color:var(--px-primary-fg);
+}
+
+/* ---- Checkboxes ----------------------------------------------------------
+   Custom appearance so the UNFILLED box takes the card surface (--px-surface:
+   slate in dark, white in light) — it reads as part of the card, showing only
+   a hairline, instead of a bright system box. Checked fills with the pink
+   selection accent used app-wide. Excludes the toggle switches (.switch),
+   whose <input> is a hidden full-size hit target. */
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *){
+  -webkit-appearance:none; appearance:none; margin:0; flex-shrink:0;
+  width:16px; height:16px; border-radius:4px;
+  border:1.5px solid var(--ehsq-color-border-default);
+  background:var(--px-surface);
+  cursor:pointer; display:inline-grid; place-content:center;
+  transition:background var(--ehsq-motion-fast,120ms) var(--ehsq-ease-default),
+             border-color var(--ehsq-motion-fast,120ms) var(--ehsq-ease-default);
+}
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *):hover{
+  border-color:var(--ehsq-color-text-tertiary);
+}
+/* Checked / indeterminate fill: neutral, not the pink selection accent. Pink is
+   the app's attention colour, and a page of ticked boxes turned into a field of
+   accent marks competing with everything that genuinely needed noticing.
+
+   Both values are theme tokens rather than fixed colours, so the pair inverts
+   with the theme and the mark always contrasts its fill:
+     light  ink #2F4051 box, white  tick
+     dark   #e7ebf1 box,   slate tick
+   --px-surface is the mark on purpose — it's whatever the surface behind the
+   box is, so the tick reads as a cut-out rather than a painted-on colour. */
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *){
+  --px-check-fill:var(--ehsq-color-text-primary);
+  --px-check-mark:var(--px-surface);
+}
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *):checked{
+  background:var(--px-check-fill);
+  border-color:var(--px-check-fill);
+}
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *):checked::after{
+  content:''; width:4px; height:8px; margin-top:-1px;
+  border:solid var(--px-check-mark); border-width:0 2px 2px 0; transform:rotate(45deg);
+}
+/* Indeterminate — a partial selection. appearance:none removes the platform
+   control entirely, so the browser's own dash never renders and an
+   indeterminate box looked identical to an empty one. Same filled ground as
+   :checked so it reads as "acted upon", with a dash instead of a tick. Placed
+   after :checked because the two can be set at once: an indeterminate box also
+   carries checked=true in some states, and the dash is the truthful mark. */
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *):indeterminate{
+  background:var(--px-check-fill);
+  border-color:var(--px-check-fill);
+}
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *):indeterminate::after{
+  content:''; width:8px; height:0; margin:0; transform:none;
+  border:solid var(--px-check-mark); border-width:0 0 2px 0; border-radius:1px;
+}
+body[data-variant="praxis"] input[type="checkbox"]:not(.switch):not(.switch *):focus-visible{
+  outline:2px solid color-mix(in srgb, var(--ehsq-color-interactive-default) 60%, transparent);
+  outline-offset:2px;
+}
+
+
+/* =====================================================================
+   Scrollbars — hidden until the scrolling element is hovered
+
+   Uses the standard scrollbar-color only — the one scrollbar property that
+   doesn't change the gutter, so Chrome/Firefox keep their overlay scrollbars
+   and nothing reflows when the thumb appears. (Declaring ::-webkit-scrollbar
+   or scrollbar-width would switch those elements to classic scrollbars and
+   permanently narrow the content.)
+
+   :focus-within is included so keyboard users, who never trigger :hover, still
+   get the position indicator while arrowing through a scrolled region.
+   ===================================================================== */
+/* The reset has to land on every element, not just :root. scrollbar-color is
+   inherited, so a single :root declaration lets a hovered ancestor cascade its
+   revealed value into every descendant — hover anywhere and the whole page's
+   scrollbars light up. Declaring it on * re-breaks that inheritance at each
+   level, so an element is only revealed when it is itself under the pointer. */
+*{ scrollbar-color: transparent transparent; }
+*:hover, *:focus-within{ scrollbar-color: var(--px-scroll) transparent; }
+
+/* Safari has no scrollbar-color yet, but its overlay scrollbars already fade
+   out on their own, so it needs nothing here. Engines with classic scrollbars
+   and no scrollbar-color support fall back to always-visible, which is the
+   safe direction — the content stays reachable. */
+
+/* =====================================================================
+   Press feedback — buttons shrink slightly while held
+
+   Follows the Mazlan prototype: hover lifts, press returns to the baseline and
+   scales down, around 150ms. Small controls take 0.95 and larger ones 0.97
+   there, so the travel reads the same at both sizes; the split below is by
+   footprint rather than by component.
+
+   Written with :where() so every selector here sits at specificity 0. A
+   component that wants different press behaviour — or none — overrides it with
+   any class rule, without needing !important or a more specific selector.
+   ===================================================================== */
+@media (prefers-reduced-motion: no-preference){
+  :where(button, [role="button"], .btn, a.btn, .tbtn, .qa, .pill-btn, .icon-btn,
+         .ehsq-navrail__btn, .card__link, .rep__pin, .segswitch > button){
+    transition: transform 150ms var(--ehsq-ease-default, cubic-bezier(.32,.72,0,1));
+  }
+  /* Small controls: icon buttons and compact pills */
+  :where(button, [role="button"], .icon-btn, .card__link, .rep__pin,
+         .ehsq-navrail__btn, .segswitch > button):active:not(:disabled):not([aria-disabled="true"]){
+    transform: scale(.95);
+  }
+  /* Larger surfaces travel less, or the shrink reads as a jump */
+  :where(.btn, a.btn, .tbtn, .qa, .pill-btn):active:not(:disabled):not([aria-disabled="true"]){
+    transform: scale(.97);
+  }
+  /* Anything that already moves on press keeps its own treatment — these carry a
+     lift or offset that scaling would fight. */
+  :where(.upnext__open, .lg-btn):active{ transform: scale(.97); }
+}
+
+
+/* =====================================================================
+   HOVER — every control shifts its background, not just its glyph.
+
+   Several families only recoloured their icon on hover: the toolbar tools,
+   the view switch, the pager, the nav-rail buttons. An icon-only change reads
+   as a rendering artefact rather than a target, and it disappears entirely for
+   anyone who isn't looking straight at the glyph.
+
+   Prefixed with body[data-variant="praxis"] purely for specificity — this
+   sheet loads before the page stylesheets that declare the bare `.tbtn:hover`
+   rules, so a plain class selector here would lose on source order.
+
+   Excluded: controls whose hover is already a background change (primary CTAs,
+   the selected segswitch option, the rail's Create button), and disabled or
+   already-selected states, which shouldn't invite a click.
+   ===================================================================== */
+body[data-variant="praxis"] :where(
+  .tbtn, .viewswitch__btn, .pager__btn, .icon-btn, .filter-toggle,
+  .ehsq-navrail__btn, .ehsq-navrail__link, .card__link, .rep__pin, .cn-item
+):not(:disabled):not([aria-disabled="true"]):not(.ehsq-navrail__btn--active):hover{
+  background-color:var(--px-hover-btn);
+}
+
+/* The active rail item is a filled pink square. The generic hover above was
+   repainting it with the surface colour, so it went white on hover and its
+   white glyph all but disappeared. It keeps its fill and shifts one step
+   lighter instead — pink-40, the tint above pink-50. */
+body[data-variant="praxis"] .ehsq-navrail__btn--active:hover{
+  background-color:var(--ehsq-color-pink-40,#ed5ea6);
+  background-image:none;
+  color:var(--ehsq-color-white);
+  box-shadow:none;
+}
+/* The tools and rail buttons are raised on their own surface, so a flat wash
+   would erase them — tint over the surface and deepen the shadow instead. */
+body[data-variant="praxis"] .tbtn:not(.tbtn--run):not(:disabled):hover,
+body[data-variant="praxis"] .pager__btn:not(.pager__btn--active):not(:disabled):hover,
+body[data-variant="praxis"] .ehsq-navrail__btn:not(.ehsq-navrail__btn--create):not(.ehsq-navrail__btn--active):hover,
+body[data-variant="praxis"] .ehsq-navrail__link:hover{
+  background-color:var(--px-surface);
+  background-image:linear-gradient(0deg, var(--px-hover-btn), var(--px-hover-btn));
+  box-shadow:var(--px-tool-shadow-hover);
+}
+body[data-variant="praxis"] .pager__btn:disabled:hover{
+  background-image:none; background-color:var(--px-surface); box-shadow:none;
+}
+/* Already-selected options keep their raised treatment; only the wash changes. */
+body[data-variant="praxis"] .viewswitch__btn--active:hover{
+  background-image:linear-gradient(0deg, var(--px-hover-btn), var(--px-hover-btn));
+}
+
+
+/* =====================================================================
+   CANONICAL PRIMARY BUTTON — one definition for the whole application.
+
+   Before this, the primary CTA rendered four different ways: the search
+   toolbar's treatment (40px, 18px padding, radius 10, gradient + lit-edge
+   shadow), the record pages' near-copy with 16px padding and a vestigial 1px
+   border, the inspection variant 4px shorter than everything else, and
+   Contextual Awareness's flat teal fill that never received the Praxis
+   treatment at all.
+
+   The search treatment wins: it was the majority and the most refined. This
+   rule is the single source; the per-page copies are deleted.
+
+   :is() not :where() — this sheet loads before the page styles, so it needs
+   real specificity to win on source order (see 7.1).
+   ===================================================================== */
+body[data-variant="praxis"] :is(.btn--primary, .tbtn--primary, .tbtn--run, .pill-btn){
+  height:40px; padding:0 18px; border:0; border-radius:10px;
+  background:var(--px-primary-grad); color:var(--px-primary-fg);
+  box-shadow:var(--px-primary-shadow);
+}
+body[data-variant="praxis"] :is(.btn--primary, .tbtn--primary, .tbtn--run, .pill-btn):hover{
+  filter:brightness(1.06); background:var(--px-primary-grad);
+}
+
+/* =====================================================================
+   Toolbar primaries — one treatment everywhere.
+
+   Light already agreed: every toolbar CTA renders the teal --px-primary-grad.
+   Dark had drifted three ways — Run on search used the soft chip, Submit and
+   New Report used the bold cyan CTA, and the inspection variant had no dark
+   treatment at all and was still painting the light-mode teal on a dark page.
+
+   The soft chip wins because it's what the quick actions and the nav-rail
+   Create button already use: a toolbar CTA sits among neutral tools, and the
+   bold cyan made it shout across the whole bar.
+
+   Scoped to toolbars on purpose — the login button and in-dialog CTAs are
+   isolated on their own surfaces, where the bold treatment still reads right.
+
+   :is() rather than :where() on the button classes: :where() contributes zero
+   specificity, which tied this with record-page.html's own
+   body[data-variant] .btn--primary and lost on source order.
+   ===================================================================== */
+body[data-variant="praxis"][data-theme="dark"]
+  :is(.toolbar, .rp-toolbar, .ws-toolbar, .admin-toolbar)
+  :is(.btn--primary, .tbtn--primary, .tbtn--run, .pill-btn){
+  background:var(--px-primary-soft);
+  color:var(--px-primary-soft-fg);
+  box-shadow:var(--px-primary-soft-shadow-sm);
+}
+/* All three parts are :is(), not :where(): the older "dark ink on cyan" rule
+   above reaches these icons at (0,4,1) via `[data-theme] .tbtn--primary .icon`,
+   and a zero-specificity :where() chain lost to it — the glyphs went
+   near-black on the dark chip and read as missing. */
+body[data-variant="praxis"][data-theme="dark"]
+  :is(.toolbar, .rp-toolbar, .ws-toolbar, .admin-toolbar)
+  :is(.btn--primary, .tbtn--primary, .tbtn--run, .pill-btn) :is(.icon, svg, .material-symbols-rounded){
+  color:var(--px-primary-soft-fg);
+}
+body[data-variant="praxis"][data-theme="dark"]
+  :is(.toolbar, .rp-toolbar, .ws-toolbar, .admin-toolbar)
+  :is(.btn--primary, .tbtn--primary, .tbtn--run, .pill-btn):hover{
+  background:var(--px-primary-soft-hover);
+  color:var(--px-primary-soft-fg);
+  box-shadow:var(--px-primary-soft-shadow-sm-hover);
+  filter:none;
+}
+
+/* =====================================================================
+   Dark — secondary toolbar buttons take the inactive nav-rail treatment
+
+   They were flat: --px-tool in dark is a 6% white wash, so a row of tool
+   pills read as text floating on the page rather than as buttons. The rail's
+   inactive items solve the same problem one level over — a solid slate chip
+   with a hairline and an inset top highlight, which is what gives them their
+   raised edge — so they're matched here rather than invented again. Hover
+   matches too: the same chip with the --px-hover-btn overlay and a brighter
+   hairline.
+
+   Only the secondaries. The primaries above keep the soft teal CTA, and the
+   label stays --ehsq-color-text-primary rather than the rail's #c8cfd7: that
+   value is tuned for an icon-only glyph, and text needs the extra contrast.
+   ===================================================================== */
+body[data-variant="praxis"][data-theme="dark"]
+  :is(.toolbar, .rp-toolbar, .ws-toolbar, .admin-toolbar)
+  :is(.tbtn, .sortbtn):not(.btn--primary):not(.tbtn--primary):not(.tbtn--run):not(.pill-btn){
+  background:var(--px-surface-2,#232c3b);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.08),inset 0 .5px 0 rgba(255,255,255,.06);
+}
+body[data-variant="praxis"][data-theme="dark"]
+  :is(.toolbar, .rp-toolbar, .ws-toolbar, .admin-toolbar)
+  :is(.tbtn, .sortbtn):not(.btn--primary):not(.tbtn--primary):not(.tbtn--run):not(.pill-btn):hover{
+  color:var(--ehsq-color-white);
+  background-color:var(--px-surface-2,#232c3b);
+  background-image:linear-gradient(0deg, var(--px-hover-btn), var(--px-hover-btn));
+  box-shadow:0 0 0 .5px rgba(255,255,255,.14),inset 0 .5px 0 rgba(255,255,255,.08);
+}
+
+/* =====================================================================
+   WCAG 1.4.3 — dark ink on the bright cyan fill
+
+   In dark, --ehsq-color-interactive-default brightens to #29D2D7, a LIGHT
+   colour (luminance .55). Anything using it as a FILL with white text
+   measures 1.86:1 against a 4.5 minimum. Selected segments, count badges and
+   the workspace Create button all did.
+
+   --px-primary-fg is the token the rest of the app already uses for exactly
+   this: dark ink on cyan, 12.4:1.
+   ===================================================================== */
+body[data-variant="praxis"][data-theme="dark"] :is(
+  .capa-prio__step--active, .subtab__count,
+  .nav-menu-drawer__item--active, .nav-menu-drawer__item--active span
+){ color:var(--px-primary-fg); }
+
+/* ---------------------------------------------------------------------
+   WCAG 2.4.1 Bypass blocks — skip to content
+
+   Every page opens with an app bar and a nav rail, so a keyboard user
+   traverses ~10 controls before reaching content. Off-screen until focused,
+   then it lands in the top-left as a normal Praxis pill. Nothing is visible
+   at rest, so the default rendering is unchanged.
+   --------------------------------------------------------------------- */
+.px-skip{
+  position:fixed; top:8px; left:8px; z-index:1000;
+  display:inline-flex; align-items:center; height:36px; padding:0 16px;
+  border-radius:10px; background:var(--px-surface); color:var(--ehsq-color-text-link);
+  font-size:.875rem; font-weight:600; text-decoration:none;
+  box-shadow:var(--px-tool-shadow-hover);
+  transform:translateY(-150%); transition:transform 120ms var(--ehsq-ease-default,ease);
+}
+.px-skip:focus-visible, .px-skip:focus{ transform:none; outline:2px solid var(--ehsq-color-teal-50); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){ .px-skip{ transition:none; } }
+
+/* ============================================================================
+   PHONE GUTTER — one value for the app bar, the page header and the content
+   ============================================================================
+   These three were set independently and none of them agreed. Measured at
+   390px before this rule:
+
+     app bar        8px left  / 24px right   (its own padding, plus a 16px
+                                              margin-right on the right cluster)
+     page header    16-84px   / 0            (--ph-pad-x, set per page: 20, 24,
+                                              32, and 84 on admin)
+     content        10-24px                  (--home-gutter, --sp-gutter, or a
+                                              hardcoded padding per family)
+
+   --px-gutter is now the single source below 640px. Everything else derives
+   from it, so the three edges line up on every page and there's one number to
+   change.
+
+   Specificity note: these need body[data-variant="praxis"] because
+   praxis-core.css loads BEFORE each page's own <style>, and the per-page
+   `.pageheader{--ph-pad-x:24px}` rules would otherwise win on source order.
+   ========================================================================= */
+@media (max-width:640px){
+  body[data-variant="praxis"]{ --px-gutter:16px; }
+
+  /* App bar. The right-hand cluster carried an extra margin-right on top of
+     the bar's padding, which is what made the bar asymmetric — 8 left, 24
+     right. The padding alone sets the inset now. */
+  body[data-variant="praxis"] .appbar{ padding-inline:var(--px-gutter); }
+  body[data-variant="praxis"] .appbar__right{ margin-right:0; }
+
+  /* Page header. Also feeds .admin-body and .rm-body, which already derive
+     their padding from --ph-pad-x, so those align for free. */
+  /* Both the token AND the padding: most pages derive their page-header inset
+     from --ph-pad-x, but a few (the record variants) declare padding directly,
+     so the token alone doesn't reach them. */
+  /* The toolbar band comes too, so its closing hairline stays flush with the
+     header's at this width instead of stepping in or out by a few px. */
+  body[data-variant="praxis"] .pageheader,
+  body[data-variant="praxis"] .toolbar{ --ph-pad-x:var(--px-gutter); padding-inline:var(--px-gutter); }
+
+  /* The admin side nav is 60px of unlabelled icons at this width — unusable,
+     and it offsets the page header and content so they can't line up with the
+     full-width app bar. Hidden here; its destinations are folded into the nav
+     drawer instead (praxis-navdrawer.js), so nothing becomes unreachable. */
+  body[data-variant="praxis"] .adminnav{ display:none !important; }
+
+  /* The page switcher duplicates what the nav drawer and the profile menu both
+     offer, and at 390px it pushed the app bar's right cluster 7px past the
+     viewport on the record variants. */
+  body[data-variant="praxis"] .appswitch{ display:none !important; }
+
+  /* Content, per page family. The two tokens come first so anything else
+     derived from them follows. */
+  body[data-variant="praxis"]{ --home-gutter:var(--px-gutter); --sp-gutter:var(--px-gutter); }
+  body[data-variant="praxis"] .home,
+  body[data-variant="praxis"] .view,
+  body[data-variant="praxis"] .record,
+  body[data-variant="praxis"] .ws-body,
+  body[data-variant="praxis"] .admin-body,
+  body[data-variant="praxis"] .rm-body,
+  body[data-variant="praxis"] .demo{ padding-inline:var(--px-gutter); }
+}

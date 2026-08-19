@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home — Ideagen EHSQ Enterprise</title>
+
+<!-- Entry gate: the prototype's login sets gl-authed for the session. Runs
+     before render so an unauthenticated visit never flashes the workspace. -->
+<script>
+  try { if (!sessionStorage.getItem('gl-authed')) { location.replace('login.html'); } } catch (e) {}
+</script>
+
+<link rel="stylesheet" href="praxis-core.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet" />
+<link rel="stylesheet" href="praxis-create-new.css" />
+<link rel="stylesheet" href="praxis-module-selector.css" />
+<link rel="stylesheet" href="praxis-profile-menu.css" />
+<link rel="stylesheet" href="praxis-mazlan.css" />
+<link rel="stylesheet" href="praxis-appbar.css" />
+<link rel="stylesheet" href="praxis-navrail.css" />
+<link rel="stylesheet" href="praxis-pageheader.css" />
+<script src="vendor/highcharts.js"></script>
+</head>
+<style>
+/* ============================================================ FONTS */
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Regular.woff2') format('woff2'), url('fonts/Gilroy-Regular.woff') format('woff'); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Medium.woff2') format('woff2'), url('fonts/Gilroy-Medium.woff') format('woff'); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-SemiBold.woff2') format('woff2'), url('fonts/Gilroy-SemiBold.woff') format('woff'); font-weight:600; font-style:normal; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Bold.woff2') format('woff2'), url('fonts/Gilroy-Bold.woff') format('woff'); font-weight:700; font-style:normal; font-display:swap; }
+
+/* ======================================================= DS TOKENS (same vocabulary as record-page) */
+:root{
+  --ehsq-color-white:#ffffff;
+  --ehsq-color-neutral-05:#f4f5f6; --ehsq-color-neutral-10:#edf0f2; --ehsq-color-neutral-15:#dadfe4;
+  --ehsq-color-neutral-20:#c8cfd7; --ehsq-color-neutral-30:#adb8c4; --ehsq-color-neutral-40:#8898a9;
+  --ehsq-color-neutral-50:#718499; --ehsq-color-neutral-60:#4d657f; --ehsq-color-neutral-70:#465c74;
+  --ehsq-color-neutral-80:#37485a; --ehsq-color-neutral-90:#2a3846; --ehsq-color-neutral-100:#202a35;
+  --ehsq-color-teal-10:#e8f3f3; --ehsq-color-teal-20:#c8e1e3; --ehsq-color-teal-50:#4499a0;
+  --ehsq-color-teal-60:#1b838b; --ehsq-color-teal-70:#176f76; --ehsq-color-teal-80:#135d63;
+  --ehsq-color-blue-10:#edf0fd; --ehsq-color-blue-50:#6882ef; --ehsq-color-blue-60:#4766eb;
+  --ehsq-color-green-10:#e6f3ee; --ehsq-color-green-60:#098b53;
+  --ehsq-color-yellow-10:#fdf9e6; --ehsq-color-yellow-50:#f2d02e; --ehsq-color-yellow-90:#887100;
+  --ehsq-color-orange-10:#fdf2e6; --ehsq-color-orange-60:#ef8100;
+  --ehsq-color-red-10:#fceaeb; --ehsq-color-red-50:#e7535c; --ehsq-color-red-60:#e22d38;
+  --ehsq-color-pink-50:#e82e8b; --ehsq-color-pink-60:#e30072; --ehsq-color-pink-90:#810041;
+  --ehsq-color-interactive-default:var(--ehsq-color-teal-60);
+  --ehsq-color-interactive-hover:var(--ehsq-color-teal-70);
+  --ehsq-color-interactive-active:var(--ehsq-color-teal-80);
+  --ehsq-color-text-primary:var(--ehsq-color-neutral-90);
+  --ehsq-color-text-secondary:var(--ehsq-color-neutral-60);
+  --ehsq-color-text-disabled:var(--ehsq-color-neutral-40);
+  --ehsq-color-text-inverse:var(--ehsq-color-white);
+  --ehsq-color-text-link:var(--ehsq-color-teal-60);
+  --ehsq-color-surface-default:var(--ehsq-color-white);
+  --ehsq-color-surface-subtle:var(--ehsq-color-neutral-10);
+  --ehsq-color-border-default:var(--ehsq-color-neutral-20);
+  --ehsq-color-border-strong:var(--ehsq-color-neutral-40);
+  --ehsq-color-border-focus:var(--ehsq-color-teal-50);
+  --ehsq-color-status-success:var(--ehsq-color-green-60);
+  --ehsq-color-status-warning:var(--ehsq-color-orange-60);
+  --ehsq-color-status-danger:var(--ehsq-color-red-60);
+  --ehsq-color-status-info:var(--ehsq-color-blue-60);
+  --ehsq-type-font-sans:'Gilroy','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --ehsq-type-size-xs:0.75rem; --ehsq-type-size-sm:0.8125rem; --ehsq-type-size-base:0.875rem;
+  --ehsq-type-size-md:1rem; --ehsq-type-size-lg:1.125rem; --ehsq-type-size-xl:1.25rem;
+  --ehsq-space-4:.25rem; --ehsq-space-8:.5rem; --ehsq-space-12:.75rem; --ehsq-space-16:1rem;
+  --ehsq-space-24:1.5rem; --ehsq-space-32:2rem;
+  --ehsq-radius-sm:.5rem; --ehsq-radius-md:.75rem; --ehsq-radius-lg:1rem; --ehsq-radius-full:9999px;
+  --ehsq-elevation-1:0 1px 2px 0 rgb(32 42 53 / .06);
+  --ehsq-elevation-4:0 10px 15px -3px rgb(32 42 53 / .1), 0 4px 6px -4px rgb(32 42 53 / .05);
+  --ehsq-motion-fast:120ms; --ehsq-ease-default:cubic-bezier(.32,.72,0,1);
+  --appbar-h:64px; --navrail-w:56px;
+  /* status tone tints (light) */
+  --tone-success-bg:var(--ehsq-color-green-10); --tone-success-fg:var(--ehsq-color-green-60);
+  --tone-info-bg:var(--ehsq-color-blue-10);     --tone-info-fg:var(--ehsq-color-blue-60);
+  --tone-warning-bg:var(--ehsq-color-orange-10);--tone-warning-fg:#b45f00;
+  --tone-danger-bg:var(--ehsq-color-red-10);    --tone-danger-fg:var(--ehsq-color-red-60);
+  --tone-neutral-bg:var(--ehsq-color-neutral-10);--tone-neutral-fg:var(--ehsq-color-neutral-60);
+  /* iOS-style liquid glass material (light) */
+  --glass-bg:rgba(255,255,255,.5);
+  --glass-blur:blur(22px) saturate(185%);
+  --glass-border:rgba(255,255,255,.6);
+  --glass-shadow:0 10px 32px -14px rgba(16,36,58,.30);
+  --glass-inset:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 .5px rgba(255,255,255,.25);
+  --glass-sheen:linear-gradient(135deg, rgba(255,255,255,.65), rgba(255,255,255,0) 42%);
+  --glass-hover:rgba(255,255,255,.28);
+  --glass-on:rgba(27,131,139,.16);
+  --glass-drawer:rgba(255,255,255,.82);
+}
+body[data-theme="dark"]{
+  --tone-success-bg:rgba(9,139,83,.16);  --tone-success-fg:#4cd08a;
+  --tone-info-bg:rgba(71,102,235,.18);   --tone-info-fg:#8aa0f5;
+  --tone-warning-bg:rgba(239,129,0,.16); --tone-warning-fg:#f5b45c;
+  --tone-danger-bg:rgba(226,45,56,.18);  --tone-danger-fg:#f28b91;
+  --tone-neutral-bg:rgba(255,255,255,.08);--tone-neutral-fg:#9aa7b4;
+  /* iOS-style liquid glass material (dark) */
+  --glass-bg:rgba(30,38,52,.52);
+  --glass-blur:blur(24px) saturate(160%);
+  --glass-border:rgba(255,255,255,.14);
+  --glass-shadow:0 14px 36px -14px rgba(0,0,0,.65);
+  --glass-inset:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 .5px rgba(255,255,255,.06);
+  --glass-sheen:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,0) 42%);
+  --glass-hover:rgba(255,255,255,.06);
+  --glass-on:rgba(41,210,215,.16);
+  --glass-drawer:rgba(28,35,48,.86);
+}
+
+/* ========================================================== BASE */
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:var(--ehsq-type-font-sans);color:var(--ehsq-color-text-primary);
+  font-size:var(--ehsq-type-size-base);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+button{font-family:inherit;cursor:pointer;color:inherit;}
+a{color:var(--ehsq-color-text-link);text-decoration:none;}
+a:hover{text-decoration:underline;}
+svg{display:block;}
+.icon{width:22px;height:22px;fill:currentColor;flex-shrink:0;}
+.icon--20{width:20px;height:20px;}.icon--18{width:18px;height:18px;}.icon--16{width:16px;height:16px;}
+/* Lucide icons are stroke-based — never fill them (the .icon rule above would). */
+.icon.lucide{fill:none;}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ======================================================= APP BAR */
+.appbar{position:relative;height:var(--appbar-h);flex-shrink:0;display:flex;align-items:center;z-index:30;}
+.appbar__product{font-weight:600;font-size: 1rem;margin-left:2px;color:var(--ehsq-color-text-primary);}
+/* Page switcher (next to the logo) — matches workspace & record pages */
+.appswitch{position:relative;}
+.appswitch__trigger{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 8px 0 10px;border:0;background:transparent;color:inherit;font-family:inherit;font-size:.875rem;font-weight:600;border-radius:var(--ehsq-radius-md);cursor:pointer;}
+.appswitch__trigger:hover{background:rgba(127,127,127,.14);}
+.appswitch__pop{position:absolute;top:calc(100% + 6px);left:0;min-width:200px;z-index:200;background:var(--ehsq-color-surface-default);border:1px solid var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);padding:6px;box-shadow:var(--ehsq-elevation-4);}
+.appswitch__pop[hidden]{display:none;}
+.appswitch__item{display:block;padding:8px 10px;border-radius:var(--ehsq-radius-sm);font-size:.875rem;font-weight:500;color:var(--ehsq-color-text-primary);text-decoration:none;}
+.appswitch__item:hover{background:var(--ehsq-color-neutral-05);text-decoration:none;}
+.appswitch__item--active{color:var(--ehsq-color-text-link);font-weight:600;}
+body[data-theme="dark"] .appswitch__item:hover{background:rgba(255,255,255,.06);}
+
+/* Toggle switch (Attachments / Search Models / theme) */
+.switch{position:relative;display:inline-flex;align-items:center;width:34px;height:20px;flex-shrink:0;}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.switch .track{position:absolute;inset:0;border-radius:999px;background:var(--ehsq-color-neutral-30);transition:background var(--ehsq-motion-fast);}
+.switch .thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--ehsq-color-white);box-shadow:0 1px 2px rgba(16,36,58,.35);transition:transform var(--ehsq-motion-fast);}
+.switch input:checked + .track{background:var(--ehsq-color-teal-60);}
+.switch input:checked ~ .thumb{transform:translateX(14px);}
+
+/* Right cluster extras */
+.appbar__right .iconbtn-ghost{width:38px;height:38px;border:0;background:transparent;color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-md);display:flex;align-items:center;justify-content:center;}
+.appbar__right .iconbtn-ghost:hover{background:rgba(16,36,58,.06);color:var(--ehsq-color-text-primary);}
+body[data-theme="dark"] .appbar__right .iconbtn-ghost:hover{background:rgba(255,255,255,.10);}
+
+/* ======================================================= LAYOUT */
+.main{flex:1;display:flex;min-height:0;}
+/* ======================================================= NAV RAIL (ported from Responsive Search — EHSQ-E DS spec) */
+.ehsq-navrail{display:flex;flex-direction:column;justify-content:space-between;width:var(--navrail-w);flex-shrink:0;
+  background:var(--ehsq-color-surface-default);border-right:1px solid var(--ehsq-color-neutral-20);box-sizing:border-box;z-index:20;}
+.ehsq-navrail__core{display:flex;flex-direction:column;align-items:center;}
+.ehsq-navrail__item{display:flex;align-items:center;justify-content:center;width:var(--navrail-w);height:56px;flex-shrink:0;}
+.ehsq-navrail__link{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--ehsq-radius-md);
+  transition:background var(--ehsq-motion-fast) var(--ehsq-ease-default);}
+.ehsq-navrail__link:hover{background:var(--ehsq-color-neutral-20);text-decoration:none;}
+.ehsq-navrail__link:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+.ehsq-navrail__link img{display:block;width:35px;height:40px;}
+.ehsq-navrail__btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;background:transparent;
+  border-radius:var(--ehsq-radius-md);color:var(--ehsq-color-neutral-70);cursor:pointer;
+  transition:background-color var(--ehsq-motion-fast) var(--ehsq-ease-default), transform 150ms var(--ehsq-ease-default);}
+.ehsq-navrail__btn:hover{background-color:var(--ehsq-color-neutral-20);}
+.ehsq-navrail__btn:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+.ehsq-navrail__btn--active{background-color:var(--ehsq-color-pink-50);color:var(--ehsq-color-white);}
+.ehsq-navrail__btn--active:hover{background-color:var(--ehsq-color-pink-50);}
+.ehsq-navrail__btn--create{background-color:var(--ehsq-color-teal-60);color:var(--ehsq-color-white);}
+.ehsq-navrail__btn--create:hover{background-color:var(--ehsq-color-teal-70);}
+
+/* ---- shared Praxis overlay material (nav-rail popovers) ---- */
+  /* Page switcher relocated into the avatar (profile) menu */
+  .appswitch{ display:none !important; }
+  .appbar__avatar{ cursor:pointer; border:2px solid rgba(16,36,58,.12); }
+/* Profile menu — shared component, see praxis-profile-menu.css */
+  /* Mazlan four-dot mark (branded) */
+  .mazlan-mark{ position:relative; display:inline-block; width:20px; height:20px; flex-shrink:0; vertical-align:middle; }
+  .mazlan-mark--sm{ width:16px; height:16px; }
+  .mazlan-mark>span{ position:absolute; width:25%; height:25%; border-radius:50%; display:block; }
+  .mazlan-mark>span:nth-child(1){ left:12.5%; top:12.5%; background:#2F4051; }
+  .mazlan-mark>span:nth-child(2){ right:12.5%; top:12.5%; background:var(--ehsq-color-pink-60); }
+  .mazlan-mark>span:nth-child(3){ left:12.5%; bottom:12.5%; background:#5CC9D0; }
+  .mazlan-mark>span:nth-child(4){ right:12.5%; bottom:12.5%; background:var(--ehsq-color-teal-60); }
+  /* dark: lift the slate top-left dot so it reads on the navy panel (matches the ref) */
+  body[data-theme="dark"] .mazlan-mark>span:nth-child(1){ background:#d1d5db; }
+</style>
+
+<style>
+/* =====================================================================
+   HOME — the classic dashboard, in the Praxis style.
+
+   A fixed set of the components we ship today: Up Next, Submissions/Recent,
+   My Top Reports, the assignments summary and Recently Created Items. No
+   customisation, no tile manager, no drag-to-arrange — that lives on the
+   Contextual Awareness workspace (profile menu).
+   ===================================================================== */
+*{ box-sizing:border-box; }
+body[data-variant="praxis"]{
+  /* background-color, not the `background` shorthand — the shorthand resets
+     background-image and was wiping the shared dot-grid page texture that
+     praxis-core.css sets on this same selector. */
+  margin:0; min-height:100vh; background-color:var(--px-page);
+  font-family:var(--ehsq-type-font-sans); color:var(--ehsq-color-text-primary);
+  -webkit-font-smoothing:antialiased;
+}
+/* Vertical sizing here is specific to this dashboard: a fixed set of five
+   components that should read as one screen. Contextual Awareness works the
+   other way round — widget sizes govern the layout and the page simply extends
+   below the fold — so none of this should be lifted into a shared stylesheet. */
+body{ --home-gutter:32px; --home-action-h:32px;
+  --ph-pad-x:32px;      /* page header aligns with the dashboard gutter */
+  --home-cap:1155px;    /* grows to a 1400px-tall view (− appbar/header/quick-actions/padding) */
+  --home-floor:660px;   /* below this the cards start clipping, so scroll instead */
+}
+/* .app / .main / .ehsq-navrail come from the chrome block above; the dashboard
+   is the scrolling pane beside the rail. */
+/* The dashboard sizes to the viewport rather than scrolling the page: the shell
+   is a column, and the grid takes whatever is left under the header and quick
+   actions. Capped at the 1080p allowance so it stops growing on taller screens
+   instead of stretching cards into empty space.
+
+   Below the floor set by --home-floor the shell scrolls instead: squeezing five
+   components past that point clips content rather than compressing it, which is
+   worse than asking for a short scroll. */
+.home-shell{ flex:1; min-width:0; display:flex; flex-direction:column; overflow-y:auto; }
+
+/* ---- Quick actions ---- */
+/* This row is Home's toolbar, so it wears the shared band (praxis-pageheader.css)
+   for its height, page fade, inset and closing hairline — which is what puts the
+   dashboard's first card on the same y as every other page's content. The inner
+   row is the band's control column and has to grow to fill it. */
+.quick-actions__inner{ display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  flex:1 1 auto; min-width:0; }
+.qa{
+  display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px;
+  color:var(--ehsq-color-white); font-size:.875rem; font-weight:600; line-height:1;
+  background:var(--px-primary-grad); border:0; border-radius:10px;
+  box-shadow:var(--px-primary-shadow); text-decoration:none; cursor:pointer;
+  transition:filter 100ms ease, transform 150ms var(--ehsq-ease-default);
+}
+.qa:hover{ filter:brightness(1.06); text-decoration:none; }  /* they're anchors; the global a:hover underline was reaching them */
+/* Dark: the Contextual Awareness workspace treatment — a translucent teal wash
+   with a bright label and a hairline, rather than carrying the light-mode
+   gradient onto a dark page where it reads as a heavy slab. */
+body[data-variant="praxis"][data-theme="dark"] .qa{
+  background:var(--px-primary-soft); color:var(--px-primary-soft-fg);
+  /* -sm: four of these sit in a row against the page rather than one button on
+     a card, so the full glow pooled between them. */
+  box-shadow:var(--px-primary-soft-shadow-sm);
+  transition:background 120ms ease, box-shadow 120ms ease, transform 150ms var(--ehsq-ease-default); }
+body[data-variant="praxis"][data-theme="dark"] .qa:hover{
+  background:var(--px-primary-soft-hover);
+  box-shadow:var(--px-primary-soft-shadow-sm-hover);
+  filter:none; }
+.qa .material-symbols-rounded{ font-size:20px; }
+
+/* ---- Dashboard grid: narrow personal column, wide analytics column ---- */
+.home{ display:grid; grid-template-columns:minmax(340px,420px) 1fr; gap:16px;
+  padding:12px var(--home-gutter) var(--home-gutter); align-items:stretch;
+  flex:1; min-height:var(--home-floor); max-height:var(--home-cap); }
+/* Personal column: Up Next sizes to its content, the two lists share the rest. */
+.home__col{ display:grid; grid-template-rows:auto 1fr 1fr; gap:16px; min-width:0; min-height:0; }
+/* Analytics column: two equal rows, matching the personal column's height. */
+.home__col--analytics{ grid-template-rows:1fr 1fr; }
+/* Enough for the donut at its smallest plus all three legend rows, and for the
+   chart to still read as a chart. */
+.home__col--analytics > .card{ min-height:314px; }
+/* ---- Tablet and below: one column, and the page scrolls ----------------
+   The desktop rules size the board to the viewport. Stacked into one column
+   that's the wrong contract: five components can't share a tablet's height
+   without each one losing its content — Up Next was collapsing to nothing but
+   its header. So the grid stops stretching, every card sizes to what it holds,
+   and the shell scrolls. */
+@media (max-width:1180px){
+  .home{
+    grid-template-columns:1fr;
+    flex:none; min-height:0; max-height:none;
+    /* Breathing room so the scroll doesn't stop flush against the last card. */
+    padding-bottom:48px;
+  }
+  .home__col, .home__col--analytics{ display:flex; flex-direction:column; }
+  .home .card{ flex:0 0 auto; }
+  .home__col--analytics > .card{ min-height:0; }
+
+  /* Header-mounted scope switch — sized like the other header controls, and
+     allowed to wrap ahead of the title rather than overflowing it. */
+  /* No flex-wrap: it let the switch drop onto its own line and sit high above
+     the title's optical centre. The header stays a single centred row and the
+     switch shrinks instead, which keeps it aligned with the title. */
+  .card__header:has(.asg__tabs--inhead){ align-items:center; padding-top:10px; padding-bottom:10px; }
+  .card__header:has(.asg__tabs--inhead) .card__aux{ align-items:center; min-width:0; }
+  .card__aux .asg__tabs--inhead{ margin:0; align-self:center; flex-wrap:nowrap; overflow-x:auto; }
+  .asg__tabs--inhead button{ padding:5px 11px; font-size:.75rem; }
+
+  /* Floors for the two scrolling lists — three rows each, measured rather than
+     guessed: activity rows are 62px, report rows average 107px. */
+  #panel-subs, #panel-recent{ min-height:186px; }
+  .reps{ min-height:321px; }
+
+  /* The donut needs its own floor once the card is content-sized. */
+  .asg__body{ min-height:250px; }
+}
+
+/* Component shell — the same header the Contextual Awareness workspace uses:
+   icon + title, an aux slot on the right, and a divider inset to the content
+   padding so its ends line up with the title rather than running full-bleed. */
+/* ---- Entrance: the five components fade and rise into place on load ----
+   Staggered diagonally (left column leads, right column offset half a beat)
+   so the board resolves as one gesture rather than a queue. The quick actions
+   are deliberately excluded — they're page chrome, and animating them made the
+   whole header feel like it was loading rather than just the content. `backwards` fill
+   is what holds the from-state through the delay — without it each card
+   paints at full opacity first and then snaps back to start. */
+@keyframes home-card-enter{
+  from{ opacity:0; transform:translateY(14px); }
+  to{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion: no-preference){
+  .home .card{ animation:home-card-enter 460ms var(--ehsq-ease-default,cubic-bezier(.32,.72,0,1)) backwards; }
+  .home__col:nth-child(1) .card:nth-child(1){ animation-delay:20ms; }
+  .home__col:nth-child(2) .card:nth-child(1){ animation-delay:70ms; }
+  .home__col:nth-child(1) .card:nth-child(2){ animation-delay:120ms; }
+  .home__col:nth-child(2) .card:nth-child(2){ animation-delay:170ms; }
+  .home__col:nth-child(1) .card:nth-child(3){ animation-delay:220ms; }
+}
+.card{ background:var(--px-surface); border-radius:12px; box-shadow:var(--praxis-card);
+  min-width:0; display:flex; flex-direction:column; overflow:hidden; }
+.card__header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  --card-header-pad:20px; padding:0 var(--card-header-pad); min-height:64px;
+  position:relative; flex-shrink:0;
+}
+.card__header::after{ content:""; position:absolute; left:var(--card-header-pad); right:var(--card-header-pad);
+  bottom:0; border-bottom:1px solid var(--ehsq-color-border-default); }
+.card__title{ display:flex; align-items:center; gap:12px; margin:0; font-size:1rem; font-weight:700;
+  color:var(--ehsq-color-text-primary); line-height:1.2; }
+/* Component-header icon: the same enclosure in both themes — a chip one step
+   off the card surface with a hairline and a lit top edge (padding, not width:
+   the glyph is an SVG). Light recesses it against white; dark elevates it. */
+.card__title .material-symbols-rounded{
+  box-sizing:content-box; width:20px; height:20px; padding:7px; border-radius:10px;
+  font-size:20px; color:var(--ehsq-color-neutral-90);
+  /* Flat: a plain fill, no gradient, hairline or shadow. The chip is a
+     background for the glyph, not a raised control — the same treatment the
+     search card's status chip uses. */
+  background:var(--px-surface-2); box-shadow:none;
+}
+body[data-theme="dark"] .card__title .material-symbols-rounded{
+  color:var(--ehsq-color-white); background:var(--px-surface-2); box-shadow:none;
+}
+.card__aux{ display:flex; align-items:center; gap:10px; font-size:.8125rem; font-weight:500;
+  color:var(--ehsq-color-text-tertiary,#8a97a4); white-space:nowrap; }
+.card__body{ padding:20px; flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+.card__link{ display:inline-flex; align-items:center; justify-content:center; width:var(--home-action-h); height:var(--home-action-h);
+  border:0; background:transparent; border-radius:8px; color:var(--ehsq-color-text-secondary); cursor:pointer; }
+.card__link:hover{ background:var(--px-hover); color:var(--ehsq-color-text-link); }
+
+/* ---- Up Next ---- */
+.upnext__record{ display:block; font-size:1rem; font-weight:700; color:var(--ehsq-color-text-link); text-decoration:none; margin-bottom:6px; }
+.upnext__record:hover{ text-decoration:underline; }
+.upnext__row{ display:flex; align-items:center; gap:12px; }
+.upnext__due{ font-size:.8125rem; font-weight:600; padding:6px 10px; border-radius:8px;
+  background:var(--ehsq-color-yellow-10,#fdf3d7); color:var(--ehsq-color-text-primary); }
+.upnext__due--over{ background:var(--ehsq-color-red-10,#fdecec); color:var(--ehsq-color-red-60,#c62828); }
+/* Dark: the light tints are near-white washes that glare on a dark card, so both
+   states switch to a translucent tint of their own hue with a lifted label —
+   the same construction the Top Reports counts use. */
+body[data-theme="dark"] .upnext__due{ background:rgba(212,136,15,.20); color:#e6ab53; }
+body[data-theme="dark"] .upnext__due--over{ background:rgba(233,90,110,.18); color:#f2a2ad; }
+/* The record line states what is being asked; the subtitle states what it is and
+   why it is blocked. Secondary ink, because a title that has to compete with its
+   own explanation is a title doing two jobs. */
+.upnext__sub{ margin:0 0 12px; font-size:.8125rem; line-height:1.5; color:var(--ehsq-color-text-secondary); }
+/* Sits beside the timing chip, deliberately unchipped: who sent it is context,
+   not status, and two pills in one row read as two things to action. */
+.upnext__by{ font-size:.8125rem; color:var(--ehsq-color-text-secondary); }
+/* --home-action-h keeps the open actions — the assignment legend's row links
+   and the chart's expand — on one control size. */
+.upnext__flag{ color:var(--ehsq-color-pink-60,var(--ehsq-color-pink-60)); display:inline-flex; }
+/* Dark: pink reads as a brand accent here rather than a warning, so the overdue
+   flag goes to Red 50. Literal fallback — this page doesn't load the sheet that
+   declares --ehsq-color-red-50. */
+body[data-theme="dark"] .upnext__flag{ color:var(--ehsq-color-red-50,var(--ehsq-color-red-50)); }
+
+/* ---- Tabs (Submissions/Recent + assignment scopes) ---- */
+/* ---------------------------------------------------------------------
+   Neutral segmented control
+
+   The display-mode switch pattern from the search page: a chip-coloured track,
+   transparent options, and the selected one lifted onto the surface colour with
+   the tool shadow. These are selections, not calls to action — a filled brand
+   colour made them compete with the quick-action buttons and the Open CTA.
+   Shared by My Activity, the assignment scope switch, the chart's date range
+   and the variant comparison switch.
+   --------------------------------------------------------------------- */
+/* Segmented switch — recessed track, raised selection.
+
+   The search page's version works because it sits on the grey page background,
+   where a white selected pill has something to lift off. On a white card that
+   mechanism has nowhere to go: the selection disappears into the surface, and
+   dropping the grey track to compensate left the unselected options as bare
+   text with no affordance.
+
+   So the contrast comes from depth rather than fill. The track is cut into the
+   card with an inset shadow, reading as a groove; the selected option sits
+   proud of it with a hairline and a real drop shadow. Unselected options are
+   visibly inside a control, which is what makes them read as clickable. */
+.segswitch{
+  display:inline-flex; align-items:stretch; gap:2px; padding:3px;
+  border-radius:11px; max-width:100%;
+  background:var(--px-chip);
+  box-shadow:inset 0 1px 2px rgba(16,36,58,.10), inset 0 0 0 .5px rgba(16,36,58,.06);
+}
+.segswitch > button{
+  display:inline-flex; align-items:center; gap:8px; border:0; background:transparent;
+  font:inherit; font-weight:600; color:var(--ehsq-color-text-secondary); border-radius:8px; cursor:pointer;
+  white-space:nowrap; transition:background var(--ehsq-motion-fast), color var(--ehsq-motion-fast),
+  box-shadow var(--ehsq-motion-fast), transform 150ms var(--ehsq-ease-default);
+}
+.segswitch > button:hover{ color:var(--ehsq-color-text-primary); }
+/* Not quite the card white — a hair lighter than the groove and ringed, so the
+   edge stays legible where it meets the card. */
+.segswitch > button[aria-selected="true"], .segswitch > button[aria-pressed="true"]{
+  background:var(--px-surface); color:var(--ehsq-color-text-primary);
+  box-shadow:0 0 0 .5px rgba(16,36,58,.14), 0 1px 2px rgba(16,36,58,.10), 0 2px 5px -2px rgba(16,36,58,.14);
+}
+/* Dark: the groove darkens rather than lightens, and the raised option takes the
+   elevated surface with a lit top edge. */
+body[data-theme="dark"] .segswitch{
+  background:rgba(0,0,0,.22);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.45), inset 0 0 0 .5px rgba(255,255,255,.05);
+}
+body[data-theme="dark"] .segswitch > button[aria-selected="true"],
+body[data-theme="dark"] .segswitch > button[aria-pressed="true"]{
+  background:var(--px-surface-2); color:var(--ehsq-color-white);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.14), 0 1px 3px rgba(0,0,0,.5), inset 0 .5px 0 rgba(255,255,255,.10);
+}
+
+.tab{ height:30px; padding:0 12px; font-size:.8125rem; }
+/* the switch lives in the header, so the body starts on content */
+#subs-t ~ * .card__body, .card__body:has(> .tl){ padding-top:10px; }
+
+/* ---- Submissions / Recent timeline ---- */
+/* Content fades out at the bottom edge instead of ending on a hard cut. The
+   mask is unconditional: these regions are sized by the grid row and effectively
+   always overflow, so gating it on scrollHeight would add JS for no visible
+   difference. */
+.tl{ list-style:none; margin:0; padding:0; flex:1; min-height:96px; overflow-y:auto;
+  -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 32px), transparent);
+  mask-image:linear-gradient(180deg, #000 calc(100% - 32px), transparent); }
+.tl__item{ position:relative; display:grid; grid-template-columns:24px 1fr; gap:12px; padding:10px 0; }
+/* connector between status dots */
+.tl__item:not(:last-child)::before{ content:""; position:absolute; left:11px; top:32px; bottom:-10px;
+  width:2px; background:var(--ehsq-color-border-default); }
+.tl__dot{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; background:var(--px-surface);
+  color:var(--ehsq-color-text-secondary); z-index:1; }
+.tl__dot--done{ color:var(--ehsq-color-green-60,#2e7d32); }
+.tl__dot .material-symbols-rounded{ font-size:20px; }
+.tl__title{ display:block; font-size:.875rem; font-weight:700; color:var(--ehsq-color-text-link); text-decoration:none; }
+.tl__title:hover{ text-decoration:underline; }
+.tl__meta{ font-size:.8125rem; color:var(--ehsq-color-text-secondary); margin-top:2px; }
+
+/* ---- My Top Reports ---- */
+.rep{ padding:12px 0 12px 0; border-bottom:1px solid var(--ehsq-color-border-default); }
+/* the first report sits close under the header rather than a full row's gap below it */
+.reps > .rep:first-child{ padding-top:0; }
+.rep:last-child{ border-bottom:0; }
+.rep__head{ display:flex; align-items:center; gap:8px; }
+.rep__dot{ width:8px; height:8px; border-radius:50%; background:var(--ehsq-color-yellow-50,#e0a800); flex-shrink:0; }
+.rep__name{ font-size:.875rem; font-weight:700; color:var(--ehsq-color-text-primary); }
+/* Same treatment as a nav-rail button: a light surface with a hairline, a soft
+   shadow and a lit top edge, at a smaller footprint since it sits in a list row.
+   The button itself doesn't change state — only the icon does, neutral when the
+   report isn't pinned and pink when it is. */
+.rep__pin{ margin-left:auto; display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px; padding:0; border:0; cursor:pointer;
+  border-radius:var(--ehsq-radius-md); color:var(--ehsq-color-text-secondary);
+  background:linear-gradient(180deg, var(--px-surface), var(--px-surface-2));
+  box-shadow:0 0 0 .5px rgba(16,36,58,.06), 0 1px 2px rgba(16,36,58,.05), inset 0 .5px 0 rgba(255,255,255,.8);
+  transition:box-shadow var(--ehsq-motion-fast) var(--ehsq-ease-default), color var(--ehsq-motion-fast) var(--ehsq-ease-default), transform 150ms var(--ehsq-ease-default); }
+.rep__pin:hover{ box-shadow:0 0 0 .5px rgba(16,36,58,.09), 0 2px 6px -1px rgba(16,36,58,.14), inset 0 .5px 0 rgba(255,255,255,.8);
+  color:var(--ehsq-color-text-primary); }
+.rep__pin[aria-pressed="true"]{ color:var(--ehsq-color-pink-60); }
+.rep__pin[aria-pressed="true"]:hover{ color:var(--ehsq-color-pink-60); }
+.rep__pin .material-symbols-rounded, .rep__pin svg{ width:16px; height:16px; font-size:16px; }
+body[data-theme="dark"] .rep__pin{
+  background:linear-gradient(180deg, var(--px-surface-2), var(--px-surface));
+  box-shadow:0 0 0 .5px rgba(255,255,255,.08), inset 0 .5px 0 rgba(255,255,255,.06); }
+body[data-theme="dark"] .rep__pin:hover{ box-shadow:0 0 0 .5px rgba(255,255,255,.14), inset 0 .5px 0 rgba(255,255,255,.08); }
+body[data-theme="dark"] .rep__pin[aria-pressed="true"]{ color:#ff6fb0; }
+.rep__time{ font-size:.8125rem; color:var(--ehsq-color-text-secondary); margin:2px 0 8px; }
+/* Badges share the row evenly instead of hugging the left edge. */
+.rep__stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+/* Equal columns are narrow, so trim the padding to fit the longest label
+   ("Changed: 30") rather than letting it ellipsis away. */
+.stat{ font-size:.75rem; font-weight:600; padding:5px 4px; border-radius:8px; white-space:nowrap;
+  text-align:center; overflow:hidden; text-overflow:ellipsis; }
+/* Same values the Report Management page uses for these counts, so a report
+   reads identically in both places. */
+.stat--changed{ background:rgba(212,136,15,.14); color:#8a5a0a; }
+.stat--unread { background:rgba(67,97,196,.12);  color:#33488f; }
+.stat--overdue{ background:rgba(196,59,59,.12);  color:#b23b3b; }
+.stat--total  { background:var(--ehsq-color-surface-subtle); color:var(--ehsq-color-text-secondary); }
+body[data-theme="dark"] .stat--changed{ background:rgba(212,136,15,.20); color:#e6ab53; }
+body[data-theme="dark"] .stat--unread { background:rgba(92,150,255,.18); color:#9db8ff; }
+body[data-theme="dark"] .stat--overdue{ background:rgba(233,90,110,.18); color:#f2a2ad; }
+body[data-theme="dark"] .stat--total  { background:var(--px-surface-2); color:var(--ehsq-color-text-secondary); }
+.reps{ flex:1; min-height:96px; overflow-y:auto; margin-top:-6px;
+  -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 32px), transparent);
+  mask-image:linear-gradient(180deg, #000 calc(100% - 32px), transparent); }
+
+/* ---- Assignments: scope tabs + one donut with a breakdown beside it ---- */
+.asg__tabs{ margin-bottom:18px; align-self:flex-start; }
+.asg__tab{ height:36px; padding:0 12px; font-size:.875rem; }
+/* On the track the badge needs a surface of its own; on the selected option the
+   track colour reads as the recess. */
+.asg__count{ font-size:.75rem; font-weight:700; padding:2px 8px; border-radius:999px;
+  background:var(--px-surface); color:var(--ehsq-color-text-secondary); }
+.asg__tab[aria-selected="true"] .asg__count{ background:var(--px-chip); color:var(--ehsq-color-text-primary); }
+
+/* Centre the donut + legend as a pair rather than pinning them left, so the
+   card's spare width falls either side instead of all on the right. */
+.asg__body{ display:grid; grid-template-columns:auto auto; justify-content:center; gap:clamp(20px,4vw,56px);
+  align-items:center; flex:1; min-height:0; }
+@media (max-width:640px){ .asg__body{ grid-template-columns:1fr; } }
+/* Sized off the space the card actually has, not the viewport — a viewport-based
+   clamp overflowed the body and clipped the ring's underside. height:100% against
+   the grid row keeps it as large as will fit, capped so it doesn't dominate a
+   tall card, and aspect-ratio keeps it circular. */
+.donut{ position:relative; height:100%; max-height:300px; width:auto; aspect-ratio:1;
+  min-height:132px; flex-shrink:0; justify-self:center; }
+.donut svg{ width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+.donut__track{ fill:none; stroke:var(--px-chip); }
+.donut__seg{ fill:none; stroke-linecap:butt; cursor:pointer;
+  transition:stroke-dasharray 400ms var(--ehsq-ease-default), opacity 160ms var(--ehsq-ease-default); }
+.donut__centre{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.donut__num{ font-size:1.25rem; font-weight:700; line-height:1; color:var(--ehsq-color-text-primary); }
+.donut__label{ font-size:.875rem; font-weight:600; color:var(--ehsq-color-text-secondary); margin-top:2px; }
+
+/* Legend: rows sit close together, and the count and open action follow the
+   label directly instead of being pushed to opposite edges of the card. */
+.brk{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; min-width:0; align-self:center; }
+.brk__row{ display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border:0; background:transparent;
+  border-radius:10px; font:inherit; cursor:pointer; text-align:left; text-decoration:none; color:inherit;
+  transition:opacity 160ms var(--ehsq-ease-default), background 120ms var(--ehsq-ease-default); }
+.brk__row:hover{ background:var(--px-hover); }
+.brk__swatch{ width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+.brk__label{ font-size:14px; font-weight:600; color:var(--ehsq-color-text-primary); min-width:8ch; }
+.brk__value{ font-size:20px; font-weight:700; color:var(--ehsq-color-text-primary); font-variant-numeric:tabular-nums; min-width:2.5ch; text-align:right;
+  transition:opacity 160ms var(--ehsq-ease-default); }
+.brk__go{ color:var(--ehsq-color-text-secondary); display:inline-flex; align-items:center; justify-content:center;
+  width:var(--home-action-h); height:var(--home-action-h); border-radius:8px; flex-shrink:0; }
+.brk__row:hover .brk__go{ background:var(--px-hover); }
+/* 24px glyph, matching the chart card's expand action */
+.brk__go .material-symbols-rounded, .brk__go svg{ width:24px; height:24px; font-size:24px; }
+.brk__row:hover .brk__go{ color:var(--ehsq-color-text-link); }
+
+/* Each panel sets its own display, which beats [hidden]'s display:none — so the
+   hidden state needs a selector that outranks the panel's own rule. */
+[data-variant-panel][hidden]{ display:none; }
+
+/* ---- Comparison switch (prototype only) ---- */
+.asg__variant button{ padding:5px 11px; font-size:.75rem; font-weight:700; }
+/* The switch is a prototype-only A/B control. Hidden by attribute so the three
+   treatments stay live and it can be re-enabled by deleting one word — but
+   .segswitch sets display, which beats [hidden] without this. */
+.asg__variant[hidden]{ display:none; }
+
+/* ---- B: figures over a segmented bar ---- */
+.asg__bar{ flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:22px; padding:0 4px; }
+.asgbar__figures{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.asgbar__fig{ display:flex; flex-direction:column; gap:2px; }
+.asgbar__num{ font-size:clamp(2rem,4.5vh,3rem); font-weight:700; line-height:1; color:var(--ehsq-color-text-primary);
+  font-variant-numeric:tabular-nums; transition:opacity 160ms var(--ehsq-ease-default); }
+.asgbar__lab{ display:inline-flex; align-items:center; gap:8px; font-size:.9375rem; font-weight:600;
+  color:var(--ehsq-color-text-secondary); }
+.asgbar__dot{ width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+.asgbar__track{ display:flex; height:16px; border-radius:999px; overflow:hidden; background:var(--px-chip); }
+.asgbar__seg{ height:100%; cursor:pointer; transition:opacity 160ms var(--ehsq-ease-default), flex-basis 400ms var(--ehsq-ease-default); }
+.asgbar__legend{ display:flex; gap:8px; flex-wrap:wrap; }
+.asgbar__go{ display:inline-flex; align-items:center; gap:6px; font-size:.8125rem; font-weight:600;
+  color:var(--ehsq-color-text-link); text-decoration:none; padding:6px 10px; border-radius:8px; }
+.asgbar__go:hover{ background:var(--px-hover); }
+.asgbar__go .material-symbols-rounded, .asgbar__go svg{ width:16px; height:16px; font-size:16px; }
+.asg__bar[data-hl] [data-key]:not([data-hl-on]){ opacity:.3; }
+
+/* ---- C: one tile per state ---- */
+.asg__cards{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; align-content:center; }
+@media (max-width:820px){ .asg__cards{ grid-template-columns:1fr; } }
+.asgcard{ display:flex; flex-direction:column; gap:6px; padding:18px 16px 14px; border-radius:12px;
+  background:var(--px-surface-2); text-decoration:none; color:inherit; position:relative; overflow:hidden;
+  transition:opacity 160ms var(--ehsq-ease-default), box-shadow 140ms var(--ehsq-ease-default); }
+.asgcard:hover{ box-shadow:var(--px-tool-shadow-hover); }
+/* the accent bar is the tile's tie to its colour, sitting on the top edge */
+.asgcard::before{ content:""; position:absolute; inset:0 0 auto 0; height:3px; background:var(--asgcard-tone); }
+.asgcard__num{ font-size:clamp(1.75rem,4vh,2.75rem); font-weight:700; line-height:1; color:var(--ehsq-color-text-primary);
+  font-variant-numeric:tabular-nums; }
+.asgcard__lab{ font-size:.9375rem; font-weight:600; color:var(--ehsq-color-text-secondary); }
+.asgcard__go{ margin-top:auto; display:inline-flex; align-items:center; gap:6px; font-size:.8125rem; font-weight:600;
+  color:var(--ehsq-color-text-link); }
+.asgcard__go .material-symbols-rounded, .asgcard__go svg{ width:16px; height:16px; font-size:16px; }
+.asg__cards[data-hl] [data-key]:not([data-hl-on]){ opacity:.35; }
+
+/* Hovering a segment or a legend row brings that slice forward and lets the
+   rest recede, so the number being pointed at is unambiguous. */
+.asg__body[data-hl] .donut__seg:not([data-hl-on]){ opacity:.22; }
+.asg__body[data-hl] .brk__row:not([data-hl-on]){ opacity:.38; }
+
+/* ---- Recently Created Items ---- */
+.rci__range button{ padding:7px 16px; font-size:.8125rem; }
+.rci__chart{ width:100%; flex:1; min-height:220px; }
+
+/* Dot grid stops above this page's top chrome. Declared on the same
+   selector praxis-core.css uses — a :root or bare-body override loses
+   to it. */
+body[data-variant="praxis"]{ --px-dot-clear:190px; }
+
+/* Phone-only controls: hidden by default, revealed by the phone query below.
+   Declared BEFORE the @media block — a media query adds no specificity, so an
+   equal-specificity rule placed after it would win on source order. */
+.asg__select, .rci__controls{ display:none; }
+
+/* ============================================================================
+   PHONE (<=640px) — the dashboard's compact form
+   ============================================================================
+   The nav rail is a drawer at this width (praxis-navdrawer.js), so the board
+   gets the full viewport. Three components need more than reflow:
+
+   - Quick actions: four full-width buttons cost 200px of the first screen and
+     duplicate the app-bar Create New menu exactly. Hidden; Create New is the
+     single entry point on phones.
+   - The scope switch and the date range were segmented controls that ran off
+     the right edge (the scope switch reached 668px on a 390px viewport).
+     Both become dropdowns.
+   - The chart's inline legend consumed the whole plot area, leaving the chart
+     about 20px tall. It becomes a dropdown that highlights series instead.
+   ========================================================================= */
+@media (max-width:640px){
+  .quick-actions{ display:none; }
+
+  /* Reclaim the vertical caps: on a phone the board is a scrolling stack, not
+     a fitted screen, so each card sizes to its content. */
+  .home{ padding:12px 16px 40px; }
+
+  /* ---- Assignments ---- */
+  .asg__tabs{ display:none; }                 /* replaced by .asg__select */
+  .asg__select{ display:block; }
+  /* The donut and its legend centre as a column rather than sitting side by
+     side; the legend rows centre with it. */
+  .asg__body{ grid-template-columns:1fr; justify-items:center; gap:14px; }
+  .brk{ align-self:center; width:max-content; max-width:100%; }
+  .brk__row{ justify-content:flex-start; }
+
+  /* ---- Recently Created ---- */
+  .rci__range{ display:none; }                /* replaced by .rci__controls */
+  .rci__controls{ display:flex; }
+  /* Full container width: the inline legend is gone, so the plot uses all of it. */
+  .rci__chart{ width:100%; min-height:240px; }
+}
+
+
+/* A native select gets the platform picker, which beats a custom menu on a
+   touch device — and it can't overflow the viewport. */
+.px-select{
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:38px; padding:0 34px 0 12px;
+  border:0; border-radius:10px; background:var(--px-chip);
+  color:var(--ehsq-color-text-primary); font:inherit; font-size:.875rem; font-weight:600;
+  box-shadow:inset 0 1px 2px rgba(16,36,58,.10), inset 0 0 0 .5px rgba(16,36,58,.06);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235D6977' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center; background-size:16px;
+  cursor:pointer;
+}
+body[data-theme="dark"] .px-select{
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.45), inset 0 0 0 .5px rgba(255,255,255,.05);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239AA7B4' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+.px-select:focus-visible{ outline:2px solid var(--ehsq-color-teal-50); outline-offset:2px; }
+
+/* The assignment scope select sits in the card body, above the donut. */
+.asg__select{ margin:0 0 14px; }
+
+/* Recently Created's phone controls: date range + the highlight dropdown,
+   under the header rather than crowded into it. */
+.rci__controls{ gap:8px; align-items:center; margin:0 0 12px; }
+.rci__controls .px-select{ flex:1 1 0; min-width:0; }
+
+/* ---- Series highlight dropdown ---- */
+.rci__hl{ position:relative; flex:1 1 0; min-width:0; }
+.rci__hl-btn{
+  display:flex; align-items:center; gap:8px; width:100%; height:38px; padding:0 12px;
+  border:0; border-radius:10px; background:var(--px-chip); cursor:pointer;
+  font:inherit; font-size:.875rem; font-weight:600; color:var(--ehsq-color-text-primary);
+  box-shadow:inset 0 1px 2px rgba(16,36,58,.10), inset 0 0 0 .5px rgba(16,36,58,.06);
+}
+body[data-theme="dark"] .rci__hl-btn{ box-shadow:inset 0 1px 2px rgba(0,0,0,.45), inset 0 0 0 .5px rgba(255,255,255,.05); }
+.rci__hl-btn:active{ transform:scale(.98); }
+.rci__hl-btn:focus-visible{ outline:2px solid var(--ehsq-color-teal-50); outline-offset:2px; }
+.rci__hl-label{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.rci__hl-btn svg{ width:16px; height:16px; flex-shrink:0; color:var(--ehsq-color-text-secondary); }
+
+.rci__hl-pop{
+  position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:40;
+  max-height:280px; overflow-y:auto; padding:6px;
+  background:var(--px-surface); border-radius:12px; box-shadow:var(--px-overlay);
+}
+.rci__hl-pop[hidden]{ display:none; }
+.rci__hl-opt{
+  display:flex; align-items:center; gap:10px; width:100%; min-height:40px; padding:0 10px;
+  border:0; background:transparent; border-radius:8px; cursor:pointer;
+  font:inherit; font-size:.8125rem; font-weight:600; text-align:left;
+  color:var(--ehsq-color-text-primary);
+}
+.rci__hl-opt:hover{ background:var(--px-hover-btn); }
+.rci__hl-swatch{ width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+.rci__hl-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rci__hl-tick{ width:16px; height:16px; flex-shrink:0; opacity:0; color:var(--ehsq-color-pink-60); }
+.rci__hl-opt[aria-pressed="true"] .rci__hl-tick{ opacity:1; }
+.rci__hl-foot{
+  display:flex; margin-top:4px; padding-top:6px; border-top:1px solid var(--ehsq-color-border-default);
+}
+.rci__hl-clear{
+  width:100%; min-height:36px; border:0; background:transparent; border-radius:8px; cursor:pointer;
+  font:inherit; font-size:.8125rem; font-weight:600; color:var(--ehsq-color-text-link);
+}
+.rci__hl-clear:hover{ background:var(--px-hover-btn); }
+
+/* Phone Create New — hidden by default, shown with the phone board. Declared
+   before the @media block so the query's display wins on source order. */
+.home-create{ display:none; }
+@media (max-width:640px){
+  .home-create{ display:flex; padding:14px var(--px-gutter,16px) 0; }
+  /* Left-aligned and sized to its label rather than stretching the row. */
+  .home-create__btn{ width:auto; }
+}
+</style>
+
+<body data-variant="praxis" data-theme="light" data-page="workspace">
+<a class="px-skip" href="#px-main">Skip to content</a>
+<script>/* apply persisted theme before render so it carries across navigation */try{var _t=localStorage.getItem('gl-theme');if(_t)document.body.setAttribute('data-theme',_t);}catch(e){}</script>
+
+<div class="app">
+  <header class="appbar">
+    <a class="appbar__brand" href="#" aria-label="Ideagen — Home">
+      <img class="appbar__logo-img appbar__logo-img--onlight" src="assets/ideagen-logo-onlight.svg" alt="Ideagen" />
+      <img class="appbar__logo-img appbar__logo-img--ondark" src="assets/ideagen-logo-dark.svg" alt="" />
+    </a>
+    <div class="appswitch">
+      <button class="appswitch__trigger" type="button" aria-haspopup="menu" aria-expanded="false"><span>Workspace</span><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button>
+      <div class="appswitch__pop" role="menu" hidden>
+        <a class="appswitch__item appswitch__item--active" role="menuitem" aria-current="page" href="index.html">Workspace</a>
+        <a class="appswitch__item" role="menuitem" href="record-page.html">Incident record</a>
+        <a class="appswitch__item" role="menuitem" href="search-page.html">Search</a>
+        <a class="appswitch__item" role="menuitem" href="admin-users.html">Admin</a>
+      </div>
+    </div>
+
+    <div class="appbar__search" role="search">
+      <div class="msel" id="ws-msel">
+        <input class="msel__input" id="ws-msel-input" type="text" readonly placeholder="All"
+               role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="ws-msel-menu" aria-label="Search scope — selected modules" />
+        <span class="msel__caret material-symbols-rounded" aria-hidden="true">arrow_drop_down</span>
+      </div>
+      <input type="text" id="ws-search-input" placeholder="Search your data" aria-label="Search your data" autocomplete="off" />
+      <button class="appbar__search-btn" aria-label="Search"><i data-lucide="search" class="icon icon--20" aria-hidden="true"></i></button>
+    </div>
+
+    <div class="appbar__right">
+      <button class="appbar__mazlan appbar__ai" type="button" aria-label="Open Mazlan" title="Mazlan">
+        <span class="mazlan-mark mazlan-mark--sm" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <span class="appbar__mazlan-label">Mazlan</span>
+      </button>
+      <div class="profile-menu" id="ws-profile">
+        <button class="appbar__avatar appbar__avatar--photo" id="ws-avatar" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu" style="background-image:url('assets/avatars/m1.jpg')"></button>
+        <div class="profile-menu__pop" id="ws-profile-pop" role="menu" aria-label="Account menu" hidden>
+          <div class="profile-menu__head">
+            <span class="profile-menu__name">James O’Connell</span>
+            <span class="profile-menu__role">Head of Engineering · Plant Ops</span>
+          </div>
+          <div class="profile-menu__navlabel">Switch to</div>
+          <a class="profile-menu__item" role="menuitem" href="index.html" aria-current="page"><span class="material-symbols-rounded">space_dashboard</span>Workspace</a>
+          <a class="profile-menu__item" role="menuitem" href="record-page.html"><span class="material-symbols-rounded">description</span>Incident record</a>
+          <a class="profile-menu__item" role="menuitem" href="search-page.html"><span class="material-symbols-rounded">search</span>Search</a>
+          <a class="profile-menu__item" role="menuitem" href="contextual-awareness.html"><span class="material-symbols-rounded">dashboard_customize</span>Contextual Awareness</a>
+          <a class="profile-menu__item" role="menuitem" href="admin-users.html"><span class="material-symbols-rounded">settings</span>Admin</a>
+          <a class="profile-menu__item" role="menuitem" href="login.html"><svg class="icon icon--20" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path></svg>Login</a>
+          <div class="profile-menu__sep" role="separator"></div>
+          <button class="profile-menu__item" type="button" role="menuitem"><svg class="icon icon--20" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profile</button>
+          <a class="profile-menu__item" role="menuitem" href="ds/index.html"><svg class="icon icon--20" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>Design system</a>
+          <a class="profile-menu__item" role="menuitem" href="animation-lab.html"><svg class="icon icon--20" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h4"></path><path d="M18 12h4"></path><path d="M12 2v4"></path><path d="M12 18v4"></path><circle cx="12" cy="12" r="4"></circle></svg>Animation lab</a>
+          <button class="profile-menu__item" type="button" role="menuitem"><svg class="icon icon--20" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</button>
+          <div class="profile-menu__sep" role="separator"></div>
+          <div class="profile-menu__row">
+            <span class="profile-menu__row-label">Appearance</span>
+            <div class="verswitch" role="group" aria-label="Appearance">
+              <button class="verswitch__opt verswitch__opt--active" type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+              <button class="verswitch__opt" type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+            </div>
+          </div>
+          <div class="profile-menu__sep" role="separator"></div>
+          <button class="profile-menu__item" type="button" role="menuitem" data-signout><svg class="icon icon--20" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+<nav class="ehsq-navrail" aria-label="Primary navigation">
+  <div class="ehsq-navrail__core">
+    <!-- Create New -->
+    <div class="ehsq-navrail__item" style="position:relative;">
+      <button class="ehsq-navrail__btn ehsq-navrail__btn--create" id="ws-create-btn" type="button" aria-label="Create new record" aria-haspopup="menu" aria-expanded="false">
+        <i data-lucide="plus" aria-hidden="true"></i>
+      </button>
+          <div class="cn-flyout" id="ws-create-pop" role="dialog" aria-label="Create new" hidden>
+            <header class="cn-head">
+              <span class="cn-head__title"><span>Create New</span></span>
+              <button class="cn-close" id="ws-cn-close" type="button" aria-label="Close"><span class="material-symbols-rounded">close</span></button>
+            </header>
+            <div class="cn-controls">
+              <label class="cn-find">
+                <span class="material-symbols-rounded">search</span>
+                <input type="text" id="ws-cn-filter" placeholder="Find a record type…" aria-label="Find a record type" autocomplete="off" />
+              </label>
+              <nav class="cn-seg" aria-label="Create new views">
+                <button class="cn-seg__btn cn-seg__btn--active" data-cn-tab="shortcuts" type="button">Shortcuts</button>
+                <button class="cn-seg__btn" data-cn-tab="all" type="button">All</button>
+                <button class="cn-seg__btn" data-cn-tab="templates" type="button">Templates</button>
+              </nav>
+            </div>
+            <div class="cn-body"><div id="ws-cn-content" class="cn-content"></div></div>
+          </div>
+    </div>
+    <!-- Home (active) -->
+    <div class="ehsq-navrail__item">
+      <a class="ehsq-navrail__btn ehsq-navrail__btn--active" href="index.html" aria-current="page" aria-label="Home">
+        <i data-lucide="house" aria-hidden="true"></i>
+      </a>
+    </div>
+    <!-- Search -->
+    <div class="ehsq-navrail__item">
+      <a class="ehsq-navrail__btn" href="search-page.html" aria-label="Search" title="Search">
+        <i data-lucide="search" aria-hidden="true"></i>
+      </a>
+    </div>
+    <!-- Reports -->
+    <div class="ehsq-navrail__item">
+      <a class="ehsq-navrail__btn" href="report-management.html" aria-label="Reports" title="Reports">
+        <i data-lucide="chart-column" aria-hidden="true"></i>
+      </a>
+    </div>
+    <!-- Dashboards -->
+    <div class="ehsq-navrail__item" style="position:relative;">
+      <!-- A trigger, not a link: this opens the workspace flyout, the same as
+           every other page. It was an <a> straight to Contextual Awareness,
+           which is one workspace rather than the picker. -->
+      <button class="ehsq-navrail__btn" type="button" id="ws-dash-btn" aria-label="Dashboards" aria-haspopup="menu" aria-expanded="false">
+        <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+      </button>
+          <div class="px-pop ws-pop" id="ws-dash-pop" role="menu" aria-label="Your workspaces" hidden>
+            <div class="px-menu__head">Your workspaces</div>
+            <button class="ws-item ws-item--new" role="menuitem" type="button">
+              <span class="ws-item__icon"><i data-lucide="plus" class="icon" aria-hidden="true"></i></span>
+              <span class="ws-item__text"><span class="ws-item__name">New dashboard</span><span class="ws-item__sub">Start from a blank workspace</span></span>
+            </button>
+            <!-- --current, not just --home: this is the workspace on screen, so it
+                 carries the rail's pink icon fill. --home only earns the badge. -->
+            <a class="ws-item ws-item--home ws-item--current" role="menuitem" href="index.html" aria-current="page">
+              <span class="ws-item__icon"><i data-lucide="factory" class="icon" aria-hidden="true"></i></span>
+              <span class="ws-item__text"><span class="ws-item__name">Quality Overview</span><span class="ws-item__sub">Home workspace</span></span>
+              <span class="ws-item__badge">Home</span>
+            </a>
+            <a class="ws-item" role="menuitem" href="index.html?ws=ehs">
+              <span class="ws-item__icon"><i data-lucide="heart-pulse" class="icon" aria-hidden="true"></i></span>
+              <span class="ws-item__text"><span class="ws-item__name">EHS Overview</span><span class="ws-item__sub">Switch workspace</span></span>
+            </a>
+          </div>
+    </div>
+    <!-- Monaco -->
+    <div class="ehsq-navrail__item">
+      <button class="ehsq-navrail__btn" type="button" aria-label="Monaco">
+        <i data-lucide="code" aria-hidden="true"></i>
+      </button>
+    </div>
+    <!-- Admin -->
+    <div class="ehsq-navrail__item">
+      <a class="ehsq-navrail__btn" href="admin-users.html" aria-label="Admin" title="Admin">
+        <i data-lucide="settings" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="home-shell" role="main" id="px-main">
+  <!-- Same structure the record, search and report pages use: nav.breadcrumb with
+       a type icon on the first crumb, then the title row. The earlier markup used
+       a .pageheader__breadcrumb class that praxis-pageheader.css doesn't define,
+       so it rendered unstyled. -->
+  <header class="pageheader">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span class="breadcrumb__home" aria-hidden="true"><span class="material-symbols-rounded">space_dashboard</span></span>
+      <span class="breadcrumb__current">Ideagen Default</span>
+    </nav>
+    <div class="pageheader__titlerow">
+      <span class="pageheader__icon" aria-hidden="true"><span class="material-symbols-rounded">space_dashboard</span></span>
+      <h1 class="pageheader__title">Home</h1>
+    </div>
+  </header>
+
+  <!-- Quick actions — the fixed set we ship, no add/manage affordance.
+       Doubles as this page's toolbar band (see praxis-pageheader.css). -->
+  <section class="toolbar quick-actions" aria-label="Quick create">
+    <div class="quick-actions__inner" id="ws-quick-actions"></div>
+  </section>
+
+  <!-- Phone-only. The nav rail is a drawer at this width and Create New is the
+       one rail action worth keeping on the page, so it sits here between the
+       header and the first component. It forwards to the rail's own trigger, so
+       there's one flyout and one set of wiring — and the flyout is fixed-
+       positioned independently of its trigger, so it opens correctly either way. -->
+  <div class="home-create">
+    <button class="qa home-create__btn" type="button" id="ws-create-phone"
+            aria-label="Create new record" aria-haspopup="menu">
+      <span class="material-symbols-rounded" aria-hidden="true">add</span>Create New
+    </button>
+  </div>
+
+  <div class="home">
+    <!-- ============ Personal column ============ -->
+    <div class="home__col">
+
+      <!-- Up Next — the user's next assigned task -->
+      <section class="card" aria-labelledby="upnext-t">
+        <header class="card__header">
+          <h2 class="card__title" id="upnext-t"><span class="material-symbols-rounded">arrow_circle_right</span><span>Up Next</span></h2>
+          <span class="card__aux">
+            <span class="upnext__flag" title="Awaiting your approval" aria-label="Awaiting your approval"><span class="material-symbols-rounded">warning</span></span>
+          </span>
+        </header>
+        <div class="card__body">
+          <a class="upnext__record" href="record-page-permit.html" id="upnext-link"></a>
+          <p class="upnext__sub" id="upnext-sub"></p>
+          <div class="upnext__row">
+            <span class="upnext__due" id="upnext-due"></span>
+            <span class="upnext__by" id="upnext-by"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Submissions / Recent -->
+      <section class="card" aria-labelledby="subs-t">
+        <header class="card__header">
+          <h2 class="card__title" id="subs-t"><span class="material-symbols-rounded">history</span><span>My Activity</span></h2>
+          <span class="card__aux">
+            <!-- In the header rather than above the list, so the body is all content -->
+            <div class="tabs segswitch" role="tablist" aria-label="Submissions and recents">
+              <button class="tab" role="tab" id="tab-subs" aria-selected="true" aria-controls="panel-subs">My Submissions</button>
+              <button class="tab" role="tab" id="tab-recent" aria-selected="false" aria-controls="panel-recent">Recent</button>
+            </div>
+          </span>
+        </header>
+        <div class="card__body">
+        <ul class="tl" role="tabpanel" id="panel-subs" aria-labelledby="tab-subs"></ul>
+        <ul class="tl" role="tabpanel" id="panel-recent" aria-labelledby="tab-recent" hidden></ul>
+        </div>
+      </section>
+
+      <!-- My Top Reports — frequently visited or pinned -->
+      <section class="card" aria-labelledby="reps-t">
+        <header class="card__header">
+          <h2 class="card__title" id="reps-t"><span class="material-symbols-rounded">lab_profile</span><span>My Top Reports</span></h2>
+        </header>
+        <div class="card__body"><div class="reps" id="reps"></div></div>
+      </section>
+    </div>
+
+    <!-- ============ Analytics column ============ -->
+    <div class="home__col home__col--analytics">
+
+      <!-- Assignments summary -->
+      <section class="card" aria-labelledby="asg-t">
+        <header class="card__header">
+          <h2 class="card__title" id="asg-t"><span class="material-symbols-rounded">assignment</span><span>Assignments</span></h2>
+          <span class="card__aux">
+            <!-- Comparison switch: the three treatments proposed for this
+                 component, side by side. Prototype-only — one of these wins and
+                 the switch goes with the losers. -->
+            <div class="asg__variant segswitch" role="group" aria-label="Layout variant" hidden>
+              <button type="button" data-variant="donut" aria-pressed="true">Donut</button>
+              <button type="button" data-variant="bar"   aria-pressed="false">Bar</button>
+              <button type="button" data-variant="cards" aria-pressed="false">Cards</button>
+            </div>
+          </span>
+        </header>
+        <div class="card__body">
+          <div class="asg__tabs segswitch" role="tablist" aria-label="Assignment scope" id="asg-tabs"></div>
+          <!-- Phone form of the scope switch. Populated from the same SCOPES
+               array as the segmented control, so they can't drift. -->
+          <select class="px-select asg__select" id="asg-select" aria-label="Assignment scope"></select>
+
+          <!-- A — donut + breakdown -->
+          <div class="asg__body" data-variant-panel="donut">
+            <div class="donut" id="asg-donut" role="img"></div>
+            <ul class="brk" id="asg-brk"></ul>
+          </div>
+
+          <!-- B — figures in a row over a segmented bar -->
+          <div class="asg__bar" data-variant-panel="bar" hidden>
+            <div class="asgbar__figures" id="asg-bar-figures"></div>
+            <div class="asgbar__track" id="asg-bar-track" role="img"></div>
+            <div class="asgbar__legend" id="asg-bar-legend"></div>
+          </div>
+
+          <!-- C — one tile per state -->
+          <div class="asg__cards" data-variant-panel="cards" id="asg-cards" hidden></div>
+        </div>
+      </section>
+
+      <!-- Recently Created Items — org-wide creation volume by object type -->
+      <section class="card" aria-labelledby="rci-t">
+        <header class="card__header">
+          <h2 class="card__title" id="rci-t"><span class="material-symbols-rounded">stacked_line_chart</span><span>Recently Created Items</span></h2>
+          <span class="card__aux">
+          <div class="rci__range segswitch" role="group" aria-label="Time range">
+            <button type="button" data-range="14" aria-pressed="true">14 Days</button>
+            <button type="button" data-range="30" aria-pressed="false">30 Days</button>
+            <button type="button" data-range="90" aria-pressed="false">90 Days</button>
+          </div>
+          <button class="card__link" type="button" aria-label="Open full report" title="Open full report">
+            <span class="material-symbols-rounded">open_in_new</span>
+          </button>
+          </span>
+        </header>
+        <div class="card__body">
+          <!-- Phone form: the date range and a series-highlight dropdown, under
+               the header rather than crowded into it. Both mirror controls that
+               exist above; nothing here is phone-only behaviour. -->
+          <div class="rci__controls">
+            <select class="px-select" id="rci-range-select" aria-label="Time range">
+              <option value="14">14 Days</option>
+              <option value="30">30 Days</option>
+              <option value="90">90 Days</option>
+            </select>
+            <div class="rci__hl">
+              <button class="rci__hl-btn" id="rci-hl-btn" type="button" aria-expanded="false" aria-haspopup="listbox">
+                <span class="rci__hl-label" id="rci-hl-label">All categories</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="rci__hl-pop" id="rci-hl-pop" role="listbox" aria-multiselectable="true" aria-label="Highlight categories" hidden></div>
+            </div>
+          </div><div class="rci__chart" id="rci-chart"></div></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /.main -->
+</div><!-- /.app -->
+
+<!-- Module-selector: scrim + body-level menu (shared app-header component) -->
+<div class="msel__scrim" id="ws-msel-scrim" hidden></div>
+<div class="msel__menu" id="ws-msel-menu" role="listbox" aria-multiselectable="true" aria-label="Select modules" hidden>
+  <div class="msel__titlebar">
+    <div class="msel__title">Select Module(s)</div>
+    <button class="msel__clear" type="button" data-msel-clear hidden>Clear</button>
+  </div>
+  <label class="cn-find msel__filter">
+    <span class="material-symbols-rounded">search</span>
+    <input id="ws-msel-filter" type="text" placeholder="Filter modules…" autocomplete="off" aria-label="Filter modules" />
+  </label>
+  <div id="ws-msel-list"></div>
+</div>
+
+<!-- Scrim behind the Create New flyout (the flyout itself sits in the nav rail) -->
+<div class="cn-scrim" id="ws-cn-scrim" hidden></div>
+<div class="cn-scrim" id="ws-dash-scrim" hidden></div>
+
+<script src="praxis-create-new.js"></script>
+<script>
+function wirePopover(btnId, popId, opts){
+  var btn=document.getElementById(btnId), pop=document.getElementById(popId);
+  if(!btn||!pop) return;
+  opts=opts||{};
+  var scrim=opts.scrimId ? document.getElementById(opts.scrimId) : null;
+  /* The flyout lives inside the nav rail, which is a flex item with z-index:20
+     — z-index applies to flex items even unpositioned, so the rail opens a
+     stacking context that traps the flyout below the z-index:119 scrim.
+
+     Dropping the rail to auto while open is the whole fix: the rail becomes a
+     non-positioned flex item and paints below the scrim (border and all nav
+     buttons with it), while the flyout, being positioned with its own z-index,
+     now resolves against the root and clears the scrim on its own.
+
+     Nothing is lifted. An earlier version raised the trigger's rail item to
+     131 to carry the flyout up, but that dragged the trigger button above the
+     scrim too, leaving one undimmed nav button sitting on top of the overlay. */
+  var rail=btn.closest('.ehsq-navrail');
+  function open(){ pop.hidden=false; if(scrim) scrim.hidden=false;
+    if(rail) rail.style.zIndex='auto';
+    btn.setAttribute('aria-expanded','true'); }
+  function close(){ pop.hidden=true; if(scrim) scrim.hidden=true;
+    if(rail) rail.style.zIndex='';
+    btn.setAttribute('aria-expanded','false'); }
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(pop.hidden) open(); else close();
+  });
+  pop.addEventListener('click',function(e){ e.stopPropagation(); });
+  document.addEventListener('click',function(){ if(!pop.hidden) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!pop.hidden){ close(); btn.focus(); } });
+  return { open:open, close:close, isOpen:function(){ return !pop.hidden; } };
+}
+
+/* Create New menu — shared flyout component (opens right of the nav rail).
+   Uses the shared CREATE_CATALOG / CN_TEMPLATES so it matches the workspace. */
+(function(){
+  var pop=document.getElementById('ws-create-pop');
+  if(!pop || typeof CREATE_CATALOG==='undefined') return;
+  var content=document.getElementById('ws-cn-content');
+  var findInput=document.getElementById('ws-cn-filter');
+  /* Shared predefined shortcuts — same set the workspace shows. */
+  var WS_SHORTCUTS = CN_SHORTCUTS;
+  var tab='shortcuts', filter='';
+  function itemHtml(i){ return '<button class="cn-item" type="button" data-cn-create="'+i.id+'">'
+    +'<span class="cn-item__icon"><span class="material-symbols-rounded">'+i.icon+'</span></span>'
+    +'<span class="cn-item__label">'+i.label+'</span></button>'; }
+  function groupHtml(g,items){ return items.length ? '<div class="cn-group cn-group--'+g.tone+'">'
+    +'<div class="cn-group__head"><span class="cn-group__icon"><span class="material-symbols-rounded">'+g.icon+'</span></span>'
+    +'<span class="cn-group__title">'+g.group+'</span></div>'
+    +'<div class="cn-grid">'+items.map(itemHtml).join('')+'</div></div>' : ''; }
+  function render(){
+    var f=filter.trim().toLowerCase();
+    if(tab==='shortcuts'){
+      content.innerHTML=CREATE_CATALOG.map(function(g){ return groupHtml(g, g.items.filter(function(i){
+        return WS_SHORTCUTS.indexOf(i.id)>=0 && (!f || i.label.toLowerCase().indexOf(f)>=0); })); }).join('')
+        || '<p class="cn-manage-note">No shortcuts match “'+filter+'”.</p>';
+    } else if(tab==='all'){
+      content.innerHTML=CREATE_CATALOG.map(function(g){ return groupHtml(g, g.items.filter(function(i){
+        return !f || i.label.toLowerCase().indexOf(f)>=0 || g.group.toLowerCase().indexOf(f)>=0; })); }).join('');
+    } else {
+      content.innerHTML='<div class="cn-tpl-list">'+CN_TEMPLATES.map(function(t){ return '<button class="cn-tpl cn-group--'+(t.tone||'purple')+'" type="button" data-cn-create="tpl">'
+        +'<span class="cn-tpl__icon"><span class="material-symbols-rounded">'+t.icon+'</span></span>'
+        +'<span class="cn-tpl__body"><span class="cn-tpl__name">'+t.label+'</span>'
+        +'<span class="cn-tpl__meta">Based on '+(t.type||'a record')+' · '+(t.sub||'pre-filled')+'</span></span></button>'; }).join('')
+        +'</div><p class="cn-manage-note">Templates are record types your team has partially filled out — pick one to start ahead.</p>';
+    }
+  }
+  var api=wirePopover('ws-create-btn','ws-create-pop',{scrimId:'ws-cn-scrim'});
+  if(!api) return;
+  /* Reset to Shortcuts and focus Find each time it opens. */
+  document.getElementById('ws-create-btn').addEventListener('click',function(){
+    if(!api.isOpen()) return;
+    tab='shortcuts'; filter=''; findInput.value='';
+    pop.classList.remove('cn-flyout--wide');
+    pop.querySelectorAll('.cn-seg__btn').forEach(function(b){ b.classList.toggle('cn-seg__btn--active', b.dataset.cnTab==='shortcuts'); });
+    render(); setTimeout(function(){ findInput.focus(); },60);
+  });
+  pop.querySelectorAll('.cn-seg__btn').forEach(function(b){ b.addEventListener('click',function(){
+    tab=b.dataset.cnTab;
+    pop.querySelectorAll('.cn-seg__btn').forEach(function(x){ x.classList.toggle('cn-seg__btn--active', x===b); });
+    pop.classList.toggle('cn-flyout--wide', tab==='all');
+    render();
+  }); });
+  findInput.addEventListener('input',function(e){ filter=e.target.value; render(); });
+  document.getElementById('ws-cn-close').addEventListener('click',api.close);
+  content.addEventListener('click',function(e){ if(e.target.closest('[data-cn-create]')) api.close(); });
+  render();
+})();
+
+/* ============================ THEME (Appearance row in the avatar menu) ============================ */
+(function(){
+  var btns = document.querySelectorAll('#ws-profile-pop [data-theme-btn]');
+  function sync(){
+    var cur = document.body.dataset.theme==='dark' ? 'dark' : 'light';
+    btns.forEach(function(b){ var on=b.getAttribute('data-theme-btn')===cur;
+      b.classList.toggle('verswitch__opt--active', on); b.setAttribute('aria-pressed', on?'true':'false'); });
+  }
+  btns.forEach(function(b){ b.addEventListener('click', function(){
+    var v = b.getAttribute('data-theme-btn');
+    document.body.dataset.theme = v; try{ localStorage.setItem('gl-theme', v); }catch(e){} sync();
+  }); });
+  sync();
+})();
+
+/* Search module selector — typeable multi-select scope picker (shared
+   CREATE_CATALOG catalog; identical to the workspace & record pages). */
+(function(){
+  var trigger = document.getElementById('ws-msel');
+  var input   = document.getElementById('ws-msel-input');
+  var menu    = document.getElementById('ws-msel-menu');
+  var list    = document.getElementById('ws-msel-list');
+  var filterInput = document.getElementById('ws-msel-filter');
+  var scrim   = document.getElementById('ws-msel-scrim');
+  if(!trigger || typeof CREATE_CATALOG === 'undefined') return;
+  var searchEl = trigger.closest('.appbar__search');   // anchor for the body-level menu
+
+  var selected = new Set();   // module ids; empty = All
+  var filter = '';
+  var open = false;
+
+  function summary(){
+    if(!selected.size) return 'All';
+    var names = [];
+    selected.forEach(function(id){ if(CN_INDEX[id]) names.push(CN_INDEX[id].label); });
+    return names.length <= 1 ? names.join('') : names[0] + ' +' + (names.length - 1);
+  }
+  function itemHtml(i){
+    var sel = selected.has(i.id);
+    return '<button class="cn-item' + (sel ? ' is-sel' : '') + '" type="button" role="option" aria-selected="' + sel + '" data-msel="' + i.id + '">'
+      + '<span class="cn-item__icon"><span class="material-symbols-rounded">' + i.icon + '</span></span>'
+      + '<span class="cn-item__label">' + i.label + '</span>'
+      + '<span class="cn-item__check material-symbols-rounded">check</span></button>';
+  }
+  function render(){
+    var f = filter.trim().toLowerCase();
+    var html = '';   // module rows only — an empty selection already means All
+    var groups = CREATE_CATALOG.map(function(g){
+      var items = g.items.filter(function(i){ return !f || i.label.toLowerCase().indexOf(f) >= 0 || g.group.toLowerCase().indexOf(f) >= 0; });
+      if(!items.length) return '';
+      return '<div class="cn-group cn-group--' + g.tone + '">'
+        + '<div class="cn-group__head"><span class="cn-group__icon"><span class="material-symbols-rounded">' + g.icon + '</span></span>'
+        + '<span class="cn-group__title">' + g.group + '</span></div>'
+        + '<div class="cn-grid">' + items.map(itemHtml).join('') + '</div></div>';
+    }).join('');
+    list.innerHTML = html + (groups ? '<div class="msel__groups">' + groups + '</div>' : '<p class="msel__empty">No modules match “' + filter + '”.</p>');
+  }
+  function syncInput(){
+    input.value = summary();
+    /* Clear is the only way back to "All" once several modules are picked */
+    var clr = menu.querySelector('[data-msel-clear]'); if(clr) clr.hidden = selected.size === 0;
+    /* Publish the full selected-module labels for the page title, then refresh it. */
+    spModuleLabels = [];
+    selected.forEach(function(id){ if(CN_INDEX[id]) spModuleLabels.push(CN_INDEX[id].label); });
+    if(typeof updateSearchTitle === 'function') updateSearchTitle();
+  }
+  function positionMenu(){
+    if(!searchEl) return;
+    var r = searchEl.getBoundingClientRect();
+    menu.style.left = r.left + 'px';
+    menu.style.top = (r.bottom + 10) + 'px';
+    menu.style.width = r.width + 'px';
+  }
+  function openMenu(){
+    if(open) return;
+    open = true; positionMenu(); menu.hidden = false; if(scrim) scrim.hidden = false; trigger.classList.add('is-open');
+    input.setAttribute('aria-expanded','true');
+    filter = ''; filterInput.value = ''; render();
+    filterInput.focus();
+  }
+  function closeMenu(){
+    if(!open) return;
+    open = false; menu.hidden = true; if(scrim) scrim.hidden = true; trigger.classList.remove('is-open');
+    input.setAttribute('aria-expanded','false');
+    filter = '';
+  }
+  window.addEventListener('resize', function(){ if(open) positionMenu(); });
+  trigger.addEventListener('click', function(e){
+    if(menu.contains(e.target)) return;
+    if(open) closeMenu(); else openMenu();
+  });
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); if(!open) openMenu(); }
+  });
+  filterInput.addEventListener('input', function(){ filter = filterInput.value; render(); });
+  filterInput.addEventListener('click', function(e){ e.stopPropagation(); });
+  menu.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(e.target.closest('[data-msel-clear]')){ selected.clear(); }
+    else { var it = e.target.closest('[data-msel]'); if(!it) return; var id = it.dataset.msel; if(selected.has(id)) selected.delete(id); else selected.add(id); }
+    syncInput(); render(); filterInput.focus();
+  });
+  document.addEventListener('click', function(e){ if(open && !trigger.contains(e.target) && !menu.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && open){ closeMenu(); } });
+  syncInput();
+})();
+
+/* Account (avatar) menu — holds the relocated page switcher */
+(function(){
+  var av=document.getElementById('ws-avatar'), pop=document.getElementById('ws-profile-pop'); if(!av||!pop) return;
+  function close(){ pop.setAttribute('hidden',''); av.setAttribute('aria-expanded','false'); }
+  av.addEventListener('click',function(e){ e.stopPropagation(); if(pop.hasAttribute('hidden')){ pop.removeAttribute('hidden'); av.setAttribute('aria-expanded','true'); } else close(); });
+  pop.addEventListener('click',function(e){ e.stopPropagation(); });
+  document.addEventListener('click',function(){ if(!pop.hasAttribute('hidden')) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!pop.hasAttribute('hidden')) close(); });
+})();
+
+/* Page switcher (next to the logo) — now hidden; kept as a harmless no-op */
+(function(){
+  var trig=document.querySelector('.appswitch__trigger'), pop=document.querySelector('.appswitch__pop'); if(!trig||!pop) return;
+  function close(){ pop.setAttribute('hidden',''); trig.setAttribute('aria-expanded','false'); }
+  trig.addEventListener('click',function(e){ e.stopPropagation(); if(pop.hasAttribute('hidden')){ pop.removeAttribute('hidden'); trig.setAttribute('aria-expanded','true'); } else close(); });
+  pop.addEventListener('click',function(e){ e.stopPropagation(); });
+  document.addEventListener('click',function(){ if(!pop.hasAttribute('hidden')) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!pop.hasAttribute('hidden')) close(); });
+})();
+</script>
+<script>
+/* =====================================================================
+   HOME — component data + behaviour.
+
+   Everything here is prototype scenario data for the fixed component set.
+   No persistence, no customisation: this dashboard is the same for everyone.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const TODAY = new Date(2026, 6, 29);          // the prototype's "today"
+
+  /* ---------------- Quick actions (fixed set) ---------------- */
+  const QUICK_ACTIONS = [
+    { icon: 'report',            label: 'Report Incident' },
+    { icon: 'visibility',        label: 'Log Observation' },
+    { icon: 'assignment_turned_in', label: 'Start Inspection' },
+    { icon: 'health_and_safety', label: 'Raise Hazard' },
+  ];
+  $('#ws-quick-actions').innerHTML = QUICK_ACTIONS.map(q =>
+    `<a class="qa" href="record-page.html"><span class="material-symbols-rounded">${q.icon}</span><span>${esc(q.label)}</span></a>`
+  ).join('');
+
+  /* ---------------- Up Next: the next assigned task ---------------- */
+  const UP_NEXT = {
+    ref:      'WCM-00482',
+    title:    'Permit WCM-00482 needs your approval',
+    sub:      'P206 hot work, boiler house bay 3. Isolation needs certifying before you can authorise.',
+    hoursAgo: 3,
+    // Matches the audit trail on record-page-permit.html, which is the record
+    // of truth for who submitted this permit.
+    byName:   'M. Fischer',
+    byRole:   'Planner',
+  };
+  $('#upnext-link').textContent = UP_NEXT.title;
+  $('#upnext-sub').textContent  = UP_NEXT.sub;
+  $('#upnext-due').textContent  = `Submitted ${UP_NEXT.hoursAgo} hours ago`;
+  $('#upnext-by').textContent   = `by ${UP_NEXT.byName}, ${UP_NEXT.byRole}`;
+
+  /* ---------------- Submissions / Recent ---------------- */
+  const SUBMISSIONS = [
+    { title: 'Runway incursion follow-up 07/17/2026', meta: '07/17/2026 | I-CA-26-177 | Incident Review', done: false },
+    { title: 'Bird strike inspection 05/26/2026',      meta: '05/26/2026 | I-CA-26-173 | Incident Review', done: false },
+    { title: 'De-icing procedure check 03/24/2026',    meta: '03/24/2026 | DMATH-2026-0009 | Retired',     done: true  },
+    { title: 'Weekly ramp safety walk',                meta: 'Every 1 Week on Monday | Scheduled',         done: true  },
+    { title: 'Fuel quality audit 02/11/2026',          meta: '02/11/2026 | AUD-2026-0041 | Closed',        done: true  },
+  ];
+  const RECENT = [
+    { title: 'Potential runway incursion at Heathrow', meta: 'Viewed 2 hours ago | ASR-2026-0162',          done: false },
+    { title: 'Bird strike on climb-out — AG304',       meta: 'Viewed 5 hours ago | ASR-2026-0161',          done: true  },
+    { title: 'Part-145 Compliance Source',             meta: 'Viewed yesterday | REQSR-2024-0016',          done: true  },
+    { title: 'Conduct Line Flight Safety Audit',       meta: 'Viewed 2 days ago | CMPLD-2026-0001',         done: false },
+    { title: 'Annual Review',                          meta: 'Viewed 3 days ago | CMTSK-2026-0010',         done: true  },
+  ];
+  const tlHtml = (rows) => rows.map(r => `
+    <li class="tl__item">
+      <span class="tl__dot${r.done ? ' tl__dot--done' : ''}" aria-hidden="true">
+        <span class="material-symbols-rounded">${r.done ? 'check_circle' : 'schedule'}</span>
+      </span>
+      <span>
+        <a class="tl__title" href="record-page.html">${esc(r.title)}</a>
+        <span class="tl__meta">${esc(r.meta)}</span>
+      </span>
+    </li>`).join('');
+  $('#panel-subs').innerHTML = tlHtml(SUBMISSIONS);
+  $('#panel-recent').innerHTML = tlHtml(RECENT);
+
+  document.querySelectorAll('[role="tablist"][aria-label="Submissions and recents"] .tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#tab-subs, #tab-recent').forEach(b => b.setAttribute('aria-selected', String(b === t)));
+      $('#panel-subs').hidden  = t.id !== 'tab-subs';
+      $('#panel-recent').hidden = t.id !== 'tab-recent';
+    });
+  });
+
+  /* ---------------- My Top Reports ---------------- */
+  const REPORTS = [
+    { name: 'Open CAPA by Site',        time: '07/29/2026, 11:33 am', pinned: true,  changed: 30, unread: 1, overdue: 3, total: 142 },
+    { name: 'Overdue Inspections',      time: '07/29/2026, 9:19 am',  pinned: true,  changed: 0,  unread: 0, overdue: 0, total: 409 },
+    { name: 'Pending Claims Reviews',   time: '07/28/2026, 4:02 pm',  pinned: false, changed: 12, unread: 4, overdue: 1, total: 87  },
+    { name: 'Audit Findings — Q3',      time: '07/27/2026, 8:45 am',  pinned: false, changed: 5,  unread: 2, overdue: 0, total: 63  },
+  ];
+  $('#reps').innerHTML = REPORTS.map(r => `
+    <div class="rep">
+      <div class="rep__head">
+        <span class="rep__dot" aria-hidden="true"></span>
+        <span class="rep__name">${esc(r.name)}</span>
+        <button class="rep__pin" type="button" aria-pressed="${r.pinned}"
+                aria-label="${r.pinned ? 'Unpin' : 'Pin'} ${esc(r.name)}" title="${r.pinned ? 'Pinned to Top Reports' : 'Pin to Top Reports'}">
+          <span class="material-symbols-rounded">keep</span>
+        </button>
+      </div>
+      <div class="rep__time">${esc(r.time)}</div>
+      <div class="rep__stats">
+        <span class="stat stat--changed">Changed: ${r.changed}</span>
+        <span class="stat stat--unread">Unread: ${r.unread}</span>
+        <span class="stat stat--overdue">Overdue: ${r.overdue}</span>
+        <span class="stat stat--total">Total: ${r.total}</span>
+      </div>
+    </div>`).join('');
+  $('#reps').addEventListener('click', (e) => {
+    const b = e.target.closest('.rep__pin'); if (!b) return;
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on));
+    b.title = on ? 'Pinned to Top Reports' : 'Pin to Top Reports';
+  });
+
+  /* ---------------- Assignments summary ----------------
+     Replaces the three outlined rings with one donut of the whole set and a
+     breakdown beside it: the ring is the total, the segments are the states
+     that need attention, and each row is a way in. */
+  const SCOPES = [
+    { id: 'mine',    label: 'My Assignments', total: 20, unread: 8, overdue: 7 },
+    { id: 'teams',   label: 'My Teams',       total: 1,  unread: 1, overdue: 0 },
+    { id: 'alts',    label: 'My Alternates',  total: 0,  unread: 0, overdue: 0 },
+    { id: 'all',     label: 'All Assignments',total: 21, unread: 9, overdue: 7 },
+  ];
+  let scope = SCOPES[0];
+
+  // Overdue / Due Soon / Unread are the three states that make up the total.
+  // "All" used to sit here, which didn't hold up — overdue and unread are
+  // subsets of All, so it was a category beside its own members.
+  const C_OVERDUE  = 'var(--ehsq-color-red-60, #e22d38)';
+  const C_DUE_SOON = 'var(--ehsq-color-yellow-50, #f2d02e)';
+  const C_UNREAD   = 'var(--ehsq-color-blue-50, #6882ef)';
+
+  $('#asg-tabs').innerHTML = SCOPES.map(s => `
+    <button class="asg__tab" role="tab" type="button" data-scope="${s.id}" aria-selected="${s.id === scope.id}">
+      ${esc(s.label)}<span class="asg__count">${s.total}</span>
+    </button>`).join('');
+
+  /* Phone form of the same switch. Built from SCOPES so the two can't drift,
+     and kept in sync both ways — whichever control the user reaches, the other
+     follows. */
+  const asgSelect = $('#asg-select');
+  asgSelect.innerHTML = SCOPES.map(sc =>
+    `<option value="${sc.id}">${esc(sc.label)} (${sc.total})</option>`).join('');
+  asgSelect.value = scope.id;
+  asgSelect.addEventListener('change', () => {
+    scope = SCOPES.find(sc => sc.id === asgSelect.value) || SCOPES[0];
+    document.querySelectorAll('#asg-tabs .asg__tab').forEach(t =>
+      t.setAttribute('aria-selected', String(t.dataset.scope === scope.id)));
+    renderAssignments();
+  });
+
+  function renderAssignments() {
+    if (asgSelect.value !== scope.id) asgSelect.value = scope.id;
+    const { total, unread, overdue } = scope;
+    // overdue and unread overlap in the source data; show them as distinct arcs
+    // of the whole, with everything else as the remainder.
+    const rest = Math.max(0, total - unread - overdue);
+    const R = 70;
+    /* Arcs are explicit paths rather than dasharray offsets on one circle. The
+       dash approach put the final segment's end at exactly the path's start
+       point, and floating-point drift let it wrap a hair past — drawing a thin
+       sliver back over the first arc, which read as a notch at twelve o'clock.
+       An arc command has exact endpoints, so the joins are clean radial cuts. */
+    const pt = (frac) => {
+      const a = frac * 2 * Math.PI;
+      return [ (84 + R * Math.cos(a)).toFixed(3), (84 + R * Math.sin(a)).toFixed(3) ];
+    };
+    const seg = (key, colour, from, to) => {
+      const frac = to - from;
+      if (frac <= 0) return '';
+      // a single state accounting for everything can't be drawn as an arc
+      // (start and end coincide) — draw the ring itself
+      if (frac >= 0.9999) {
+        return `<circle class="donut__seg" data-key="${key}" cx="84" cy="84" r="${R}"
+                   fill="none" stroke="${colour}" stroke-width="13"></circle>`;
+      }
+      const [x0, y0] = pt(from), [x1, y1] = pt(to);
+      return `<path class="donut__seg" data-key="${key}" fill="none" stroke="${colour}" stroke-width="13"
+                 d="M ${x0} ${y0} A ${R} ${R} 0 ${frac > 0.5 ? 1 : 0} 1 ${x1} ${y1}"></path>`;
+    };
+    let at = 0;
+    const arcs = [['overdue', overdue, C_OVERDUE], ['dueSoon', rest, C_DUE_SOON], ['unread', unread, C_UNREAD]]
+      .map(([k, v, c]) => { const f = v / (total || 1); const out = seg(k, c, at, at + f); at += f; return out; }).join('');
+
+    $('#asg-donut').setAttribute('aria-label',
+      `${total} ${scope.label}: ${overdue} overdue, ${rest} due soon, ${unread} unread`);
+    $('#asg-donut').innerHTML = `
+      <svg viewBox="0 0 168 168" aria-hidden="true">
+        <circle class="donut__track" cx="84" cy="84" r="${R}" stroke-width="18"></circle>
+        ${arcs}
+      </svg>
+      <div class="donut__centre">
+        <div class="donut__num">${total}</div>
+        <div class="donut__label">${total === 1 ? 'Assignment' : 'Assignments'}</div>
+      </div>`;
+
+    // Three mutually exclusive states that sum to the total in the centre, so a
+    // row's count now matches the arc it points at.
+    const rows = [
+      { key: 'overdue', label: 'Overdue',  value: overdue, colour: C_OVERDUE,  href: 'search-page.html' },
+      { key: 'dueSoon', label: 'Due Soon', value: rest,    colour: C_DUE_SOON, href: 'search-page.html' },
+      { key: 'unread',  label: 'Unread',   value: unread,  colour: C_UNREAD,   href: 'search-page.html' },
+    ];
+    $('#asg-brk').innerHTML = rows.map(r => `
+      <li>
+        <a class="brk__row" data-key="${r.key}" href="${r.href}">
+          <span class="brk__swatch" style="background:${r.colour}"></span>
+          <span class="brk__label">${r.label}</span>
+          <span class="brk__value">${r.value}</span>
+          <span class="brk__go" aria-hidden="true"><span class="material-symbols-rounded">open_in_new</span></span>
+        </a>
+      </li>`).join('');
+
+    /* ---- B: figures over a segmented bar ---- */
+    $('#asg-bar-figures').innerHTML = rows.map(r => `
+      <div class="asgbar__fig" data-key="${r.key}">
+        <span class="asgbar__num">${r.value}</span>
+        <span class="asgbar__lab"><span class="asgbar__dot" style="background:${r.colour}"></span>${r.label}</span>
+      </div>`).join('');
+    // flex-basis rather than width so the segments always fill the track exactly
+    $('#asg-bar-track').innerHTML = total
+      ? rows.map(r => r.value ? `<span class="asgbar__seg" data-key="${r.key}" title="${r.label}: ${r.value}"
+             style="flex:${r.value} 1 0; background:${r.colour}"></span>` : '').join('')
+      : '';
+    $('#asg-bar-track').setAttribute('aria-label',
+      `${total} ${scope.label}: ` + rows.map(r => `${r.value} ${r.label.toLowerCase()}`).join(', '));
+    $('#asg-bar-legend').innerHTML = rows.map(r => `
+      <a class="asgbar__go" data-key="${r.key}" href="${r.href}">View ${r.label}
+        <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span></a>`).join('');
+
+    /* ---- C: one tile per state ---- */
+    $('#asg-cards').innerHTML = rows.map(r => `
+      <a class="asgcard" data-key="${r.key}" href="${r.href}" style="--asgcard-tone:${r.colour}">
+        <span class="asgcard__num">${r.value}</span>
+        <span class="asgcard__lab">${r.label}</span>
+        <span class="asgcard__go">View<span class="material-symbols-rounded" aria-hidden="true">open_in_new</span></span>
+      </a>`).join('');
+  }
+
+/* Tablet: the assignment scope switch moves into the card header. Stacked in a
+   single column the body reads as a stack of unrelated bands — switch, donut,
+   legend — and the header has the room the desktop layout doesn't. Relocated in
+   the DOM rather than repositioned in CSS so the tab order follows the visual
+   order in both places. */
+(function relocateAsgSwitch(){
+  const tabs = document.getElementById('asg-tabs');
+  if (!tabs) return;
+  const card = tabs.closest('.card');
+  const aux  = card.querySelector('.card__header .card__aux');
+  const body = card.querySelector('.card__body');
+  const mq   = window.matchMedia('(max-width:1180px)');
+  const place = () => {
+    if (mq.matches) { if (tabs.parentElement !== aux) aux.prepend(tabs); }
+    else if (tabs.parentElement !== body) body.prepend(tabs);
+    tabs.classList.toggle('asg__tabs--inhead', mq.matches);
+  };
+  place();
+  mq.addEventListener('change', place);
+})();
+
+  /* Comparison switch — the three proposed treatments, rendered from the same
+     data so a scope change updates whichever is showing. */
+  (function initVariants() {
+    const sw = document.querySelector('.asg__variant');
+    if (!sw) return;
+    sw.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-variant]'); if (!b) return;
+      const want = b.dataset.variant;
+      sw.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll('[data-variant-panel]').forEach(pnl => {
+        pnl.hidden = pnl.dataset.variantPanel !== want;
+      });
+    });
+  })();
+
+  /* Pair the arc and its legend row. Delegated once, so it survives the
+     re-render that every scope change triggers. */
+  (function initHighlight() {
+    // every variant marks its parts with the same data-key, so one handler per
+    // panel gives all three the same pairing behaviour
+    document.querySelectorAll('[data-variant-panel]').forEach((panel) => {
+      const set = (key) => {
+        panel.querySelectorAll('[data-hl-on]').forEach(e => e.removeAttribute('data-hl-on'));
+        if (!key) { panel.removeAttribute('data-hl'); return; }
+        panel.setAttribute('data-hl', key);
+        panel.querySelectorAll(`[data-key="${key}"]`).forEach(e => e.setAttribute('data-hl-on', ''));
+      };
+      panel.addEventListener('pointerover', (e) => {
+        const t = e.target.closest('[data-key]');
+        set(t ? t.dataset.key : null);
+      });
+      panel.addEventListener('pointerleave', () => set(null));
+      // keyboard parity: tabbing highlights the same pair
+      panel.addEventListener('focusin',  (e) => { const t = e.target.closest('[data-key]'); if (t) set(t.dataset.key); });
+      panel.addEventListener('focusout', (e) => { if (!panel.contains(e.relatedTarget)) set(null); });
+    });
+  })();
+  $('#asg-tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('.asg__tab'); if (!b) return;
+    scope = SCOPES.find(s => s.id === b.dataset.scope) || SCOPES[0];
+    $('#asg-tabs').querySelectorAll('.asg__tab').forEach(t => t.setAttribute('aria-selected', String(t === b)));
+    renderAssignments();
+  });
+  renderAssignments();
+
+  /* ---------------- Recently Created Items ----------------
+     Org-wide creation volume by object type, stacked. One dominant series with
+     a spike plus a long tail of small ones, which is what the real data does. */
+  const SERIES = [
+    { name: 'T&C – Training Curriculum', colour: '#e30072', peak: 1240, base: 40 },
+    { name: 'INSP – Inspection',         colour: '#b8006a', peak: 120,  base: 26 },
+    { name: 'T&C – Training Course',     colour: '#7d1146', peak: 90,   base: 18 },
+    { name: 'Integrated Reference Data', colour: '#123f4a', peak: 70,   base: 14 },
+    { name: 'T&C – Training Record',     colour: '#0f6b73', peak: 60,   base: 12 },
+    { name: 'IMS – Incident',            colour: '#1b9aa2', peak: 48,   base: 10 },
+    { name: 'Document',                  colour: '#5ce0e5', peak: 36,   base: 8  },
+    { name: 'Risk Matrix – Rating',      colour: '#a8eff2', peak: 24,   base: 6  },
+    { name: 'Schedule',                  colour: '#2e9e5b', peak: 18,   base: 5  },
+    { name: 'Audit Question Detail',     colour: '#14532d', peak: 12,   base: 4  },
+  ];
+  let range = 14, chart = null;
+
+  /* Deterministic pseudo-random in [0,1) — the shape has to be the same on every
+     render (and every range switch), so Math.random is out. */
+  function rnd(seed) {
+    const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  function buildSeries(days) {
+    const cats = [], out = SERIES.map(s => ({ name: s.name, color: s.colour, data: [] }));
+    /* Real creation volume isn't a bell. It's a main burst with a shoulder, a
+       couple of unrelated smaller bumps, a weekly rhythm where weekends fall
+       away, and day-to-day noise that differs per object type. Peaks are placed
+       at fractions of the window so the shape reads the same at every range. */
+    const bumps = [
+      { at: 0.38, width: 0.075, amp: 1.00 },   // the main burst
+      { at: 0.46, width: 0.045, amp: 0.42 },   // its shoulder, slightly after
+      { at: 0.14, width: 0.035, amp: 0.20 },   // an earlier, unrelated run
+      { at: 0.78, width: 0.055, amp: 0.16 },   // a smaller later one
+    ];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(TODAY); d.setDate(d.getDate() - (days - 1 - i));
+      cats.push(`${String(d.getMonth() + 1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`);
+      const t = i / (days - 1);
+      let env = 0;
+      for (const bmp of bumps) {
+        const z = (t - bmp.at) / bmp.width;
+        env += bmp.amp * Math.exp(-(z * z));
+      }
+      // weekends run quiet; Sat/Sun keep about a third of the volume
+      const dow = d.getDay();
+      const week = (dow === 0 || dow === 6) ? 0.34 : 0.92 + rnd(i * 3.1) * 0.16;
+      SERIES.forEach((s, k) => {
+        // each type gets its own noise, so the bands don't move in lockstep
+        const jitter = 0.72 + rnd(i * 7.7 + k * 13.3) * 0.62;
+        const spike  = rnd(i * 2.3 + k * 5.1) > 0.94 ? 1.5 + rnd(i + k) : 1;  // occasional outlier day
+        const v = (s.base * jitter + (s.peak - s.base) * env * jitter) * week * spike;
+        out[k].data.push(Math.max(0, Math.round(v)));
+      });
+    }
+    return { cats, out };
+  }
+
+  function renderChart() {
+    const { cats, out } = buildSeries(range);
+    const dark = document.body.dataset.theme === 'dark';
+    const text = dark ? '#9aa7b4' : '#5a6b7b';
+    /* Highcharts writes font-family inline on every <text>, so the container's
+       inherited Gilroy never reaches the SVG. chart.style seeds the default for
+       axis labels and data labels; legend itemStyle and tooltip style carry
+       their own font-family defaults and have to be set explicitly. */
+    const FONT = getComputedStyle(document.body).fontFamily;
+    if (chart) chart.destroy();
+    chart = Highcharts.chart('rci-chart', {
+      chart: { type: 'areaspline', backgroundColor: 'transparent', spacing: [8, 8, 8, 0],
+               style: { fontFamily: FONT } },
+      title: { text: null }, credits: { enabled: false },
+      xAxis: { categories: cats, tickInterval: Math.ceil(range / 6), lineColor: dark ? '#2a3342' : '#e3e8ee',
+               labels: { style: { color: text, fontSize: '11px', fontFamily: FONT } } },
+      yAxis: { title: { text: 'Count', style: { color: text, fontSize: '11px', fontFamily: FONT } },
+               gridLineColor: dark ? '#222b39' : '#eef1f5',
+               labels: { style: { color: text, fontSize: '11px', fontFamily: FONT } } },
+      /* squareSymbol alone doesn't square the marker for an areaspline — the
+         series symbol drives it — so the marker is set explicitly and sized to
+         match. verticalAlign:'top' with y:0 lines the legend up with the top of
+         the plot area rather than floating it against the vertical centre. */
+      /* Phone: the inline legend consumed the entire plot area, leaving the
+         chart about 20px tall. Below 640px it's off and the highlight dropdown
+         under the header takes its place. */
+      legend: { enabled: !window.matchMedia('(max-width:640px)').matches,
+                align: 'right', verticalAlign: 'top', layout: 'vertical', y: 0,
+                itemMarginBottom: 3, squareSymbol: true, symbolRadius: 0,
+                symbolHeight: 11, symbolWidth: 11, symbolPadding: 8,
+                itemStyle: { color: text, fontWeight: '500', fontSize: '12px', fontFamily: FONT },
+                itemHoverStyle: { color: dark ? '#fff' : '#101c2a' } },
+      tooltip: { shared: true, backgroundColor: dark ? '#192336' : '#fff',
+                 borderColor: dark ? '#2a3342' : '#e3e8ee',
+                 style: { color: dark ? '#e6edf5' : '#101c2a', fontSize: '12px', fontFamily: FONT } },
+            // legendSymbol:'rectangle' makes Highcharts draw a <rect> for the swatch;
+      // an area series otherwise renders a line-and-marker path, which is the odd
+      // shape the legend was showing
+      plotOptions: { areaspline: { stacking: 'normal', lineWidth: 1.5, legendSymbol: 'rectangle',
+                                   marker: { enabled: false, symbol: 'square' },
+                                   fillOpacity: 0.85 } },
+      series: out,
+    });
+  }
+
+  function setRange(v) {
+    range = +v;
+    document.querySelectorAll('.rci__range button').forEach(x =>
+      x.setAttribute('aria-pressed', String(+x.dataset.range === range)));
+    const sel = document.getElementById('rci-range-select');
+    if (sel && +sel.value !== range) sel.value = String(range);
+    renderChart();
+  }
+  document.querySelector('.rci__range').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-range]'); if (!b) return;
+    setRange(b.dataset.range);
+  });
+  document.getElementById('rci-range-select').addEventListener('change', e => setRange(e.target.value));
+
+  /* ---- Series highlight (phone) -------------------------------------------
+     The inline legend consumed the whole plot area at this width, so it becomes
+     a dropdown. Selecting categories HIGHLIGHTS them rather than filtering:
+     everything stays plotted, the unselected series drop to a low opacity, so
+     the total shape of the stack is still readable. Empty selection = all
+     categories at full strength, which is the default. */
+  const hlBtn   = document.getElementById('rci-hl-btn');
+  const hlPop   = document.getElementById('rci-hl-pop');
+  const hlLabel = document.getElementById('rci-hl-label');
+  const highlighted = new Set();
+
+  function paintHighlight() {
+    if (!chart) return;
+    const any = highlighted.size > 0;
+    chart.series.forEach(sr => {
+      const on = !any || highlighted.has(sr.name);
+      sr.update({ opacity: on ? 1 : 0.15, fillOpacity: on ? 0.85 : 0.08 }, false);
+    });
+    chart.redraw();
+    hlLabel.textContent = !any ? 'All categories'
+      : highlighted.size === 1 ? [...highlighted][0]
+      : highlighted.size + ' categories';
+  }
+
+  function buildHighlightList() {
+    if (!chart) return;
+    hlPop.innerHTML = chart.series.map(sr => `
+      <button class="rci__hl-opt" type="button" role="option" data-series="${esc(sr.name)}"
+              aria-selected="${highlighted.has(sr.name)}" aria-pressed="${highlighted.has(sr.name)}">
+        <span class="rci__hl-swatch" style="background:${sr.color}"></span>
+        <span class="rci__hl-name">${esc(sr.name)}</span>
+        <svg class="rci__hl-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+      </button>`).join('') +
+      `<div class="rci__hl-foot"><button class="rci__hl-clear" type="button">Show all</button></div>`;
+  }
+
+  hlBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (hlPop.hidden) { buildHighlightList(); hlPop.hidden = false; hlBtn.setAttribute('aria-expanded', 'true'); }
+    else { hlPop.hidden = true; hlBtn.setAttribute('aria-expanded', 'false'); }
+  });
+  hlPop.addEventListener('click', e => {
+    e.stopPropagation();
+    if (e.target.closest('.rci__hl-clear')) { highlighted.clear(); buildHighlightList(); paintHighlight(); return; }
+    const opt = e.target.closest('.rci__hl-opt'); if (!opt) return;
+    const name = opt.dataset.series;
+    highlighted.has(name) ? highlighted.delete(name) : highlighted.add(name);
+    opt.setAttribute('aria-selected', String(highlighted.has(name)));
+    opt.setAttribute('aria-pressed', String(highlighted.has(name)));
+    paintHighlight();
+  });
+  document.addEventListener('click', () => {
+    if (!hlPop.hidden) { hlPop.hidden = true; hlBtn.setAttribute('aria-expanded', 'false'); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !hlPop.hidden) { hlPop.hidden = true; hlBtn.setAttribute('aria-expanded','false'); hlBtn.focus(); }
+  });
+
+  renderChart();
+  paintHighlight();
+  /* Crossing the phone breakpoint changes whether the legend is drawn, so the
+     chart has to be rebuilt rather than just resized. */
+  window.matchMedia('(max-width:640px)').addEventListener('change', () => {
+    renderChart(); paintHighlight();
+  });
+  // the chart carries its own palette for light/dark, so redraw on theme change
+  new MutationObserver(renderChart).observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+  // its height now comes from the grid row rather than a fixed value, so follow
+  // the container instead of waiting for a window resize
+  if (window.ResizeObserver) {
+    let t;
+    new ResizeObserver(() => { clearTimeout(t); t = setTimeout(() => chart && chart.reflow(), 60); })
+      .observe(document.getElementById('rci-chart'));
+  }
+})();
+</script>
+
+<!-- Mazlan config for Home — suggestions scoped to the dashboard rather than a
+     single record; the shared component reads this lazily on each open. -->
+<script>
+  window.MAZLAN_CONFIG = {
+    greeting: 'Hi James — here to help. Your dashboard is showing 12 overdue assignments.',
+    scope: 'Global',
+    suggestions: [
+      { cat:'Workspace', icon:'assignment',          text:'Summarize My Assignments',  reply:'You have **12 overdue**, 18 due soon and 7 unread. The oldest is a CAPA task from 14 days ago.' },
+      { cat:'Resume',    icon:'arrow_circle_right',  text:'What Should I Work On?',    reply:'Start with **INC-2024-001234** — it is overdue and blocking two downstream actions.' },
+      { cat:'Reports',   icon:'stacked_line_chart',  text:'Explain This Week’s Trend', reply:'Creation volume is up **21%** week over week, driven mostly by inspection findings at LHR.' },
+      { cat:'Create',    icon:'add',                 text:'Log a New Incident',        reply:'I can start an incident for you — tell me what happened and where.' }
+    ]
+  };
+</script>
+
+<!-- Mazlan drawer — right-side overlay opened from the Mazlan trigger button in
+     the top bar. Sits below the app header, on top of page content with a
+     subtle scrim. Chat input pinned to the bottom, conversation/suggestions
+     fill the body. The "Open full Mazlan" link is a placeholder for the
+     adjacent full-page experience. -->
+<div class="mazlan-scrim" id="mazlan-scrim" hidden></div>
+<aside class="mazlan-drawer" id="mazlan-drawer" hidden role="dialog" aria-modal="false" aria-labelledby="mazlan-drawer-title">
+  <!-- Sliding menu sub-drawer: slides in from the left, covers the chat
+       surface. Mazlan navigation + pinned + recent chats. -->
+  <div class="mazlan-menu" id="mazlan-menu" aria-hidden="true">
+    <header class="mazlan-menu__head">
+      <div class="mazlan-menu__brand">
+        <span class="mazlan-mark mazlan-mark--md" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <span class="mazlan-menu__brand-label">Mazlan</span>
+      </div>
+      <button class="mazlan-drawer__menu-btn" id="mazlan-menu-close" type="button" aria-label="Close menu">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </header>
+    <nav class="mazlan-menu__nav" aria-label="Mazlan menu">
+      <button class="mazlan-menu__item mazlan-menu__item--active" type="button" data-menu="newchat">
+        <span class="mazlan-menu__new-cube" aria-hidden="true"><span class="material-symbols-rounded">add</span></span>
+        New chat
+        <span class="mazlan-menu__shortcut">⌘⇧N</span>
+      </button>
+      <button class="mazlan-menu__item" type="button" data-menu="chats">
+        <span class="material-symbols-rounded">chat_bubble</span>
+        Chats
+        <span class="mazlan-menu__shortcut">⌘⇧C</span>
+      </button>
+      <button class="mazlan-menu__item" type="button" data-menu="assistants">
+        <span class="material-symbols-rounded">category</span>
+        Assistants
+        <span class="mazlan-menu__shortcut">⌘⇧E</span>
+      </button>
+      <button class="mazlan-menu__item" type="button" data-menu="library">
+        <span class="material-symbols-rounded">menu_book</span>
+        Library
+        <span class="mazlan-menu__shortcut">⌘⇧L</span>
+      </button>
+      <button class="mazlan-menu__item" type="button" data-menu="settings">
+        <span class="material-symbols-rounded">settings</span>
+        Settings
+      </button>
+    </nav>
+    <div class="mazlan-menu__divider"></div>
+    <div class="mazlan-menu__body">
+      <section class="mazlan-menu__section">
+        <button class="mazlan-menu__section-head" type="button" aria-expanded="true">
+          <span class="material-symbols-rounded mazlan-menu__chev">chevron_right</span>
+          <span class="material-symbols-rounded">push_pin</span>
+          Pinned
+        </button>
+        <div class="mazlan-menu__list" id="mazlan-menu-pinned">
+          <button class="mazlan-menu__chat" type="button">Boeing audit prep walkthrough</button>
+          <button class="mazlan-menu__chat" type="button">FAS-2026-0418 root cause draft</button>
+        </div>
+      </section>
+      <section class="mazlan-menu__section">
+        <button class="mazlan-menu__section-head" type="button" aria-expanded="true">
+          <span class="material-symbols-rounded mazlan-menu__chev">chevron_right</span>
+          <span class="material-symbols-rounded">schedule</span>
+          Recents
+        </button>
+        <div class="mazlan-menu__list" id="mazlan-menu-recents">
+          <button class="mazlan-menu__chat" type="button">CAPA effectiveness check</button>
+          <button class="mazlan-menu__chat" type="button">Hot-zone watchlist for Bay 7</button>
+          <button class="mazlan-menu__chat" type="button">NADCAP self-assessment status</button>
+          <button class="mazlan-menu__chat" type="button">Argonaut Plating supplier audit prep</button>
+          <button class="mazlan-menu__chat" type="button">Weekly KPI brief · this Monday</button>
+          <button class="mazlan-menu__chat" type="button">Hex-chrome IH sampling assignments</button>
+          <button class="mazlan-menu__chat" type="button">Wing-skin program training compliance</button>
+        </div>
+      </section>
+    </div>
+  </div>
+  <header class="mazlan-drawer__head">
+    <button class="mazlan-drawer__menu-btn" id="mazlan-menu-btn" type="button" aria-label="Open Mazlan menu" aria-expanded="false">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
+    <span class="mazlan-drawer__head-spacer" id="mazlan-drawer-title"></span>
+    <div class="mazlan-drawer__head-actions">
+      <button class="mazlan-drawer__head-btn" id="mazlan-open-full" type="button" aria-label="Open the full Mazlan experience" title="Open in full">
+        <span class="material-symbols-rounded">open_in_full</span>
+      </button>
+      <button class="mazlan-drawer__head-btn" id="mazlan-drawer-close" type="button" aria-label="Close Mazlan" title="Close">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+  </header>
+  <div class="mazlan-drawer__body" id="mazlan-drawer-body">
+    <!-- Decorative dot-pattern background — fades in at the top via a
+         radial-gradient mask. From the v3 prototype's welcome state. -->
+    <div class="mazlan-drawer__dots" aria-hidden="true"></div>
+    <!-- Welcome landing — centered logo + persona-named greeting. Hides
+         when the user starts a conversation. -->
+    <section class="mazlan-welcome" id="mazlan-welcome" aria-hidden="false">
+      <span class="mazlan-welcome__logo mazlan-mark mazlan-mark--xl" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+      <p class="mazlan-welcome__greeting" id="mazlan-welcome-greeting">Hi, what can I help you with today?</p>
+    </section>
+    <!-- Conversation thread fills the body. The body scrolls; suggestions
+         and input pin to the bottom in the footer below. -->
+    <section class="mazlan-thread" id="mazlan-thread" aria-live="polite" aria-relevant="additions"></section>
+  </div>
+  <!-- Suggestion prompts live in the footer, just above the input. They
+       vanish as soon as the user starts typing or sends a message. -->
+  <div class="mazlan-drawer__bottom">
+  <section class="mazlan-suggestions" id="mazlan-suggestions" aria-label="Quick starts">
+    <div class="mazlan-suggestions__grid" id="mazlan-suggestions-grid"></div>
+  </section>
+  <footer class="mazlan-drawer__footer">
+    <form class="mazlan-drawer__input" id="mazlan-drawer-form">
+      <textarea class="mazlan-drawer__textarea" id="mazlan-drawer-textarea" rows="2" placeholder="Ask Mazlan…" aria-label="Message Mazlan"></textarea>
+      <!-- Toolbar: + dropdown on the left, scope picker · voice · primary on the right -->
+      <div class="mazlan-drawer__toolbar">
+        <div class="mazlan-drawer__tools-left">
+          <div class="mazlan-plus-wrap">
+            <button class="mazlan-tool-btn" type="button" id="mazlan-plus-btn" aria-haspopup="true" aria-expanded="false" aria-label="Add attachment">
+              <span class="material-symbols-rounded">add</span>
+            </button>
+            <div class="mazlan-dropdown" id="mazlan-plus-dropdown" hidden role="menu" aria-label="Add attachment">
+              <button class="mazlan-dropdown__item" type="button" role="menuitem" data-tool="photo">
+                <span class="material-symbols-rounded mazlan-dropdown__icon">photo_camera</span>
+                <span class="mazlan-dropdown__title">Take photo</span>
+              </button>
+              <button class="mazlan-dropdown__item" type="button" role="menuitem" data-tool="attach">
+                <span class="material-symbols-rounded mazlan-dropdown__icon">attach_file</span>
+                <span class="mazlan-dropdown__title">Attach file or photo</span>
+              </button>
+              <button class="mazlan-dropdown__item" type="button" role="menuitem" data-tool="record">
+                <span class="material-symbols-rounded mazlan-dropdown__icon">videocam</span>
+                <span class="mazlan-dropdown__title">Record a clip</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="mazlan-drawer__tools-right">
+          <button class="mazlan-tool-btn" type="button" data-tool="voice" aria-label="Voice input">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
+            </svg>
+          </button>
+          <!-- Primary button — single button that transforms in place. Mic
+               icon by default (voice input); the icon swaps to a paper-plane
+               and the button becomes a submit-the-form action as soon as
+               the textarea has content. -->
+          <button class="mazlan-drawer__primary" type="button" id="mazlan-primary-btn" aria-label="Voice to text">
+            <span class="material-symbols-rounded" id="mazlan-primary-icon">mic</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </footer>
+  </div>
+</aside>
+
+<script src="praxis-mazlan.js"></script>
+<script src="praxis-lucide.js"></script>
+<script src="praxis-navdrawer.js"></script>
+<script>
+/* Module menu: collapsible groups (phone). The heads are rendered by the host
+   page's JS, so this delegates from the menu rather than binding per head —
+   re-rendering the list can't break it. Only active below 640px, where the CSS
+   turns the head into a control; above that the groups stay open. */
+(function(){
+  var phone = window.matchMedia('(max-width:640px)');
+  document.addEventListener('click', function(e){
+    if(!phone.matches) return;
+    var head = e.target.closest('.msel__menu .cn-group__head');
+    if(!head) return;
+    var group = head.closest('.cn-group'); if(!group) return;
+    e.stopPropagation();
+    var collapsed = group.classList.toggle('is-collapsed');
+    head.setAttribute('aria-expanded', String(!collapsed));
+  }, true);
+  /* Give the heads button semantics when they become controls. */
+  function markHeads(){
+    if(!phone.matches) return;
+    document.querySelectorAll('.msel__menu .cn-group__head').forEach(function(h){
+      if(h.hasAttribute('aria-expanded')) return;
+      h.setAttribute('role','button'); h.setAttribute('tabindex','0');
+      h.setAttribute('aria-expanded','true');
+    });
+  }
+  document.addEventListener('click', markHeads);
+  phone.addEventListener('change', markHeads);
+  setTimeout(markHeads, 800);
+})();
+
+/* ---- Phone Create New ----------------------------------------------------
+   The nav rail is a drawer at phone width and Create New is the one rail
+   action worth keeping on the page, so a button sits between the page header
+   and the first component. It forwards to the rail's own trigger so there's a
+   single flyout and a single set of wiring.
+
+   The flyout lives inside the nav-rail item, which is display:none at this
+   width — so toggling `hidden` did nothing, the panel simply had no box. It's
+   moved to <body> here. It's position:fixed, so its DOM parent doesn't affect
+   where it lands, and being outside the rail also sidesteps the rail's
+   stacking context entirely. */
+(function(){
+  var phoneBtn = document.getElementById('ws-create-phone');
+  var railBtn  = document.getElementById('ws-create-btn');
+  var pop      = document.getElementById('ws-create-pop');
+  if (!phoneBtn || !railBtn || !pop) return;
+
+  var phone = window.matchMedia('(max-width:640px)');
+  function reparent(){
+    if (phone.matches && pop.parentElement !== document.body) document.body.appendChild(pop);
+  }
+  reparent();
+  phone.addEventListener('change', reparent);
+
+  phoneBtn.addEventListener('click', function(e){ e.stopPropagation(); railBtn.click(); });
+})();
+
+/* Workspace flyout — same component and wiring as the other pages. */
+(function(){
+  if (typeof wirePopover !== 'function') return;
+  var api = wirePopover('ws-dash-btn','ws-dash-pop',{ scrimId:'ws-dash-scrim' });
+  if (!api) return;
+  document.querySelectorAll('#ws-dash-pop .ws-item').forEach(function(i){
+    i.addEventListener('click', function(){ api.close(); });
+  });
+})();
+</script>
+<!-- msel-collapse -->
+<script src="praxis-profile-menu.js"></script>
+<script src="praxis-breadcrumb-back.js"></script>
+</body>
+</html>

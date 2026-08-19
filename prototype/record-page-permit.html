@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Permit WCM-00482 — Ideagen EHSQ Enterprise</title>
+<!--
+  Work clearance management — permit record page.
+
+  Built to the same baseline as groom-lake's record-page-capa.html, which is the
+  reference for this layout: the Simple Workflow Layout the live product uses —
+  a guide column carrying Current task and Workflow, a tabbed content column, and
+  a related-records column on the right. The stylesheet below is that page's,
+  taken verbatim so this permit sits in exactly the same material as every other
+  record page; the block after it carries only what a permit needs and a CAPA
+  does not.
+
+  Reached from the Up Next card on index.html.
+-->
+<link rel="stylesheet" href="praxis-core.css">
+<link rel="stylesheet" href="praxis-profile-menu.css" />
+<link rel="stylesheet" href="praxis-navrail.css">
+<link rel="stylesheet" href="praxis-appbar.css">
+<link rel="stylesheet" href="praxis-pageheader.css">
+<style>
+/* ============================================================ FONTS */
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Regular.woff2') format('woff2'), url('fonts/Gilroy-Regular.woff') format('woff'); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Medium.woff2') format('woff2'), url('fonts/Gilroy-Medium.woff') format('woff'); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-SemiBold.woff2') format('woff2'), url('fonts/Gilroy-SemiBold.woff') format('woff'); font-weight:600; font-style:normal; font-display:swap; }
+@font-face { font-family:'Gilroy'; src:url('fonts/Gilroy-Bold.woff2') format('woff2'), url('fonts/Gilroy-Bold.woff') format('woff'); font-weight:700; font-style:normal; font-display:swap; }
+
+/* ======================================================= DS TOKENS */
+:root{
+  /* neutrals */
+  --ehsq-color-white:#ffffff;
+  --ehsq-color-neutral-05:#f4f5f6; --ehsq-color-neutral-10:#edf0f2; --ehsq-color-neutral-15:#dadfe4;
+  --ehsq-color-neutral-20:#c8cfd7; --ehsq-color-neutral-30:#adb8c4; --ehsq-color-neutral-40:#8898a9;
+  --ehsq-color-neutral-50:#718499; --ehsq-color-neutral-60:#4d657f; --ehsq-color-neutral-70:#465c74;
+  --ehsq-color-neutral-80:#37485a; --ehsq-color-neutral-90:#2a3846; --ehsq-color-neutral-100:#202a35;
+  /* teal (brand) */
+  --ehsq-color-teal-10:#e8f3f3; --ehsq-color-teal-20:#c8e1e3; --ehsq-color-teal-50:#4499a0;
+  --ehsq-color-teal-60:#1b838b; --ehsq-color-teal-70:#176f76; --ehsq-color-teal-80:#135d63;
+  /* accents */
+  --ehsq-color-blue-10:#edf0fd; --ehsq-color-blue-60:#4766eb;
+  --ehsq-color-green-10:#e6f3ee; --ehsq-color-green-60:#098b53;
+  --ehsq-color-yellow-10:#fdf9e6; --ehsq-color-yellow-90:#887100;
+  --ehsq-color-orange-10:#fdf2e6; --ehsq-color-orange-60:#ef8100;
+  --ehsq-color-red-10:#fceaeb; --ehsq-color-red-50:#e7535c; --ehsq-color-red-60:#e22d38;
+  --ehsq-color-pink-50:#e82e8b; --ehsq-color-pink-60:#e30072; --ehsq-color-pink-90:#810041;
+  /* semantic */
+  --ehsq-color-interactive-default:var(--ehsq-color-teal-60);
+  --ehsq-color-interactive-hover:var(--ehsq-color-teal-70);
+  --ehsq-color-interactive-active:var(--ehsq-color-teal-80);
+  --ehsq-color-text-primary:var(--ehsq-color-neutral-90);
+  --ehsq-color-text-secondary:var(--ehsq-color-neutral-60);
+  --ehsq-color-text-disabled:var(--ehsq-color-neutral-40);
+  --ehsq-color-text-inverse:var(--ehsq-color-white);
+  --ehsq-color-text-link:var(--ehsq-color-teal-60);
+  --ehsq-color-surface-default:var(--ehsq-color-white);
+  --ehsq-color-surface-subtle:var(--ehsq-color-neutral-10);
+  --ehsq-color-border-default:var(--ehsq-color-neutral-20);
+  --ehsq-color-border-strong:var(--ehsq-color-neutral-40);
+  --ehsq-color-border-focus:var(--ehsq-color-teal-50);
+  --ehsq-color-status-success:var(--ehsq-color-green-60);
+  --ehsq-color-status-warning:var(--ehsq-color-orange-60);
+  --ehsq-color-status-danger:var(--ehsq-color-red-60);
+  --ehsq-color-status-info:var(--ehsq-color-blue-60);
+  /* type */
+  --ehsq-type-font-sans:'Gilroy','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --ehsq-type-size-xs:0.75rem; --ehsq-type-size-sm:0.8125rem; --ehsq-type-size-base:0.875rem;
+  --ehsq-type-size-md:1rem; --ehsq-type-size-lg:1.125rem; --ehsq-type-size-xl:1.25rem;
+  /* space */
+  --ehsq-space-4:.25rem; --ehsq-space-8:.5rem; --ehsq-space-12:.75rem; --ehsq-space-16:1rem;
+  --ehsq-space-24:1.5rem; --ehsq-space-32:2rem;
+  /* radius */
+  --ehsq-radius-sm:.25rem; --ehsq-radius-md:.5rem; --ehsq-radius-lg:.75rem; --ehsq-radius-full:9999px;
+  /* elevation */
+  --ehsq-elevation-1:0 1px 2px 0 rgb(32 42 53 / .06);
+  --ehsq-elevation-2:0 1px 3px 0 rgb(32 42 53 / .1), 0 1px 2px -1px rgb(32 42 53 / .06);
+  --ehsq-elevation-3:0 4px 6px -1px rgb(32 42 53 / .1), 0 2px 4px -2px rgb(32 42 53 / .06);
+  --ehsq-elevation-4:0 10px 15px -3px rgb(32 42 53 / .1), 0 4px 6px -4px rgb(32 42 53 / .05);
+  /* motion */
+  --ehsq-motion-fast:100ms; --ehsq-ease-default:cubic-bezier(.2,0,.38,.9);
+  /* chrome dims */
+  --appbar-h:64px; --navrail-w:56px;
+}
+
+/* ========================================================== BASE */
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:var(--ehsq-type-font-sans);color:var(--ehsq-color-text-primary);
+  background:var(--ehsq-color-neutral-05);font-size:var(--ehsq-type-size-base);line-height:1.5;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+button{font-family:inherit;cursor:pointer;}
+a{color:var(--ehsq-color-text-link);text-decoration:none;}
+a:hover{text-decoration:underline;}
+svg{display:block;}
+.icon{width:24px;height:24px;fill:currentColor;flex-shrink:0;}
+/* Lucide icons are stroke-based — never fill them (the .icon rule above would). */
+.icon.lucide{fill:none;}
+.icon--20{width:20px;height:20px;}
+.icon--16{width:16px;height:16px;}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+
+.app{display:flex;flex-direction:column;height:100vh;}
+
+/* ======================================================= APP BAR (Search Bar) */
+.appbar{position:relative;height:var(--appbar-h);flex-shrink:0;display:flex;align-items:center;gap:var(--ehsq-space-16);
+  padding:0 var(--ehsq-space-16);background:var(--ehsq-color-neutral-90);color:var(--ehsq-color-text-inverse);
+  z-index:30;}
+.appbar__brand{display:flex;align-items:center;flex-shrink:0;text-decoration:none;}
+.appbar__brand:hover{text-decoration:none;}
+.appbar__logo-img{height:26px;width:auto;display:block;}
+.appbar__logo-img--onlight{display:none;}
+.appbar__logo-img--ondark{display:block;}
+body[data-variant="praxis"] .appbar__logo-img--onlight{display:block;}
+body[data-variant="praxis"] .appbar__logo-img--ondark{display:none;}
+body[data-variant="praxis"][data-theme="dark"] .appbar__logo-img--onlight{display:none;}
+body[data-variant="praxis"][data-theme="dark"] .appbar__logo-img--ondark{display:block;}
+.appbar__product b{font-weight:700;}
+/* Page switcher (next to the logo) — inherits header ink so it reads on any header */
+.appswitch{position:relative;}
+.appswitch__trigger{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 8px 0 10px;border:0;background:transparent;color:inherit;font-family:inherit;font-size:.875rem;font-weight:600;border-radius:var(--ehsq-radius-md);cursor:pointer;}
+.appswitch__trigger:hover{background:rgba(127,127,127,.14);}
+.appswitch__pop{position:absolute;top:calc(100% + 6px);left:0;min-width:200px;z-index:200;background:var(--ehsq-color-surface-default);border:1px solid var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);padding:6px;box-shadow:var(--ehsq-elevation-4);}
+.appswitch__pop[hidden]{display:none;}
+.appswitch__item{display:block;padding:8px 10px;border-radius:var(--ehsq-radius-sm);font-size:.875rem;font-weight:500;color:var(--ehsq-color-text-primary);text-decoration:none;}
+.appswitch__item:hover{background:var(--ehsq-color-neutral-05);text-decoration:none;}
+.appswitch__item--active{color:var(--ehsq-color-text-link);font-weight:600;}
+body[data-theme="dark"] .appswitch__item:hover{background:rgba(255,255,255,.06);}
+/* Search field — Miramar default: white boxed field with module divider + teal search button */
+.appbar__search{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:840px;
+  display:flex;align-items:center;height:48px;border-radius:var(--ehsq-radius-md);overflow:hidden;background:var(--ehsq-color-white);}
+.appbar__module{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;width:256px;height:100%;padding:0 12px;
+  background:var(--ehsq-color-neutral-05);color:var(--ehsq-color-text-secondary);font-size:.8125rem;font-weight:600;white-space:nowrap;
+  border-right:1px solid var(--ehsq-color-border-default);}
+.appbar__search input{flex:1;border:0;outline:0;height:100%;padding:0 14px;font-family:inherit;font-size:.875rem;
+  background:transparent;color:var(--ehsq-color-text-primary);min-width:0;}
+.appbar__search-btn{width:40px;height:100%;border:0;background:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);
+  display:flex;align-items:center;justify-content:center;}
+.appbar__search-btn:hover{background:var(--ehsq-color-interactive-hover);}
+.appbar__right{display:flex;align-items:center;gap:var(--ehsq-space-8);margin-left:auto;}
+/* Profile menu — shared component, see praxis-profile-menu.css */
+.appbar__iconbtn{width:40px;height:40px;border:0;background:transparent;color:rgba(255,255,255,.85);border-radius:var(--ehsq-radius-md);
+  display:flex;align-items:center;justify-content:center;transition:background var(--ehsq-motion-fast),color var(--ehsq-motion-fast);}
+.appbar__iconbtn:hover{background:rgba(255,255,255,.12);color:var(--ehsq-color-white);}
+.appbar__ai{position:relative;}
+/* Mazlan button — branded 4-dot mark + label pill (matches the Workspace header) */
+.mazlan-mark{position:relative;display:inline-block;width:20px;height:20px;flex-shrink:0;vertical-align:middle;}
+.mazlan-mark--sm{width:16px;height:16px;}
+.mazlan-mark>span{position:absolute;width:25%;height:25%;border-radius:50%;display:block;}
+.mazlan-mark>span:nth-child(1){left:12.5%;top:12.5%;background:#2F4051;}
+.mazlan-mark>span:nth-child(2){right:12.5%;top:12.5%;background:var(--ehsq-color-pink-60);}
+.mazlan-mark>span:nth-child(3){left:12.5%;bottom:12.5%;background:#5CC9D0;}
+.mazlan-mark>span:nth-child(4){right:12.5%;bottom:12.5%;background:var(--ehsq-color-teal-60);}
+.appbar__mazlan{display:inline-flex;align-items:center;gap:var(--ehsq-space-8);height:36px;padding:0 var(--ehsq-space-12);
+  background:rgba(255,255,255,.12);color:var(--ehsq-color-text-inverse);border:1px solid rgba(255,255,255,.16);
+  border-radius:999px;font-family:inherit;font-size:var(--ehsq-type-size-sm);font-weight:600;cursor:pointer;flex-shrink:0;
+  transition:background .15s,border-color .15s;}
+.appbar__mazlan:hover{background:rgba(255,255,255,.2);}
+.appbar__avatar{width:34px;height:34px;border-radius:50%;background:var(--ehsq-color-teal-60) center/cover no-repeat;color:var(--ehsq-color-white);border:2px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8125rem;overflow:hidden;}
+
+/* ========================================================= SHELL */
+.shell{flex:1;display:flex;min-height:0;}
+
+/* ======================================================= NAV RAIL (ported from Responsive Search — EHSQ-E DS spec) */
+.ehsq-navrail{display:flex;flex-direction:column;justify-content:space-between;width:var(--navrail-w);flex-shrink:0;
+  background:var(--ehsq-color-surface-default);border-right:1px solid var(--ehsq-color-neutral-20);box-sizing:border-box;z-index:20;}
+.ehsq-navrail__core{display:flex;flex-direction:column;align-items:center;}
+.ehsq-navrail__item{display:flex;align-items:center;justify-content:center;width:var(--navrail-w);height:56px;flex-shrink:0;}
+.ehsq-navrail__link{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--ehsq-radius-md);
+  transition:background var(--ehsq-motion-fast) var(--ehsq-ease-default);}
+.ehsq-navrail__link:hover{background:var(--ehsq-color-neutral-20);text-decoration:none;}
+.ehsq-navrail__link:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+.ehsq-navrail__link img{display:block;width:35px;height:40px;}
+.ehsq-navrail__btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;background:transparent;
+  border-radius:var(--ehsq-radius-md);color:var(--ehsq-color-neutral-70);cursor:pointer;
+  transition:background-color var(--ehsq-motion-fast) var(--ehsq-ease-default);}
+.ehsq-navrail__btn:hover{background-color:var(--ehsq-color-neutral-20);}
+.ehsq-navrail__btn:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+.ehsq-navrail__btn--active{background-color:var(--ehsq-color-pink-50);color:var(--ehsq-color-white);}
+.ehsq-navrail__btn--active:hover{background-color:var(--ehsq-color-pink-50);}
+.ehsq-navrail__btn--create{background-color:var(--ehsq-color-teal-60);color:var(--ehsq-color-white);}
+.ehsq-navrail__btn--create:hover{background-color:var(--ehsq-color-teal-70);}
+
+/* ========================================================= MAIN */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:auto;}
+
+/* =====================================================================
+   PRAXIS — Mazlan design language on the record page. Light + dark.
+   Surfaces/materials driven by --px-* vars so both color schemes reuse
+   one set of component rules. Dot-grid page texture. Mazlan DNA: slate
+   layered elevation w/ lit edges, frosted glass, 12px geometry, lighter
+   strokes, teal→magenta AI signature, brighter cyan accent in the dark.
+   ===================================================================== */
+body[data-variant="praxis"]{
+  /* ink + strokes (light) */
+  --ehsq-color-text-primary:#2F4051; --ehsq-color-text-secondary:#5D6977;
+  --ehsq-color-border-default:#E2E5E9;
+  /* geometry + motion */
+  --ehsq-radius-sm:8px; --ehsq-radius-md:12px; --ehsq-radius-lg:16px;
+  --ehsq-ease-default:cubic-bezier(.32,.72,0,1);
+  /* slate elevation */
+  --ehsq-elevation-1:0 0 0 .5px rgba(16,36,58,.05),0 1px 2px rgba(16,36,58,.04);
+  /* Praxis surface/material palette now comes from praxis-core.css. */
+  /* dotted-grid page texture — faded at top (toolbar cover) and at left/right edges (page-color gradient over the dots) */
+  background-color:var(--px-page);
+  background-image:
+    /* Symmetric about the content area: opaque to the rail's right edge, then
+       the same 7% ramp the right edge uses. */
+    linear-gradient(to right, var(--px-page) 0, var(--px-page) var(--navrail-w, 56px),
+      transparent calc(var(--navrail-w, 56px) + 7%), transparent 93%, var(--px-page) 100%),
+    radial-gradient(circle, var(--px-dot) 1px, transparent 1px);
+  background-size:100% 100%, 18px 18px;
+  background-repeat:no-repeat, repeat;
+  background-attachment:fixed, fixed;
+  color:var(--ehsq-color-text-primary);
+}
+
+/* ---- base DARK: recolors token-driven styles (covers Miramar too) ---- */
+body[data-theme="dark"]{
+  color-scheme:dark;
+  --ehsq-color-surface-default:#192336; --ehsq-color-surface-subtle:#161c27;
+  --ehsq-color-neutral-05:#10151e; --ehsq-color-neutral-10:#222b39;
+  --ehsq-color-neutral-15:#2a3342; --ehsq-color-neutral-20:#3a4556;
+  --ehsq-color-border-default:rgba(255,255,255,.10);
+  --ehsq-color-text-primary:#e7ebf1; --ehsq-color-text-secondary:#9aa7b4; --ehsq-color-text-disabled:#62707e;
+}
+body[data-theme="dark"] .ehsq-navrail__btn{color:var(--ehsq-color-text-secondary);}
+/* dark readability: inks hardcoded to neutral-70/90 need lightening */
+body[data-theme="dark"] .field__prompt{color:var(--ehsq-color-text-secondary);}
+body[data-theme="dark"] .field__value{color:var(--ehsq-color-text-primary);}
+body[data-theme="dark"] .tbtn{color:var(--ehsq-color-text-primary);}
+body[data-theme="dark"] .wf__step--active{color:#5CE0E5;}
+body[data-theme="dark"] .callout__content{background:transparent;color:var(--ehsq-color-text-primary);}
+body[data-variant="praxis"][data-theme="dark"] .callout__header{background:color-mix(in srgb, var(--ehsq-color-interactive-default) 16%, transparent);color:#7fe9ed;border-bottom-color:rgba(255,255,255,.08);}
+
+/* ---- Praxis DARK: Mazlan dark surfaces + materials ---- */
+body[data-variant="praxis"][data-theme="dark"]{
+  --ehsq-color-text-primary:#e7ebf1; --ehsq-color-text-secondary:#9aa7b4;
+  --ehsq-color-border-default:rgba(255,255,255,.10);
+  --ehsq-color-surface-default:#192336; --ehsq-color-surface-subtle:#161c27;
+  --ehsq-color-interactive-default:#29D2D7; --ehsq-color-text-link:#5CE0E5;
+}
+
+/* Theme toggle icon swap (global) */
+.appbar__theme-sun{display:none;}
+body[data-theme="dark"] .appbar__theme-moon{display:none;}
+body[data-theme="dark"] .appbar__theme-sun{display:block;}
+
+/* App header — light & floating (Praxis only); no bottom border */
+body[data-variant="praxis"] .appbar{background:var(--px-page);color:var(--ehsq-color-text-primary);}
+/* Search — fully-rounded floating pill; module + magnifier are borderless floating elements */
+body[data-variant="praxis"] .appbar__search{height:44px;border-radius:var(--ehsq-radius-full);overflow:visible;
+  background:var(--ehsq-color-surface-default);padding:0 6px 0 4px;box-shadow:0 0 0 1px rgba(16,36,58,.08),0 1px 2px rgba(16,36,58,.05);}
+body[data-variant="praxis"][data-theme="dark"] .appbar__search{box-shadow:0 0 0 1px rgba(255,255,255,.10);}
+body[data-variant="praxis"] .appbar__module{justify-content:flex-start;gap:6px;width:auto;height:56%;padding:0 16px 0 14px;
+  background:transparent;border-right:1px solid var(--ehsq-color-border-default);}
+body[data-variant="praxis"] .appbar__search-btn{background:transparent;color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-full);}
+body[data-variant="praxis"] .appbar__search-btn:hover{background:transparent;color:var(--ehsq-color-text-primary);}
+/* Icon buttons — dark ink on the light header */
+body[data-variant="praxis"] .appbar__iconbtn{color:var(--ehsq-color-text-secondary);}
+body[data-variant="praxis"] .appbar__iconbtn:hover{background:rgba(16,36,58,.06);color:var(--ehsq-color-text-primary);}
+body[data-variant="praxis"][data-theme="dark"] .appbar__iconbtn:hover{background:rgba(255,255,255,.10);}
+/* Mazlan — light pill (AI gradient kept below) */
+body[data-variant="praxis"] .appbar__mazlan{background:var(--ehsq-color-neutral-70);color:var(--ehsq-color-white);border-color:rgba(255,255,255,.14);}
+body[data-variant="praxis"] .appbar__mazlan:hover{filter:brightness(1.08);}
+body[data-variant="praxis"][data-theme="dark"] .appbar__mazlan{background:var(--ehsq-color-neutral-70);border-color:rgba(255,255,255,.14);}
+body[data-variant="praxis"] .appbar__mazlan .mazlan-mark>span:nth-child(1){background:var(--ehsq-color-white);}
+body[data-variant="praxis"] .appbar__avatar{border-color:rgba(16,36,58,.12);}
+body[data-variant="praxis"][data-theme="dark"] .appbar__avatar{border-color:rgba(255,255,255,.22);}
+/* Mazlan reads as a neutral control — the four-dot mark carries the identity */
+
+/* Nav rail — transparent/borderless; buttons become neutral filled containers */
+body[data-variant="praxis"] .ehsq-navrail{background:transparent;border-right:1px solid var(--ehsq-color-border-default);}
+body[data-variant="praxis"] .ehsq-navrail__btn:not(.ehsq-navrail__btn--active):not(.ehsq-navrail__btn--create){color:var(--ehsq-color-text-secondary);
+  background:var(--px-surface);box-shadow:0 0 0 .5px rgba(16,36,58,.06),0 1px 2px rgba(16,36,58,.05);}
+body[data-variant="praxis"] .ehsq-navrail__btn:not(.ehsq-navrail__btn--active):not(.ehsq-navrail__btn--create):hover{background:var(--px-surface);box-shadow:0 0 0 .5px rgba(16,36,58,.09),0 2px 6px -1px rgba(16,36,58,.14);}
+body[data-variant="praxis"][data-theme="dark"] .ehsq-navrail__btn:not(.ehsq-navrail__btn--active):not(.ehsq-navrail__btn--create){background:rgba(255,255,255,.06);box-shadow:0 0 0 .5px rgba(255,255,255,.10);}
+/* Praxis: hub icon gets the same neutral container as the other nav buttons */
+body[data-variant="praxis"] .ehsq-navrail__link{background:var(--px-surface);box-shadow:0 0 0 .5px rgba(16,36,58,.06),0 1px 2px rgba(16,36,58,.05);}
+body[data-variant="praxis"] .ehsq-navrail__link:hover{background:var(--px-surface);box-shadow:0 0 0 .5px rgba(16,36,58,.09),0 2px 6px -1px rgba(16,36,58,.14);}
+body[data-variant="praxis"][data-theme="dark"] .ehsq-navrail__link{background:rgba(255,255,255,.06);box-shadow:0 0 0 .5px rgba(255,255,255,.10);}
+body[data-variant="praxis"] .ehsq-navrail__link img{width:auto;height:28px;}
+body[data-variant="praxis"] .ehsq-navrail__btn--create{
+  background:linear-gradient(180deg,#1f8f97,var(--ehsq-color-teal-60));color:var(--ehsq-color-white);
+  box-shadow:0 0 0 .5px rgba(16,36,58,.18),0 2px 6px -1px rgba(27,131,139,.45),inset 0 .5px 0 rgba(255,255,255,.25);
+}
+
+/* Page header */
+/* Dot grid fades in across the toolbar: hidden behind the page header,
+   full strength at the top of the record content. Achieved by covering the
+   body dots with the flat page color, then fading that cover to transparent. */
+body[data-variant="praxis"] .pageheader{background:var(--px-page);border-bottom-color:var(--ehsq-color-border-default);}
+body[data-variant="praxis"] .toolbar{background:linear-gradient(to bottom, var(--px-page) 0%, transparent 100%);}
+body[data-variant="praxis"] .pageheader__icon{border-radius:8px;box-shadow:0 1px 2px rgba(16,36,58,.18),inset 0 .5px 0 rgba(255,255,255,.25);}
+
+/* Cards — layered elevation + lit edge instead of a 1px box */
+body[data-variant="praxis"] .card,
+body[data-variant="praxis"] .content-card,
+body[data-variant="praxis"] .summary{border:0;border-radius:12px;background:var(--px-surface);box-shadow:var(--praxis-card);}
+body[data-variant="praxis"] .card__titlebar{border-bottom-color:var(--ehsq-color-border-default);}
+body[data-variant="praxis"] .summary__title{letter-spacing:-.015em;}
+
+/* Toolbar tools — soft pills, hairline + micro shadow, lift on hover */
+body[data-variant="praxis"] .tbtn{background:var(--px-tool);border-radius:10px;color:var(--ehsq-color-text-primary);box-shadow:var(--px-tool-shadow);}
+body[data-variant="praxis"] .tbtn .icon{color:var(--ehsq-color-text-secondary);}
+body[data-variant="praxis"] .tbtn:hover{box-shadow:var(--px-tool-shadow-hover);}
+body[data-variant="praxis"] .tbtn:active{background:var(--px-surface-2);}
+
+/* Primary button — refined teal with lit edge */
+body[data-variant="praxis"] .btn--primary{
+  background:linear-gradient(180deg,#1f8f97,var(--ehsq-color-teal-60));border-radius:10px;color:var(--ehsq-color-white);
+  box-shadow:0 0 0 .5px rgba(16,36,58,.2),0 1px 2px rgba(16,36,58,.15),0 8px 18px -8px rgba(27,131,139,.5),inset 0 .5px 0 rgba(255,255,255,.28);
+}
+body[data-variant="praxis"] .btn--primary:hover{filter:brightness(1.06);background:linear-gradient(180deg,#1f8f97,var(--ehsq-color-teal-60));}
+
+/* Overlays — frosted glass + ambient elevation */
+body[data-variant="praxis"] .tb-dropdown,
+body[data-variant="praxis"] .ehsq-rfpopup{
+  background:var(--px-glass);border:0;border-radius:14px;
+  -webkit-backdrop-filter:saturate(1.3) blur(16px);backdrop-filter:saturate(1.3) blur(16px);
+  box-shadow:var(--px-overlay),inset 0 .5px 0 var(--px-edge);
+}
+body[data-variant="praxis"] .tb-dropdown__item{border-radius:8px;color:var(--ehsq-color-text-primary);}
+body[data-variant="praxis"] .tb-dropdown__item--danger{color:var(--ehsq-color-status-danger);font-weight:500;}
+body[data-variant="praxis"] .tb-dropdown__item:hover{background:var(--px-hover);}
+body[data-variant="praxis"] .ehsq-rfpopup__header{border-bottom-color:var(--ehsq-color-border-default);}
+body[data-variant="praxis"] .ehsq-rfguide__track{background:var(--ehsq-color-neutral-20);}
+body[data-variant="praxis"] .ehsq-rfguide__fill{box-shadow:inset 0 .5px 0 rgba(255,255,255,.35);}
+
+/* Toggle pills — primary-tint selected (cyan in dark) */
+body[data-variant="praxis"] .toggle{background:var(--px-surface);border-color:var(--ehsq-color-border-default);color:var(--ehsq-color-text-primary);}
+body[data-variant="praxis"] .toggle--selected,
+body[data-variant="praxis"] .toggle[aria-checked="true"]{
+  background:color-mix(in srgb, var(--ehsq-color-interactive-default) 14%, transparent);
+  border-color:var(--ehsq-color-interactive-default);color:var(--ehsq-color-interactive-default);
+}
+
+/* Chips + summary description — soft inset surfaces */
+body[data-variant="praxis"] .chip{background:var(--px-chip);color:var(--ehsq-color-text-primary);}
+body[data-variant="praxis"] .summary__desc{background:var(--px-surface-2);border-radius:10px;box-shadow:inset 0 0 0 1px rgba(127,140,160,.18);}
+
+/* Callout — hairline + 12px + lit */
+body[data-variant="praxis"] .callout{border-color:color-mix(in srgb, var(--ehsq-color-interactive-default) 38%, transparent);border-radius:12px;box-shadow:var(--ehsq-elevation-1);}
+
+/* Field interactions */
+body[data-variant="praxis"] .field:hover{background:var(--px-hover);}
+
+/* Process tree current — soft amber tint instead of a hard 2px box */
+body[data-variant="praxis"] .ptree__record--current{border-color:rgba(27,131,139,.5);background:rgba(27,131,139,.10);border-radius:10px;}
+
+/* Focus rings — brand glow */
+body[data-variant="praxis"] .tbtn:focus-visible,
+body[data-variant="praxis"] .btn:focus-visible,
+body[data-variant="praxis"] .ehsq-navrail__btn:focus-visible,
+body[data-variant="praxis"] .ehsq-navrail__btn--create:focus-visible,
+body[data-variant="praxis"] .tab:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb, var(--ehsq-color-interactive-default) 22%, transparent);}
+
+/* ==================================================== PAGE HEADER */
+/* Box and inset divider come from the shared component in
+   praxis-pageheader.css, so this header is the same height as every other and
+   the toolbar band below it inherits the same inset. Only this page's own
+   typography and icon treatment stay local. */
+.main{--ph-pad-x:var(--ehsq-space-24);}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:.8125rem;color:var(--ehsq-color-text-secondary);
+  font-weight:600;margin-bottom:6px;flex-wrap:wrap;}
+.breadcrumb a{color:var(--ehsq-color-text-secondary);}
+.breadcrumb a:hover{color:var(--ehsq-color-text-primary);}
+.breadcrumb__sep{color:var(--ehsq-color-neutral-30);}
+.breadcrumb__current{color:var(--ehsq-color-text-primary);}
+.pageheader__titlerow{display:flex;align-items:center;gap:12px;}
+/* Module icon chip — solid teal-60 so it reads on the light-grey page.
+   a11y (WCAG 1.4.11 non-text contrast): chip vs page bg #f4f5f6 ≈ 4.1:1; white glyph vs teal-60 ≈ 4.5:1. */
+.pageheader__icon{width:32px;height:32px;border-radius:var(--ehsq-radius-md);background:var(--ehsq-color-teal-60);
+  color:var(--ehsq-color-white);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pageheader__title{font-size:var(--ehsq-type-size-xl);font-weight:700;line-height:1.25;margin:0;}
+.pageheader__status{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:var(--ehsq-radius-full);
+  font-size:.75rem;font-weight:700;letter-spacing:.02em;}
+.pill--open{background:var(--ehsq-color-green-10);color:var(--ehsq-color-green-60);}
+.pill--dot::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;}
+
+/* ===================================================== TOOLBAR (record — RS-derived) */
+/* The band — height, page fade, inset and closing hairline — is the shared
+   component in praxis-pageheader.css. Only the centred column is local. */
+.toolbar__inner{justify-content:space-between;gap:var(--ehsq-space-24);}
+.toolbar__group{display:flex;align-items:center;gap:var(--ehsq-space-8);}
+.tbtn{display:flex;align-items:center;gap:var(--ehsq-space-8);height:40px;padding:0 var(--ehsq-space-12);
+  background:var(--ehsq-color-neutral-15);color:var(--ehsq-color-neutral-90);font-family:inherit;font-size: 0.875rem;font-weight:600;
+  border:0;border-radius:var(--ehsq-radius-md);white-space:nowrap;
+  transition:background-color var(--ehsq-motion-fast) var(--ehsq-ease-default);}
+.tbtn .icon{width:20px;height:20px;}
+.tbtn:hover{background:var(--ehsq-color-neutral-20);}
+.tbtn:active{background:var(--ehsq-color-neutral-30);}
+.tbtn:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:-2px;}
+.tbtn--icon{width:36px;padding:0;justify-content:center;}
+.tbtn__caret{margin-left:-2px;color:var(--ehsq-color-text-secondary);}
+.tb-menu{position:relative;}
+.tb-dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:208px;background:var(--ehsq-color-surface-default);
+  border:1px solid var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);box-shadow:var(--ehsq-elevation-3);
+  padding:4px;z-index:50;}
+.tb-dropdown[hidden]{display:none;}
+.tb-dropdown__item{display:flex;align-items:center;gap:10px;width:100%;height:36px;padding:0 10px;border:0;background:transparent;
+  font-family:inherit;font-size:.875rem;font-weight:500;color:var(--ehsq-color-text-primary);text-align:left;
+  border-radius:var(--ehsq-radius-sm);cursor:pointer;}
+.tb-dropdown__item:hover{background:var(--ehsq-color-neutral-05);}
+.tb-dropdown__item:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:-2px;}
+.tb-dropdown__item--danger{color:var(--ehsq-color-status-danger);}
+.tb-dropdown__sep{height:1px;background:var(--ehsq-color-border-default);margin:4px 0;}
+
+/* ===================================== REQUIRED FIELDS GUIDE (DS: components/required-fields-guide) */
+.ehsq-rfguide{position:relative;display:flex;flex-direction:column;gap:var(--ehsq-space-8);width:320px;flex-shrink:0;}
+.ehsq-rfguide__bar{width:100%;}
+.ehsq-rfguide__track{height:8px;background:var(--ehsq-color-neutral-20);border-radius:var(--ehsq-radius-sm);overflow:hidden;}
+.ehsq-rfguide__fill{height:100%;background:var(--ehsq-color-interactive-default);border-radius:var(--ehsq-radius-sm);transition:width .3s var(--ehsq-ease-default);}
+.ehsq-rfguide__fill--complete{background:var(--ehsq-color-green-60);}
+.ehsq-rfguide__row{display:flex;align-items:center;justify-content:space-between;gap:var(--ehsq-space-8);}
+.ehsq-rfguide__message{font-size:var(--ehsq-type-size-xs);font-weight:600;color:var(--ehsq-color-text-secondary);white-space:nowrap;line-height:18px;}
+.ehsq-rfguide__message--complete{color:var(--ehsq-color-green-60);}
+.ehsq-rfguide__action{display:inline-flex;align-items:center;gap:4px;padding:0;border:0;background:transparent;font-family:inherit;
+  font-size:var(--ehsq-type-size-xs);font-weight:600;color:var(--ehsq-color-interactive-default);cursor:pointer;white-space:nowrap;line-height:18px;}
+.ehsq-rfguide__action:hover{color:var(--ehsq-color-interactive-hover);text-decoration:underline;}
+.ehsq-rfguide__action:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;border-radius:2px;}
+.ehsq-rfguide__chevron{flex-shrink:0;transition:transform .2s var(--ehsq-ease-default);}
+.ehsq-rfguide__action[aria-expanded="true"] .ehsq-rfguide__chevron{transform:rotate(180deg);}
+/* Popup — anchored to the RIGHT edge of the guide so it stays within the viewport at the toolbar's right */
+.ehsq-rfpopup{position:absolute;top:calc(100% + 8px);right:0;width:360px;max-height:520px;background:var(--ehsq-color-surface-default);
+  border:1px solid var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);box-shadow:var(--ehsq-elevation-3);
+  display:flex;flex-direction:column;overflow:hidden;z-index:100;}
+.ehsq-rfpopup[hidden]{display:none;}
+.ehsq-rfpopup__header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--ehsq-color-border-default);}
+.ehsq-rfpopup__count{font-size:1rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+.ehsq-rfpopup__required{color:var(--ehsq-color-status-danger);}
+.ehsq-rfpopup__asterisk{color:var(--ehsq-color-status-danger);font-size:.875rem;}
+.ehsq-rfpopup__close{display:flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-sm);cursor:pointer;}
+.ehsq-rfpopup__close:hover{background:var(--ehsq-color-neutral-05);}
+.ehsq-rfpopup__list{display:flex;flex-direction:column;padding:8px 24px 24px;overflow-y:auto;}
+.ehsq-rfpopup__item{display:flex;align-items:center;gap:8px;min-height:32px;padding:8px 0;font-size:1rem;font-weight:600;
+  color:var(--ehsq-color-text-link);text-decoration:none;}
+.ehsq-rfpopup__item:hover{color:var(--ehsq-color-interactive-hover);text-decoration:underline;}
+.ehsq-rfpopup__icon{flex-shrink:0;color:var(--ehsq-color-neutral-60);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:var(--ehsq-radius-sm);
+  font-family:inherit;font-size: 0.875rem;font-weight:600;border:1px solid transparent;transition:background var(--ehsq-motion-fast),border-color var(--ehsq-motion-fast),transform 150ms var(--ehsq-ease-default);white-space:nowrap;}
+.btn--primary{background:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);}
+.btn--primary:hover{background:var(--ehsq-color-interactive-hover);}
+/* Submit matches the height + corner radius of the other toolbar buttons (.tbtn) */
+.toolbar .btn{height:40px;border-radius:var(--ehsq-radius-md);}
+.btn--secondary{background:var(--ehsq-color-surface-default);color:var(--ehsq-color-text-primary);border-color:var(--ehsq-color-border-default);}
+.btn--secondary:hover{background:var(--ehsq-color-neutral-05);}
+.btn--ghost{background:transparent;color:var(--ehsq-color-interactive-default);}
+.btn--ghost:hover{background:var(--ehsq-color-teal-10);}
+.iconbtn{width:40px;height:40px;border:1px solid var(--ehsq-color-border-default);background:var(--ehsq-color-surface-default);
+  color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-sm);display:flex;align-items:center;justify-content:center;}
+.iconbtn:hover{background:var(--ehsq-color-neutral-05);color:var(--ehsq-color-text-primary);}
+
+/* ==================================================== RECORD GRID */
+.record{display:flex;gap:var(--ehsq-space-16);padding:var(--ehsq-space-8) var(--ehsq-space-24) var(--ehsq-space-24);
+  align-items:flex-start;}
+.record__guide{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:var(--ehsq-space-8);}
+.record__content{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--ehsq-space-16);}
+.record__tree{width:300px;flex-shrink:0;}
+/* Collapsible side panels (record guides + process tree).
+   Two knobs for the whole rail — the width slide, the contents, the toggle and
+   its chevron all re-time and re-curve together. --rail-ease leaves the
+   standstill gently over a long first third instead of lurching off the mark
+   (~3% of travel in the first 10% of the duration), then eases into its stop
+   over a long decelerating tail rather than arriving on a fixed clock.
+
+   The old 200ms width slide paired with `display:none` on the contents, so the
+   cards blinked out on the first frame and an empty 40px shell finished the
+   slide on its own. The contents now stay mounted for the whole collapse —
+   `display` transitions discretely, which defers `none` to the end.
+   The pinned child width stops the cards reflowing on every frame as the rail
+   narrows, and clip-path hides the resulting overhang. clip-path rather than
+   overflow, because overflow-x on these rails would force the visible y-axis to
+   `auto` and hang a scrollbar on a column that has none. */
+.record__guide,.record__tree{
+  --rail-dur:480ms; --rail-ease:cubic-bezier(.34,.01,.1,1); --rail-w:300px;
+  --rail-travel:-56px;
+  position:relative;
+  transition:width var(--rail-dur) var(--rail-ease);
+  /* Horizontal only, deliberately. Plain inset(0) also clips vertically, which
+     erases the toggle on any page whose .record is align-items:flex-start
+     rather than stretch: there the rail's height is content-driven, a collapsed
+     rail has no in-flow children left, so the clip box is 0px tall and takes
+     the absolutely-positioned button down with it — leaving no way to re-open
+     the rail. Negative top/bottom insets expand the region past the box. */
+  clip-path:inset(-100vh 0);
+}
+.panel-toggle{position:absolute;top:12px;right:12px;z-index:5;width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border:0;background:transparent;color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-sm);cursor:pointer;
+  /* Geometry morphs on the rail's clock; background/colour stay on the fast
+     token so hover still answers immediately. */
+  transition:right var(--rail-dur,480ms) var(--rail-ease,ease),
+             width var(--rail-dur,480ms) var(--rail-ease,ease),
+             height var(--rail-dur,480ms) var(--rail-ease,ease),
+             border-radius var(--rail-dur,480ms) var(--rail-ease,ease),
+             box-shadow var(--rail-dur,480ms) var(--rail-ease,ease),
+             background var(--ehsq-motion-fast) var(--ehsq-ease-default),
+             color var(--ehsq-motion-fast) var(--ehsq-ease-default);}
+.panel-toggle:hover{background:var(--ehsq-color-neutral-05);color:var(--ehsq-color-text-primary);}
+.panel-toggle svg{width:18px;height:18px;transition:transform var(--rail-dur,480ms) var(--rail-ease,ease);}
+/* The card travels rather than being wiped. A stationary card crossed by a hard
+   clip edge is a slide-transition wipe — the shape reads as mechanical however
+   well the width is eased, and a `linear` fade on top of it makes it worse. So
+   the card glides in the same direction the closing edge sweeps (left, for both
+   rails: contents are left-anchored and the width comes off the right) and
+   shrinks a touch, so it looks carried out of the way rather than eaten.
+   translate3d keeps it on the compositor, off the layout pass the width is
+   already paying for.
+
+   Travel is capped at 56px and the fade overlaps almost all of it, on purpose.
+   The card exits through the rail's own inner edge, which sits mid-page rather
+   than at the viewport edge, so a card still solid while leaving gets chopped
+   there — "Record Guides" renders as "Guides", which reads as a broken layout
+   rather than as movement. Keeping opacity low across the exit means the cut
+   edge is never legible; the glide is what you see, not the crop. Travelling
+   the other way instead (outward, toward each rail's own outer edge) trades the
+   crop for an 88px gap opening between the content column and the card, which
+   looks like the card has detached.
+
+   Both directions ease out; nothing in here is linear. Movement leads opacity
+   slightly both ways, so the card is already going somewhere before it starts
+   to disappear — that is what separates this from a cross-dissolve.
+
+   Expanded resting state, and the expand direction. */
+.record__guide>:not(.panel-toggle),.record__tree>:not(.panel-toggle){
+  width:var(--rail-w);opacity:1;transform:none;
+  transition:opacity calc(var(--rail-dur) * .5) cubic-bezier(.2,.6,.35,1) calc(var(--rail-dur) * .2),
+             transform calc(var(--rail-dur) * .9) var(--rail-ease);
+}
+/* Feathering the closing edge with a mask was the obvious way to soften the cut,
+   and it is a trap: a mask applies to the whole element, and the toggle is a
+   child of it sitting hard against that edge — so the button you need in order
+   to re-open the rail dissolves along with the card. Putting the mask on the
+   card instead would need a second interpolated property tracking the rail's
+   live edge, which is a lot of machinery for a little softness. The travel
+   below does the same job structurally. */
+/* min-height gives the collapsed rail a box to hold its toggle. Without it the
+   rail is 0px tall wherever .record is align-items:flex-start or the columns
+   stack, because a collapsed rail has no in-flow children left — the button then
+   overflows into whatever sits below and gets painted over, so it is on screen
+   but not clickable. z-index:5 cannot save it: clip-path makes the rail a
+   stacking context, which traps the button's z-index inside it. 48px = the
+   toggle's 12px top offset plus its 24px box plus 12px. */
+.record__guide.is-collapsed,.record__tree.is-collapsed{width:40px;min-height:48px;}
+/* Collapse direction: the glide runs the full duration; the fade starts almost
+   at once and is done by ~60%, so the exit crop is never legible and the last
+   40% is an empty rail closing the final few px — too small to read as a shell. */
+.record__guide.is-collapsed>:not(.panel-toggle),.record__tree.is-collapsed>:not(.panel-toggle){
+  display:none;opacity:0;transform:translate3d(var(--rail-travel),0,0) scale(.98);
+  transition:opacity calc(var(--rail-dur) * .55) cubic-bezier(.3,0,.6,.9) calc(var(--rail-dur) * .06),
+             transform var(--rail-dur) var(--rail-ease),
+             display var(--rail-dur) allow-discrete;
+}
+/* Coming back from display:none there is no previous rendered style to animate
+   from, so without this the expand fade silently never runs and the contents
+   snap in at full opacity over a half-open rail. Gives them the state to leave. */
+@starting-style{
+  .record__guide>:not(.panel-toggle),.record__tree>:not(.panel-toggle){
+    opacity:0;transform:translate3d(var(--rail-travel),0,0) scale(.98);
+  }
+}
+.record__guide.is-collapsed .panel-toggle,.record__tree.is-collapsed .panel-toggle{right:8px;}
+.record__guide.is-collapsed .panel-toggle svg,.record__tree.is-collapsed .panel-toggle svg{transform:rotate(180deg);}
+/* Collapsed re-expand button gets the neutral toolbar/nav-rail pill treatment
+   (white surface + lit-edge shadow) so it reads against the dot-grid page.
+   The geometry here — 32px box, right:4px, 10px radius — is already on the
+   rail's clock via the .panel-toggle transition, so it morphs with the collapse
+   rather than snapping. */
+body[data-variant="praxis"] .record__guide.is-collapsed .panel-toggle,
+body[data-variant="praxis"] .record__tree.is-collapsed .panel-toggle{
+  width:32px;height:32px;right:4px;border-radius:10px;
+  background:var(--px-tool);color:var(--ehsq-color-text-secondary);box-shadow:var(--px-tool-shadow);}
+body[data-variant="praxis"] .record__guide.is-collapsed .panel-toggle:hover,
+body[data-variant="praxis"] .record__tree.is-collapsed .panel-toggle:hover{
+  background:var(--px-tool);color:var(--ehsq-color-text-primary);box-shadow:var(--px-tool-shadow-hover);}
+/* Rails snap instead of sliding when the OS asks for less motion. The
+   .is-collapsed variants are listed too, not redundantly: they carry the
+   `display ... allow-discrete` transition and outweigh the plain child selector,
+   so without them the rail snaps shut while its contents hang on for the full
+   duration. Equal specificity, declared later, so these win. */
+@media (prefers-reduced-motion:reduce){
+  .record__guide,.record__tree,
+  .record__guide>:not(.panel-toggle),.record__tree>:not(.panel-toggle),
+  .record__guide.is-collapsed>:not(.panel-toggle),.record__tree.is-collapsed>:not(.panel-toggle),
+  .panel-toggle,.panel-toggle svg{transition:none;}
+}
+/* body/section collapse within the process tree (Praxis-only) */
+body[data-variant="praxis"] .ptree.is-collapsed .ptree__body{display:none;}
+body[data-variant="praxis"] .ptree__section.is-collapsed .ptree__items{display:none;}
+body[data-variant="praxis"] .ptree__section.is-collapsed .chevron-btn svg{transform:rotate(-90deg);}
+
+/* ===== Variant view visibility: freeze Miramar to its original look, keep Praxis current ===== */
+body[data-variant="miramar"] .guide-view--praxis,
+body[data-variant="miramar"] .tree-view--praxis,
+body[data-variant="miramar"] .panel-toggle{display:none;}
+body[data-variant="praxis"] .guide-view--miramar,
+body[data-variant="praxis"] .tree-view--miramar{display:none;}
+
+/* generic guide card */
+.card{background:var(--ehsq-color-surface-default);border:1px solid var(--ehsq-color-border-default);
+  border-radius:var(--ehsq-radius-md);}
+/* breathing room at the top + bottom of the record-guide card */
+.ctask-wf{padding:8px 0 12px;}
+.card__titlebar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;
+  border-bottom:1px solid var(--ehsq-color-border-default);}
+.card__title{font-size:.75rem;font-weight:600;color:var(--ehsq-color-text-secondary);letter-spacing:.02em;}
+/* record-guide section titles sit in a grey container, matching the process-tree badges */
+.ctask-wf .card__title{display:flex;width:100%;align-items:center;height:24px;padding:4px 12px;background:var(--ehsq-color-neutral-10);border-radius:var(--ehsq-radius-full);color:var(--ehsq-color-text-primary);letter-spacing:normal;}
+/* In dark mode the light-mode grey chip (neutral-10, an opaque slate) read
+   brighter than anything else in the guide. It takes the toolbar buttons'
+   neutral instead, so the guide's containers and the toolbar's read as one
+   material. */
+body[data-theme="dark"] .ctask-wf .card__title{background:var(--px-tool);}
+/* record-guide element title — top-left, across from the collapse control */
+.ctask-wf__hdr{display:flex;align-items:center;padding:4px 16px 10px;}
+.ctask-wf__title{font-size:16px;font-weight:600;color:var(--ehsq-color-neutral-90);}
+/* process-tree element title (Praxis) — match size + position, no bottom border */
+body[data-variant="praxis"] .ptree .card__title{font-size:16px;font-weight:600;color:var(--ehsq-color-neutral-90);letter-spacing:normal;}
+body[data-variant="praxis"] .ptree .card__titlebar{padding:12px 16px 10px;border-bottom:0;}
+/* titles read light in dark mode */
+body[data-theme="dark"] .ctask-wf__title,
+body[data-variant="praxis"][data-theme="dark"] .ptree .card__title{color:var(--ehsq-color-text-primary);}
+.chevron-btn{width:24px;height:24px;border:0;background:transparent;color:var(--ehsq-color-text-secondary);
+  border-radius:var(--ehsq-radius-sm);display:flex;align-items:center;justify-content:center;}
+.chevron-btn:hover{background:var(--ehsq-color-neutral-05);}
+.chevron-btn svg{transition:transform .2s var(--ehsq-ease-default);}
+.is-collapsed .chevron-btn svg{transform:rotate(-90deg);}
+.card__body{padding:12px 16px;}
+.is-collapsed .card__body{display:none;}
+/* per-section collapse inside the combined Current Task + Workflow card */
+.card__titlebar.is-collapsed + .card__body{display:none;}
+.card__titlebar.is-collapsed .chevron-btn svg{transform:rotate(-90deg);}
+
+/* current task */
+.ctask__badges{display:flex;gap:6px;padding:10px 16px 0;}
+.ctask-wf .ctask__badges{padding:14px 0 0;}
+/* combined Current Task + Workflow card: full-width hairline between the two */
+.ctask-wf__sep{height:1px;background:var(--ehsq-color-border-default);}
+.ctask__badge{width:24px;height:24px;border-radius:var(--ehsq-radius-full);display:flex;align-items:center;justify-content:center;color:var(--ehsq-color-white);}
+.ctask__badge--status{background:var(--ehsq-color-status-success);}
+.ctask__badge--age{background:var(--ehsq-color-teal-60);font-size:11px;font-weight:700;}
+.ctask__badge--assign{background:var(--ehsq-color-pink-90);}
+.ctask__task{font-size:var(--ehsq-type-size-lg);font-weight:600;margin:8px 0;}
+.ctask-wf .ctask__task{display:inline-flex;align-items:center;gap:8px;margin:12px 0;padding:5px 14px 5px 11px;
+  color:var(--ehsq-color-pink-90);background:color-mix(in srgb, var(--ehsq-color-pink-60) 12%, transparent);
+  border-radius:var(--ehsq-radius-full);font-size:var(--ehsq-type-size-base);font-weight:600;text-align:left;}
+.ctask-wf .ctask__task::before{content:"";flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--ehsq-color-pink-60);}
+body[data-theme="dark"] .ctask-wf .ctask__task{color:var(--ehsq-color-pink-50);background:color-mix(in srgb, var(--ehsq-color-pink-50) 20%, transparent);}
+.ctask__assignee{display:flex;align-items:center;gap:8px;}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--ehsq-color-teal-70);color:var(--ehsq-color-white);font-weight:600;
+  display:flex;align-items:center;justify-content:center;font-size:.875rem;flex-shrink:0;}
+.ctask__assignee-name{font-size:.8125rem;}
+.ctask__assignee-name small{display:block;color:var(--ehsq-color-text-secondary);font-weight:400;}
+.ctask__assignee-label{font-size:.8125rem;color:var(--ehsq-color-text-secondary);}
+.ctask-wf .ctask__assignee-name{font-weight:600;}
+.ctask__reassign{display:inline-block;margin-top:10px;font-size:.8125rem;font-weight:600;}
+.ctask-wf .ctask__reassign{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;height:36px;padding:0 16px;
+  background:linear-gradient(180deg,#1f8f97,var(--ehsq-color-teal-60));color:var(--ehsq-color-white);border:0;border-radius:10px;
+  box-shadow:0 0 0 .5px rgba(16,36,58,.2),0 1px 2px rgba(16,36,58,.15),0 8px 18px -8px rgba(27,131,139,.5),inset 0 .5px 0 rgba(255,255,255,.28);
+  font-family:inherit;font-size: 0.875rem;font-weight:600;cursor:pointer;transition:filter var(--ehsq-motion-fast) var(--ehsq-ease-default);}
+.ctask-wf .ctask__reassign:hover{filter:brightness(1.06);}
+
+/* required fields */
+.rf__title .accent{color:var(--ehsq-color-status-danger);}
+.rf__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+.rf__list a{font-size:.875rem;font-weight:600;}
+
+/* workflow */
+.wf__panel{padding-top:0;}
+.wf .card__body{padding-top:0;}
+.wf__steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;}
+.wf__step{display:flex;align-items:center;gap:8px;padding:10px 0;font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+.ctask-wf .wf__step{padding:4px 0;}
+/* Miramar: divider lines between steps; Praxis: simple list, no dividers */
+.wf__step + .wf__step{border-top:1px solid var(--ehsq-color-border-default);}
+.ctask-wf .wf__step + .wf__step{border-top:0;}
+.wf__step .icon{width:20px;height:20px;}
+.wf__step--complete .icon{color:var(--ehsq-color-green-60);}
+.wf__step--pending{color:var(--ehsq-color-text-secondary);}
+.wf__step--pending .icon{opacity:.55;}
+.ctask-wf .wf__step--pending .icon{color:var(--ehsq-color-neutral-70);opacity:1;}
+.wf__step--active{color:var(--ehsq-color-teal-70);}
+/* Praxis: active workflow step stands out as a pink chip */
+.ctask-wf .wf__step--active{color:var(--ehsq-color-pink-60);background:rgba(227,0,114,.10);border-radius:8px;padding:6px 8px;margin:2px -8px;}
+.ctask-wf .wf__step--active .icon{color:var(--ehsq-color-pink-60);}
+
+/* ============================================= CONTENT (tabs + fields) */
+.content-card{background:var(--ehsq-color-surface-default);border:1px solid var(--ehsq-color-border-default);
+  border-radius:var(--ehsq-radius-md);overflow:hidden;}
+
+/* Summary section (record overview card above the tabs) */
+.summary{padding-top:var(--ehsq-space-12);}
+body[data-variant="praxis"] .summary{padding-bottom:20px;}
+.summary .field:first-child::before{display:none;}
+.summary__title{margin:0;padding:20px 24px 16px;font-size: 1.875rem;font-weight:600;line-height:1.2;color:var(--ehsq-color-text-primary);}
+.summary__desc{position:relative;width:100%;min-height:96px;background:var(--ehsq-color-neutral-05);
+  border-radius:var(--ehsq-radius-sm);padding:12px 14px 24px;font-size: 0.875rem;font-weight:400;line-height:1.6;color:var(--ehsq-color-text-primary);}
+.summary__desc p{margin:0;}
+.summary__desc-grip{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;color:var(--ehsq-color-neutral-40);}
+.summary__desc-grip svg{display:block;}
+.tabs{display:flex;gap:24px;padding:0 24px;border-bottom:1px solid var(--ehsq-color-border-default);overflow-x:auto;}
+.tab{height:48px;border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;font-size:1rem;font-weight:600;
+  color:var(--ehsq-color-text-secondary);white-space:nowrap;transition:color var(--ehsq-motion-fast);}
+.tab:hover{color:var(--ehsq-color-text-primary);}
+.tab--active{color:var(--ehsq-color-text-primary);border-bottom-color:var(--ehsq-color-interactive-default);}
+/* Praxis: active tab enclosed in a light-teal rectangle instead of an underline */
+body[data-variant="praxis"] .tabs{border-bottom:0;gap:8px;padding:16px 20px 8px;}
+body[data-variant="praxis"] .tab{height:36px;border-bottom:0;border-radius:var(--ehsq-radius-md);padding:0 14px;}
+body[data-variant="praxis"] .tab--active{background:rgba(27,131,139,.18);color:var(--ehsq-color-text-primary);}
+
+.tabpanel{display:none;}
+.tabpanel--active{display:block;}
+.tabpanel__placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:64px 24px;color:var(--ehsq-color-text-secondary);text-align:center;}
+.tabpanel__placeholder .icon{width:40px;height:40px;color:var(--ehsq-color-neutral-30);}
+
+/* section */
+.section__header{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 24px;cursor:pointer;}
+.section__title{font-size:var(--ehsq-type-size-md);font-weight:600;}
+.section.is-collapsed .section__body{display:none;}
+.section.is-collapsed .section__header .chevron-btn svg{transform:rotate(-90deg);}
+
+/* field row */
+.field{position:relative;display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 24px;
+  transition:background var(--ehsq-motion-fast);}
+/* inset divider (doesn't reach the container edges) */
+.field::before{content:"";position:absolute;top:0;left:var(--ehsq-space-24);right:var(--ehsq-space-24);height:1px;background:var(--ehsq-color-border-default);}
+.field:hover{background:var(--ehsq-color-surface-subtle);}
+.field__prompt{width:200px;flex-shrink:0;font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-neutral-70);}
+.field__prompt .req{color:var(--ehsq-color-red-50);margin-left:2px;}
+.field__value{font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-neutral-90);display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.field__value--empty::after{content:"—";color:var(--ehsq-color-text-disabled);}
+.field__value .caret{color:var(--ehsq-color-text-secondary);margin-left:auto;}
+.field--vertical{flex-direction:column;align-items:flex-start;gap:8px;}
+.field--vertical .field__prompt{width:auto;}
+/* Praxis: taller single-line fields */
+body[data-variant="praxis"] .field:not(.field--vertical){min-height:64px;}
+.field__group{position:relative;display:flex;}
+.field__group::before{content:"";position:absolute;top:0;left:var(--ehsq-space-24);right:var(--ehsq-space-24);height:1px;background:var(--ehsq-color-border-default);}
+.field__group .field{flex:1;min-width:0;}
+.field__group .field::before{display:none;}
+.field__group .field__prompt{width:auto;display:block;margin-bottom:2px;}
+.field__group .field{flex-direction:column;align-items:flex-start;gap:2px;}
+
+/* toggle (picklist pills) */
+.toggle-group{display:flex;gap:6px;flex-wrap:wrap;}
+.toggle{height:30px;padding:0 16px;border:2px solid var(--ehsq-color-interactive-default);border-radius:var(--ehsq-radius-full);
+  background:var(--ehsq-color-surface-default);font-family:inherit;font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+.toggle:hover{background:var(--ehsq-color-neutral-10);}
+.toggle--selected{background:var(--ehsq-color-teal-10);}
+.toggle[aria-checked="true"]{background:var(--ehsq-color-teal-10);}
+
+/* chips */
+.chip-area{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 12px;border-radius:var(--ehsq-radius-full);
+  background:var(--ehsq-color-surface-subtle);font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+.chip button{border:0;background:none;padding:0;display:flex;color:var(--ehsq-color-text-secondary);}
+.chip button:hover{color:var(--ehsq-color-text-primary);}
+.chip-add{border:0;background:none;padding:0;color:var(--ehsq-color-interactive-default);display:flex;}
+.chip-add:hover{color:var(--ehsq-color-interactive-hover);}
+
+/* callout */
+.callout{margin:16px 24px;border:1px solid var(--ehsq-color-teal-60);border-radius:var(--ehsq-radius-md);overflow:hidden;}
+.callout__header{display:flex;align-items:center;gap:8px;padding:6px 16px;background:var(--ehsq-color-teal-10);
+  color:var(--ehsq-color-teal-60);font-weight:600;font-size: 0.875rem;border-bottom:1px solid var(--ehsq-color-teal-60);}
+.callout__body{display:flex;flex-wrap:wrap;gap:6px 24px;padding:12px 16px;font-size:.875rem;color:var(--ehsq-color-text-primary);}
+.callout__body span strong{font-weight:700;}
+
+/* ==================================================== PROCESS TREE */
+.ptree__body{padding:12px;}
+.ptree__record{padding:8px;border-radius:var(--ehsq-radius-sm);}
+.ptree__record--current{border:2px solid var(--ehsq-color-status-warning);}
+.ptree__id{font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-text-link);}
+.ptree__title{font-size:.875rem;color:var(--ehsq-color-text-primary);margin-top:2px;}
+.ptree__status{font-size:.8125rem;color:var(--ehsq-color-text-secondary);}
+.ptree__connector{height:8px;}
+body[data-variant="praxis"] .ptree__connector{height:20px;}
+.ptree__children{padding-left:0;}
+.ptree__section{margin-bottom:8px;}
+body[data-variant="praxis"] .ptree__section{margin-bottom:20px;}
+.ptree__section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.ptree__badge{display:inline-flex;align-items:center;height:24px;padding:4px 8px;background:var(--ehsq-color-neutral-10);
+  border-radius:var(--ehsq-radius-sm);font-size:.75rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+/* Praxis: process-tree section titles as fully-rounded pills (match record guides) */
+body[data-variant="praxis"] .ptree__badge{border-radius:var(--ehsq-radius-full);padding:4px 12px;}
+.ptree__items{display:flex;flex-direction:column;gap:8px;}
+body[data-variant="praxis"] .ptree__items{gap:4px;}
+
+/* ---- Process Map: progressive accordion (Option A) ---- */
+.pm{padding:4px 12px 12px;}
+.pm__root{display:block;text-decoration:none;padding:8px;border-radius:8px;}
+.pm__root:hover{background:color-mix(in srgb, var(--ehsq-color-interactive-default) 8%, transparent);}
+/* Parent (root) record: tint only — no left edge bar. Child records keep
+   theirs, so the current child still reads as the marked one. */
+.pm__root--current{background:rgba(27,131,139,.10);}
+.pm__root-id{display:block;font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-text-link);}
+.pm__root-title{font-size:.8125rem;color:var(--ehsq-color-text-secondary);}
+.pm__group{border-top:1px solid var(--ehsq-color-border-default);}
+.pm__group:first-of-type{margin-top:6px;}
+.pm__group .pm__group{border-top:0;}
+.pm__grouphdr{width:100%;display:flex;align-items:center;gap:8px;padding:9px 6px;background:none;border:0;cursor:pointer;font-family:inherit;color:var(--ehsq-color-text-primary);}
+.pm__grouphdr:hover{color:var(--ehsq-color-interactive-hover);}
+.pm__chev{width:16px;height:16px;flex-shrink:0;color:var(--ehsq-color-text-secondary);transition:transform .2s var(--ehsq-ease-default);}
+.pm svg.pm__chev{fill:currentColor;}
+.pm__grouphdr[aria-expanded="true"] .pm__chev{transform:rotate(180deg);}
+.pm__grouplabel{flex:1;text-align:left;font-size: 0.875rem;font-weight:600;}
+.pm__count{flex-shrink:0;min-width:22px;height:20px;padding:0 7px;border-radius:var(--ehsq-radius-full);background:var(--ehsq-color-neutral-10);color:var(--ehsq-color-text-secondary);font-size:.6875rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+.pm__panel{display:none;padding:0 0 8px 13px;}
+.pm__grouphdr[aria-expanded="true"] + .pm__panel{display:block;}
+.pm__items{border-left:1px solid var(--ehsq-color-border-default);margin-left:2px;padding-left:8px;display:flex;flex-direction:column;gap:2px;}
+.pm__rec{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:6px 8px;border-radius:8px;text-decoration:none;color:inherit;}
+.pm__rec:hover{background:color-mix(in srgb, var(--ehsq-color-interactive-default) 8%, transparent);}
+.pm__rec--current{background:rgba(27,131,139,.10);box-shadow:inset 3px 0 0 var(--ehsq-color-interactive-default);}
+.pm__rec-id{font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-link);}
+.pm__rec-title{flex-basis:100%;font-size:.75rem;color:var(--ehsq-color-text-secondary);}
+.pm__status{margin-left:auto;font-size: 0.6875rem;font-weight:700;letter-spacing:normal;padding:2px 7px;border-radius:var(--ehsq-radius-full);white-space:nowrap;}
+.pm__status--closed{background:var(--ehsq-color-green-10);color:var(--ehsq-color-green-90,#04502f);}
+/* Text on a -10 tint uses the -90 step: colour-60 on tint-10 measures 2.44:1
+   against the 4.5 minimum (WCAG 1.4.3). */
+.pm__status--open{background:var(--ehsq-color-orange-10);color:var(--ehsq-color-orange-90,#7a4a00);}
+.pm__status--overdue{background:var(--ehsq-color-red-10);color:var(--ehsq-color-red-90,#8c1119);}
+.pm__status--progress{background:var(--ehsq-color-blue-10);color:var(--ehsq-color-blue-60);}
+.pm__status--todo{background:var(--ehsq-color-neutral-10);color:var(--ehsq-color-text-secondary);}
+
+/* ---- Dark mode: status pills use brighter, more saturated foreground colours
+   over a subtle translucent tint of the same hue, instead of the washed-out
+   light-mode -10/-60 tints. Bright fg on the dark card keeps WCAG 2.2 AA. ---- */
+body[data-theme="dark"] .pm__status--open,
+body[data-theme="dark"] .pill--warn{background:color-mix(in srgb,#ffbf66 16%,transparent);color:#ffc978;}
+body[data-theme="dark"] .pm__status--progress{background:color-mix(in srgb,#8fb2ff 16%,transparent);color:#a3c0ff;}
+body[data-theme="dark"] .pm__status--closed,
+body[data-theme="dark"] .pill--open{background:color-mix(in srgb,#5fe0a0 16%,transparent);color:#6fe6ac;}
+body[data-theme="dark"] .pm__status--overdue{background:color-mix(in srgb,#ff9a9a 16%,transparent);color:#ffa7a7;}
+body[data-theme="dark"] .pm__status--todo,
+body[data-theme="dark"] .pill--todo{background:rgba(255,255,255,.08);color:#b8c3d1;}
+.pm__more{align-self:flex-start;margin:2px 0 2px 6px;padding:2px 4px;background:none;border:0;cursor:pointer;font-family:inherit;font-size:.75rem;font-weight:600;color:var(--ehsq-color-text-link);}
+.pm__more:hover{text-decoration:underline;}
+.pm-hidden{display:none !important;}
+
+/* =====================================================================
+   PRAXIS INTERACTIVE COMPONENTS (record page)
+   Mazlan drawer · Create-New menu · Search module selector ·
+   Search suggestions · Workspaces popout · large-character description.
+   ALL Praxis-only. Overlays use the shared Praxis material (--px-*),
+   support light + dark, close on outside-click + Escape, WCAG 2.2 AA.
+   New DOM lives hidden by default and only opens in Praxis (JS-guarded).
+   ===================================================================== */
+
+/* ---- shared Praxis overlay material ---- */
+.px-pop{position:absolute;z-index:200;background:var(--ehsq-color-surface-default);
+  border:1px solid var(--ehsq-color-border-default);border-radius:12px;padding:6px;
+  box-shadow:var(--ehsq-elevation-4);}
+.px-pop[hidden]{display:none;}
+body[data-variant="praxis"] .px-pop{border:0;
+  box-shadow:0 0 0 .5px rgba(16,36,58,.06),0 18px 38px -16px rgba(16,36,58,.22),inset 0 .5px 0 rgba(255,255,255,.6);}
+body[data-variant="praxis"][data-theme="dark"] .px-pop{background:rgba(26,32,45,.9);
+  -webkit-backdrop-filter:saturate(1.3) blur(16px);backdrop-filter:saturate(1.3) blur(16px);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.08),0 24px 50px -20px rgba(0,0,0,.7);}
+/* generic overlay row */
+.px-menu__head{padding:8px 10px 4px;font-size:.6875rem;font-weight:700;letter-spacing:normal;color:var(--ehsq-color-text-secondary);}
+.px-menu__item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:transparent;
+  border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;font-size:.875rem;font-weight:500;
+  color:var(--ehsq-color-text-primary);text-decoration:none;}
+.px-menu__item:hover{background:var(--ehsq-color-neutral-05);text-decoration:none;}
+body[data-variant="praxis"] .px-menu__item:hover{background:var(--px-hover);}
+.px-menu__item .icon{width:20px;height:20px;color:var(--ehsq-color-text-secondary);flex-shrink:0;}
+.px-menu__item:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:-2px;}
+.px-menu__sep{height:1px;background:var(--ehsq-color-border-default);margin:6px 4px;}
+
+/* ============================== 1 · MAZLAN DRAWER + SCRIM ============================== */
+.mz-scrim{position:fixed;inset:var(--appbar-h) 0 0 0;background:rgba(32,42,53,.28);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);z-index:95;opacity:0;
+  transition:opacity .28s var(--ehsq-ease-default);}
+.mz-scrim[hidden]{display:none;}
+.mz-scrim.is-open{opacity:1;}
+.mz-drawer{position:fixed;top:calc(var(--appbar-h) + 16px);right:16px;bottom:16px;
+  width:min(460px,calc(100vw - 32px));z-index:96;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--ehsq-color-surface-default);border:1px solid var(--ehsq-color-border-default);
+  border-radius:16px;box-shadow:var(--ehsq-elevation-4);
+  transform:translateX(calc(100% + 24px));transition:transform .32s var(--ehsq-ease-default);}
+.mz-drawer[hidden]{display:none;}
+.mz-drawer.is-open{transform:translateX(0);}
+body[data-variant="praxis"] .mz-drawer{border:0;
+  box-shadow:0 0 0 .5px rgba(16,36,58,.08),-8px 16px 48px -16px rgba(16,36,58,.28),inset 0 .5px 0 rgba(255,255,255,.6);}
+body[data-variant="praxis"][data-theme="dark"] .mz-drawer{background:var(--px-surface);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.08),-8px 16px 48px -16px rgba(0,0,0,.7);}
+.mz-drawer__head{display:flex;align-items:center;gap:10px;padding:14px 12px 14px 16px;flex-shrink:0;
+  border-bottom:1px solid var(--ehsq-color-border-default);}
+.mz-drawer__brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.mz-drawer__title{margin:0;font-size:var(--ehsq-type-size-md);font-weight:700;color:var(--ehsq-color-text-primary);}
+.mz-drawer__close{width:36px;height:36px;flex-shrink:0;border:0;background:transparent;border-radius:50%;
+  color:var(--ehsq-color-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s,color .15s;}
+.mz-drawer__close:hover{background:var(--px-hover,rgba(16,36,58,.06));color:var(--ehsq-color-text-primary);}
+.mz-drawer__close:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+.mz-drawer__body{flex:1;min-height:0;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px;}
+.mz-greeting{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:16px 8px 4px;}
+.mz-greeting__logo{width:36px;height:36px;}
+.mz-greeting p{margin:0;font-size:1rem;font-weight:600;color:var(--ehsq-color-text-primary);line-height:1.4;}
+.mz-suggs{display:flex;flex-direction:column;gap:8px;margin-top:auto;}
+.mz-sugg{display:inline-flex;align-items:center;gap:10px;text-align:left;width:100%;padding:12px 14px;
+  border:1px solid var(--ehsq-color-border-default);border-radius:12px;background:var(--ehsq-color-surface-default);
+  font-family:inherit;font-size:.875rem;font-weight:600;color:var(--ehsq-color-text-primary);cursor:pointer;
+  transition:box-shadow .15s,transform .15s,background .15s;}
+.mz-sugg .icon{width:18px;height:18px;color:var(--ehsq-color-interactive-default);flex-shrink:0;}
+.mz-sugg:hover{box-shadow:var(--px-tool-shadow-hover,0 2px 8px -2px rgba(16,36,58,.16));transform:translateY(-1px);}
+.mz-sugg:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+body[data-variant="praxis"] .mz-sugg{background:var(--px-surface);}
+body[data-variant="praxis"][data-theme="dark"] .mz-sugg{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.10);}
+.mz-drawer__footer{flex-shrink:0;padding:12px 16px 16px;border-top:1px solid var(--ehsq-color-border-default);}
+.mz-input{display:flex;align-items:flex-end;gap:8px;padding:10px 10px 10px 14px;border-radius:16px;
+  border:1px solid var(--ehsq-color-border-default);background:var(--ehsq-color-surface-default);
+  transition:box-shadow .2s;}
+body[data-variant="praxis"][data-theme="dark"] .mz-input{background:rgba(255,255,255,.05);}
+.mz-input:focus-within{box-shadow:0 0 0 2px color-mix(in srgb,var(--ehsq-color-interactive-default) 30%,transparent);
+  border-color:var(--ehsq-color-interactive-default);}
+.mz-input textarea{flex:1;border:0;outline:0;resize:none;font:inherit;font-size: 0.875rem;font-weight:500;
+  line-height:1.6;background:transparent;color:var(--ehsq-color-text-primary);min-height:24px;max-height:120px;}
+.mz-input textarea::placeholder{color:var(--ehsq-color-text-secondary);}
+.mz-input__send{width:34px;height:34px;flex-shrink:0;border:0;border-radius:12px;color:var(--ehsq-color-white);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#1f8f97,var(--ehsq-color-teal-60));
+  box-shadow:0 0 0 .5px rgba(16,36,58,.2),inset 0 .5px 0 rgba(255,255,255,.25);}
+.mz-input__send:hover{filter:brightness(1.06);}
+.mz-input__send:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;}
+
+/* ============================== 2 · CREATE NEW MENU ============================== */
+.cn-pop{top:0;left:calc(100% + 8px);width:248px;}
+.cn-item .icon{color:var(--ehsq-color-interactive-default);}
+
+/* ============================== 3 · SEARCH MODULE SELECTOR ============================== */
+body[data-variant="praxis"] .appbar__module{border:0;background:transparent;cursor:pointer;font-family:inherit;}
+.appbar__module{cursor:default;}
+.sm-pop{top:calc(100% + 8px);left:0;width:280px;max-height:60vh;overflow-y:auto;}
+.sm-opt{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:transparent;
+  border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;font-size:.875rem;font-weight:500;
+  color:var(--ehsq-color-text-primary);}
+.sm-opt:hover{background:var(--ehsq-color-neutral-05);}
+body[data-variant="praxis"] .sm-opt:hover{background:var(--px-hover);}
+.sm-opt:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:-2px;}
+.sm-opt__box{width:18px;height:18px;flex-shrink:0;border:1.5px solid var(--ehsq-color-border-strong);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;color:var(--ehsq-color-white);}
+.sm-opt__box svg{width:14px;height:14px;opacity:0;}
+.sm-opt[aria-checked="true"] .sm-opt__box{background:var(--ehsq-color-interactive-default);border-color:var(--ehsq-color-interactive-default);}
+.sm-opt[aria-checked="true"] .sm-opt__box svg{opacity:1;}
+
+/* ============================== 4 · SEARCH SUGGESTIONS ============================== */
+.ss-pop{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:210;padding:6px;
+  background:var(--ehsq-color-surface-default);border:1px solid var(--ehsq-color-border-default);border-radius:12px;
+  box-shadow:var(--ehsq-elevation-4);max-height:60vh;overflow-y:auto;}
+.ss-pop[hidden]{display:none;}
+body[data-variant="praxis"] .ss-pop{border:0;
+  box-shadow:0 0 0 .5px rgba(16,36,58,.06),0 18px 38px -16px rgba(16,36,58,.22),inset 0 .5px 0 rgba(255,255,255,.6);}
+body[data-variant="praxis"][data-theme="dark"] .ss-pop{background:rgba(26,32,45,.94);
+  -webkit-backdrop-filter:saturate(1.3) blur(16px);backdrop-filter:saturate(1.3) blur(16px);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.08),0 24px 50px -20px rgba(0,0,0,.7);}
+.ss-sec__head{padding:8px 10px 4px;font-size:.6875rem;font-weight:700;letter-spacing:normal;
+  color:var(--ehsq-color-text-secondary);}
+.ss-row{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:transparent;
+  border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;font-size:.875rem;font-weight:500;
+  color:var(--ehsq-color-text-primary);}
+.ss-row:hover{background:var(--ehsq-color-neutral-05);}
+body[data-variant="praxis"] .ss-row:hover{background:var(--px-hover);}
+.ss-row .icon{width:18px;height:18px;color:var(--ehsq-color-text-secondary);flex-shrink:0;}
+.ss-row mark{background:transparent;color:var(--ehsq-color-interactive-default);font-weight:700;}
+.ss-row[hidden]{display:none;}
+
+/* ============================== 5 · WORKSPACES POPOUT ============================== */
+.ws-pop{top:0;left:calc(100% + 8px);width:300px;max-height:70vh;overflow-y:auto;}
+.ws-item{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px;border:0;background:transparent;
+  border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;color:var(--ehsq-color-text-primary);text-decoration:none;}
+.ws-item:hover{background:var(--ehsq-color-neutral-05);text-decoration:none;}
+body[data-variant="praxis"] .ws-item:hover{background:var(--px-hover);}
+.ws-item:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:-2px;}
+.ws-item__icon{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:var(--ehsq-color-neutral-10);color:var(--ehsq-color-text-secondary);}
+.ws-item__icon .icon{width:19px;height:19px;}
+.ws-item--home .ws-item__icon{background:var(--ehsq-color-teal-10);color:var(--ehsq-color-teal-80);}
+.ws-item--new .ws-item__icon{background:transparent;color:var(--ehsq-color-interactive-default);}
+.ws-item__text{display:flex;flex-direction:column;min-width:0;flex:1;}
+.ws-item__name{font-size:.875rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ws-item__sub{font-size:.75rem;color:var(--ehsq-color-text-secondary);}
+
+/* ============================== 6 · DESCRIPTION → LARGE-CHARACTER FIELD ============================== */
+/* Praxis-only: description reads as a text-area field with See-All footer + focus bars. */
+body[data-variant="praxis"] .summary__desc{padding:12px 14px 8px;cursor:text;}
+body[data-variant="praxis"] .summary__desc:focus-within{outline:none;box-shadow:inset 0 0 0 1px rgba(127,140,160,.18),
+  0 0 0 2px color-mix(in srgb,var(--ehsq-color-interactive-default) 55%,transparent);}
+.summary__desc-foot{display:flex;align-items:center;justify-content:flex-end;padding:8px 2px 18px;}
+body[data-variant="miramar"] .summary__desc-foot{display:none;}
+.summary__desc-seeall{font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-link);background:transparent;border:0;
+  padding:0;cursor:pointer;font-family:inherit;}
+.summary__desc-seeall:hover{text-decoration:underline;}
+.summary__desc-seeall:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:2px;border-radius:2px;}
+
+/* ============================== MODULE SELECTOR · GO-TO-RECORD ENTRY ============================== */
+.sm-go{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:transparent;
+  border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;font-size:.875rem;font-weight:500;
+  color:var(--ehsq-color-text-primary);text-decoration:none;}
+.sm-go:hover{background:var(--ehsq-color-neutral-05);text-decoration:none;}
+body[data-variant="praxis"] .sm-go:hover{background:var(--px-hover);}
+.sm-go:focus-visible{outline:2px solid var(--ehsq-color-teal-50);outline-offset:-2px;}
+.sm-go .icon{width:18px;height:18px;color:var(--ehsq-color-interactive-default);flex-shrink:0;}
+.sm-go__code{font-weight:700;color:var(--ehsq-color-text-primary);}
+.sm-go__sub{font-size:.75rem;color:var(--ehsq-color-text-secondary);font-weight:500;}
+
+/* ============================== INSPECTION ITEMS TABLE ============================== */
+/* Completion due date — sits inline on the section header row, after the title */
+.insp-due{display:inline-flex;align-items:center;gap:6px;margin-left:16px;margin-right:auto;
+  font-size:.8125rem;font-weight:400;color:var(--ehsq-color-text-secondary);}
+.insp-due strong{font-weight:600;color:var(--ehsq-color-text-primary);}
+/* sub-tabs (Inspection Items / Attachments) */
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--ehsq-color-border-default);margin-bottom:12px;}
+.subtab{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;font-family:inherit;
+  font-size:.875rem;font-weight:600;color:var(--ehsq-color-text-secondary);padding:8px 12px;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;}
+.subtab:hover{color:var(--ehsq-color-text-primary);}
+.subtab--active{color:var(--ehsq-color-interactive-default);border-bottom-color:var(--ehsq-color-interactive-default);}
+.subtab__count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;
+  border-radius:var(--ehsq-radius-full);background:var(--ehsq-color-neutral-100);color:var(--ehsq-color-white);font-size:.6875rem;font-weight:700;}
+.subtab--active .subtab__count{background:var(--ehsq-color-interactive-default);}
+.subpanel{display:none;}
+.subpanel--active{display:block;}
+.insp-table__group.is-collapsed + .insp-rowset,.insp-row.is-hidden{display:none;}
+/* table toolbar row */
+.insp-tbar{display:flex;align-items:center;gap:16px;padding:6px 0 12px;flex-wrap:wrap;}
+.insp-tbar__btn{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;font-family:inherit;
+  font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-secondary);cursor:pointer;padding:4px 2px;}
+.insp-tbar__btn:hover{color:var(--ehsq-color-interactive-default);}
+.insp-tbar__btn .icon{width:18px;height:18px;}
+.insp-tbar__spacer{margin-left:auto;}
+.insp-tbar__range{font-size:.8125rem;color:var(--ehsq-color-text-secondary);}
+.insp-pager{display:inline-flex;align-items:center;gap:2px;}
+.insp-pager__btn{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 6px;
+  border:0;background:transparent;border-radius:var(--ehsq-radius-sm);font-family:inherit;font-size:.8125rem;font-weight:600;
+  color:var(--ehsq-color-text-secondary);cursor:pointer;}
+.insp-pager__btn:hover{background:var(--ehsq-color-neutral-05);color:var(--ehsq-color-text-primary);}
+.insp-pager__btn--active{background:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);}
+.insp-pager__btn--active:hover{background:var(--ehsq-color-interactive-hover);color:var(--ehsq-color-white);}
+.insp-pager__btn .icon{width:18px;height:18px;}
+/* the table itself */
+.insp-table{width:100%;border-collapse:collapse;font-size:.875rem;}
+.insp-table thead th{text-align:left;font-weight:600;font-size:.75rem;letter-spacing:.02em;color:var(--ehsq-color-text-secondary);
+  padding:8px 12px;border-bottom:1px solid var(--ehsq-color-border-default);white-space:nowrap;}
+.insp-table__group td{padding:10px 12px;font-weight:700;font-size:.8125rem;color:var(--ehsq-color-interactive-default);
+  background:var(--ehsq-color-teal-10);border-bottom:1px solid var(--ehsq-color-border-default);}
+body[data-variant="praxis"][data-theme="dark"] .insp-table__group td{background:rgba(27,131,139,.15);}
+.insp-table__group .chevron-btn{float:right;color:var(--ehsq-color-text-secondary);}
+.insp-table tbody tr.insp-row{border-bottom:1px solid var(--ehsq-color-border-default);}
+.insp-table tbody tr.insp-row:nth-child(even){background:var(--ehsq-color-neutral-05);}
+body[data-variant="praxis"][data-theme="dark"] .insp-table tbody tr.insp-row:nth-child(even){background:rgba(255,255,255,.03);}
+.insp-table td{padding:14px 12px;vertical-align:middle;}
+.insp-table .insp-q{color:var(--ehsq-color-text-primary);max-width:340px;line-height:1.4;}
+.insp-table .insp-answer{width:150px;}
+.insp-table .insp-notes{width:150px;color:var(--ehsq-color-text-secondary);}
+.insp-table .insp-actions{width:170px;text-align:right;}
+/* Record Info sub-tab (Notifications / General / Related Items) */
+.tabpanel[data-panel="info"] .subtabs{padding:12px 24px 0;margin-bottom:8px;}
+.ri-tablewrap{padding:4px 24px 16px;}
+.ri-table .ri-person{color:var(--ehsq-color-text-primary);font-weight:600;}
+.ri-table th.ri-notice,.ri-table td.ri-notice{width:220px;text-align:center;}
+.ri-empty{color:var(--ehsq-color-text-secondary);font-size: 0.875rem;padding:24px;}
+.subpanel[data-subpanel="general"] .field:first-child::before{display:none;}
+/* Toggle switch (shared component, ported from praxis-admin.css) */
+.switch{position:relative;display:inline-flex;align-items:center;width:34px;height:20px;flex-shrink:0;}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.switch .track{position:absolute;inset:0;border-radius:999px;background:var(--ehsq-color-neutral-30);transition:background var(--ehsq-motion-fast);}
+.switch .thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--ehsq-color-white);box-shadow:0 1px 2px rgba(16,36,58,.35);transition:transform var(--ehsq-motion-fast);pointer-events:none;}
+.switch input:checked + .track{background:var(--ehsq-color-teal-60);}
+.switch input:checked ~ .thumb{transform:translateX(14px);}
+/* Attachments tab: icon-grid + table views */
+.att-block__title{display:flex;align-items:center;gap:8px;padding:14px 24px 12px;font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+.att-bar{display:flex;align-items:center;gap:10px;padding:0 24px 10px;}
+.att-bar__spacer{margin-left:auto;}
+.att-view{display:inline-flex;align-items:center;gap:2px;padding:3px;background:var(--px-chip);border-radius:var(--ehsq-radius-md);}
+.att-view__btn{width:32px;height:32px;border:0;background:transparent;color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-sm);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background var(--ehsq-motion-fast),color var(--ehsq-motion-fast);}
+.att-view__btn:hover{color:var(--ehsq-color-text-primary);}
+.att-view__btn--active,.att-view__btn--active:hover{background:var(--px-surface);color:var(--ehsq-color-teal-60);box-shadow:var(--px-tool-shadow);}
+.att-view__btn .icon{width:20px;height:20px;}
+.att-upload{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:1px solid var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);background:var(--ehsq-color-surface-default);font-family:inherit;font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-primary);cursor:pointer;}
+.att-upload:hover{border-color:var(--ehsq-color-interactive-default);color:var(--ehsq-color-interactive-default);}
+.att-upload .icon{width:18px;height:18px;}
+.att-view-panel{display:none;}
+.att-view-panel--active{display:block;}
+/* icon grid */
+.att-grid{display:grid;grid-template-columns:repeat(auto-fill,150px);gap:8px;padding:8px 24px 16px;}
+.att-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:150px;height:150px;padding:12px;border:1px solid transparent;border-radius:var(--ehsq-radius-md);transition:background var(--ehsq-motion-fast),border-color var(--ehsq-motion-fast);}
+.att-card:hover{background:var(--px-hover);border-color:var(--ehsq-color-border-default);}
+.att-card__thumb{width:60px;height:60px;color:var(--ehsq-color-text-primary);}
+.att-card__thumb svg{width:100%;height:100%;}
+.att-card__name{width:100%;text-align:center;font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.att-card__actions{display:flex;gap:6px;}
+.att-card__btn{width:28px;height:28px;border:0;background:transparent;color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-sm);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.att-card__btn:hover{background:var(--px-chip);color:var(--ehsq-color-interactive-default);}
+.att-card__btn .icon{width:18px;height:18px;}
+/* table view (built on .insp-table) */
+.att-tablewrap{padding:0 24px 16px;overflow-x:auto;}
+.att-table .att-order{width:90px;}
+.att-table .att-print{width:70px;text-align:center;}
+.att-table .att-file{color:var(--ehsq-color-text-primary);font-weight:600;}
+.att-table__fileicon{width:18px;height:18px;margin-right:8px;color:var(--ehsq-color-text-secondary);vertical-align:middle;flex-shrink:0;}
+.att-table .att-file span{display:inline-flex;align-items:center;}
+.att-table th .icon{width:14px;height:14px;vertical-align:middle;margin-left:3px;color:var(--ehsq-color-text-secondary);}
+.att-table .att-actions{width:120px;text-align:right;white-space:nowrap;}
+.att-rowactions{display:inline-flex;gap:4px;justify-content:flex-end;}
+.att-rowactions .att-card__btn:hover{background:var(--px-chip);}
+.att-rowactions .att-card__btn--danger:hover{color:var(--ehsq-color-red-50);}
+/* inline rename */
+.att-rename{font-family:inherit;font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-primary);border:1px solid var(--ehsq-color-interactive-default);border-radius:var(--ehsq-radius-sm);padding:2px 6px;width:100%;max-width:220px;background:var(--ehsq-color-surface-default);}
+.att-rename:focus{outline:2px solid var(--ehsq-color-interactive-default);outline-offset:-1px;}
+.att-card__name .att-rename{text-align:center;}
+/* document links */
+.att-doclinks{border-top:1px solid var(--ehsq-color-border-default);}
+.att-add{display:inline-flex;align-items:center;gap:6px;margin:8px 24px 14px;border:0;background:transparent;font-family:inherit;font-size:.875rem;font-weight:600;color:var(--ehsq-color-interactive-default);cursor:pointer;padding:4px 2px;}
+.att-add .icon{width:20px;height:20px;}
+/* Yes / No / NA pill choices */
+.ynn{display:flex;flex-wrap:wrap;gap:8px;width:max-content;}
+/* Required-field token (replaces the old red underline) */
+.req-token{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:2px 8px;border-radius:var(--ehsq-radius-full);
+  background:var(--ehsq-color-red-10);color:var(--ehsq-color-status-danger);font-size:.6875rem;font-weight:700;
+  letter-spacing:.02em;width:max-content;}
+.ynn--answered ~ .req-token{display:none;}
+.ynn__opt{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:30px;padding:0 12px;
+  border:1px solid var(--ehsq-color-border-strong);border-radius:var(--ehsq-radius-full);background:var(--ehsq-color-surface-default);
+  font-family:inherit;font-size:.8125rem;font-weight:600;color:var(--ehsq-color-text-secondary);cursor:pointer;}
+.ynn__opt:hover{border-color:var(--ehsq-color-interactive-default);color:var(--ehsq-color-interactive-default);}
+.ynn__opt--selected{background:var(--ehsq-color-interactive-default);border-color:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);}
+.ynn__opt--selected:hover{background:var(--ehsq-color-interactive-hover);color:var(--ehsq-color-white);}
+/* Create Action button — teal ghost, icon trails the label */
+.insp-create{display:inline-flex;align-items:center;gap:6px;border:0;
+  background:transparent;border-radius:var(--ehsq-radius-full);padding:6px 10px;
+  font-family:inherit;font-size:.8125rem;font-weight:600;color:var(--ehsq-color-interactive-default);cursor:pointer;white-space:nowrap;}
+.insp-create:hover{background:var(--ehsq-color-teal-10);color:var(--ehsq-color-interactive-hover);}
+.insp-create .icon{width:18px;height:18px;color:currentColor;}
+
+/* ===================================================== CAPA — hero + record pager */
+/* Reserve the process-tree gutter so the Required Fields Guide aligns to the
+   content column's right edge (matches the inspection record); the record
+   pager floats in that reserved gutter, positioned against the centred column
+   so it lands on the column's right edge rather than the page's. Padding
+   mirrors .record so the controls share the cards' left edge. */
+.toolbar__inner{position:relative;
+  padding:0 calc(var(--ehsq-space-24) + 316px) 0 var(--ehsq-space-24);}
+/* The central content column caps at 750px; combined with the fixed guide (300)
+   and tree (300) columns plus their gaps, that sets the overall grid width, which
+   is centred on large screens and stays fluid below. The toolbar's inner column
+   shares the same centred width so the Required Fields Guide keeps aligning to
+   the content column's right edge. */
+.toolbar__inner,.record{width:100%;max-width:calc(750px + 600px + 2 * var(--ehsq-space-16) + 2 * var(--ehsq-space-24));margin-left:auto;margin-right:auto;}
+.record__content{max-width:750px;}
+/* Summary hero: priority chip + record title, divider below (matches CAPA record header) */
+.capa-hero{display:flex;flex-direction:column;align-items:stretch;gap:22px;padding:8px 24px 22px;}
+/* Priority scale: horizontal full-width segmented scale, low→critical, active level filled */
+.capa-prio{display:flex;width:100%;line-height:1;
+  border:1px solid var(--ehsq-color-border-default);border-radius:4px;overflow:hidden;}
+.capa-prio__step{flex:1;text-align:center;padding:5px 8px;
+  font-size:.8125rem;font-weight:600;letter-spacing:.02em;
+  color:var(--ehsq-color-text-secondary);background:var(--ehsq-color-neutral-05);
+  border-right:1px solid var(--ehsq-color-border-default);}
+.capa-prio__step:last-child{border-right:none;}
+.capa-prio__step--active{background:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);font-weight:700;}
+body[data-theme="dark"] .capa-prio__step{background:transparent;}
+body[data-theme="dark"] .capa-prio__step--active{background:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);}
+.capa-hero__title{font-size:var(--ehsq-type-size-xl);font-weight:600;margin:0;line-height:1.25;color:var(--ehsq-color-text-primary);letter-spacing:-.01em;}
+.capa-hero__divider{height:1px;background:var(--ehsq-color-border-default);margin:0 24px 4px;}
+/* Action Description — read-only multiline surface (reuses the summary description look) */
+.capa-desc{width:100%;min-height:96px;background:var(--ehsq-color-neutral-05);border-radius:10px;padding:12px 14px;
+  font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-neutral-90);position:relative;}
+body[data-variant="praxis"] .capa-desc{background:var(--px-surface-2);box-shadow:inset 0 0 0 1px rgba(127,140,160,.18);}
+body[data-theme="dark"] .capa-desc{color:var(--ehsq-color-text-primary);}
+.capa-desc__grip{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;color:var(--ehsq-color-neutral-40);}
+/* Record pager (top-right of the toolbar) */
+.rec-pager{position:absolute;top:50%;right:var(--ehsq-space-24);transform:translateY(-50%);display:flex;align-items:center;gap:var(--ehsq-space-4);flex-shrink:0;}
+.rec-pager__count{font-size:.875rem;font-weight:600;color:var(--ehsq-color-text-secondary);padding:0 8px;white-space:nowrap;}
+/* Generated-from link card (Assigned section) */
+.gen-card{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:4px 24px 8px;padding:16px;
+  border:1px solid var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);background:var(--ehsq-color-surface-default);}
+body[data-variant="praxis"] .gen-card{border:0;box-shadow:var(--praxis-card);}
+.gen-card__id{font-size: 0.875rem;font-weight:700;color:var(--ehsq-color-text-link);}
+.gen-card__sub{font-size:.875rem;color:var(--ehsq-color-text-secondary);margin-top:6px;}
+.gen-card__btn{flex-shrink:0;height:32px;padding:0 14px;border:1px solid var(--ehsq-color-border-default);background:var(--ehsq-color-neutral-05);
+  color:var(--ehsq-color-text-primary);border-radius:var(--ehsq-radius-sm);font-family:inherit;font-size:.8125rem;font-weight:600;white-space:nowrap;}
+.gen-card__btn:hover{background:var(--ehsq-color-neutral-10);}
+/* Workflow step — "not applicable / skipped" minus-circle marker */
+.wf__step--skip{color:var(--ehsq-color-text-secondary);}
+.wf__step--skip .icon{color:var(--ehsq-color-neutral-40);}
+
+/* ===================================================== RESPONSIVE */
+@media (max-width:1200px){
+  .record{flex-wrap:wrap;}
+  .record__guide,.record__tree{width:100%;--rail-w:100%;flex-direction:row;flex-wrap:wrap;}
+  /* :not(.panel-toggle) — the toggle is a direct child too, and although being
+     absolutely positioned keeps it out of the flex layout, min-width still
+     applies and outranks its own width:24px. It was being stretched to 240px,
+     reaching out of the collapsed 40px rail and across the content column,
+     where the column paints over its centre and swallows the click. */
+  .record__guide>*:not(.panel-toggle){flex:1;min-width:240px;}
+  .record__content{order:-1;width:100%;flex-basis:100%;}
+}
+/* ===== Attachment upload modal ===== */
+.upload-scrim{position:fixed;inset:0;background:rgba(16,24,38,.42);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);display:flex;align-items:flex-start;justify-content:center;padding-top:88px;z-index:400;}
+.upload-scrim[hidden]{display:none;}
+.upload-modal{width:580px;max-width:calc(100vw - 32px);max-height:calc(100vh - 140px);display:flex;flex-direction:column;background:var(--px-surface);border-radius:var(--ehsq-radius-lg);box-shadow:var(--px-overlay);overflow:hidden;}
+.upload-modal__head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--ehsq-color-border-default);}
+.upload-modal__title{margin:0;font-size: 1rem;font-weight:700;color:var(--ehsq-color-text-primary);}
+.upload-modal__close{width:32px;height:32px;border:0;background:transparent;color:var(--ehsq-color-text-secondary);border-radius:var(--ehsq-radius-md);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.upload-modal__close:hover{background:var(--px-chip);color:var(--ehsq-color-text-primary);}
+.upload-modal__body{padding:20px;overflow-y:auto;}
+.dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:30px 20px;border:2px dashed var(--ehsq-color-border-default);border-radius:var(--ehsq-radius-md);text-align:center;cursor:pointer;transition:border-color var(--ehsq-motion-fast),background var(--ehsq-motion-fast);}
+.dropzone:hover{border-color:var(--ehsq-color-interactive-default);background:var(--px-hover);}
+.dropzone.is-dragover{border-color:var(--ehsq-color-interactive-default);background:var(--ehsq-color-teal-10);}
+.dropzone__icon{width:40px;height:40px;color:var(--ehsq-color-interactive-default);}
+.dropzone__text{font-size: 0.875rem;font-weight:600;color:var(--ehsq-color-text-primary);}
+.dropzone__text b{color:var(--ehsq-color-interactive-default);text-decoration:underline;}
+.dropzone__hint{font-size:.8125rem;color:var(--ehsq-color-text-secondary);}
+.upload-list{margin-top:16px;}
+.upload-list__title{font-size:.75rem;font-weight:700;letter-spacing:.02em;color:var(--ehsq-color-text-secondary);margin:0 0 6px;}
+.upload-table{width:100%;border-collapse:collapse;font-size:.8125rem;}
+.upload-table th{text-align:left;font-weight:600;font-size:.6875rem;letter-spacing:.02em;color:var(--ehsq-color-text-secondary);padding:6px 8px;border-bottom:1px solid var(--ehsq-color-border-default);}
+.upload-table td{padding:9px 8px;border-bottom:1px solid var(--ehsq-color-border-default);vertical-align:middle;}
+.upload-table .u-name{color:var(--ehsq-color-text-primary);font-weight:600;word-break:break-word;}
+.upload-table .u-size{width:88px;color:var(--ehsq-color-text-secondary);white-space:nowrap;}
+.upload-table .u-status{width:140px;}
+.upload-table .u-remove{width:36px;text-align:right;}
+.u-prog{height:4px;border-radius:2px;background:var(--px-chip);overflow:hidden;margin-top:6px;}
+.u-prog__bar{height:100%;width:0;background:var(--ehsq-color-interactive-default);transition:width .15s ease;}
+.u-chip{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:var(--ehsq-radius-full);white-space:nowrap;}
+.u-chip .icon{width:14px;height:14px;}
+.u-chip--uploading{background:var(--ehsq-color-teal-10);color:var(--ehsq-color-interactive-default);}
+.u-chip--success{background:var(--ehsq-color-green-10);color:var(--ehsq-color-green-60);}
+.u-chip--error{background:var(--ehsq-color-red-10);color:var(--ehsq-color-red-60);}
+.upload-modal__foot{display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--ehsq-color-border-default);}
+.upload-modal__foot .u-count{margin-right:auto;font-size:.8125rem;color:var(--ehsq-color-text-secondary);font-weight:600;}
+.upload-btn{height:36px;padding:0 18px;border-radius:var(--ehsq-radius-md);font-family:inherit;font-size:.875rem;font-weight:700;cursor:pointer;}
+.upload-btn--ghost{border:1px solid var(--ehsq-color-border-default);background:var(--ehsq-color-surface-default);color:var(--ehsq-color-text-primary);}
+.upload-btn--ghost:hover{border-color:var(--ehsq-color-text-secondary);}
+.upload-btn--primary{border:0;background:var(--ehsq-color-interactive-default);color:var(--ehsq-color-white);}
+.upload-btn--primary:hover{filter:brightness(1.05);}
+.upload-btn--primary:disabled{opacity:.45;cursor:not-allowed;filter:none;}
+
+/* (Toolbar primary now comes from praxis-core.css.)
+*/
+body[data-variant="praxis"][data-theme="dark"] .toolbar :where(.btn--primary, .tbtn--primary) :where(.icon, svg){ color:#5CE0E5; }
+body[data-variant="praxis"][data-theme="dark"] .toolbar :where(.btn--primary, .tbtn--primary):hover{
+  background:linear-gradient(180deg,rgb(22,72,86) 0%,rgb(18,48,63) 100%);
+  box-shadow:0 0 0 .5px rgba(41,210,215,.40),0 1px 2px rgba(0,0,0,.28),
+             0 6px 14px -8px rgba(41,210,215,.32),inset 0 1px 0 rgba(255,255,255,.14);
+  filter:none;
+}
+
+/* This page's app bar + page header + toolbar end at 202px, past the 192px
+   default, so the dot grid needs its own clearance. Declared on the selector
+   praxis-core.css uses — a :root override loses to it. */
+body[data-variant="praxis"]{ --px-dot-clear:202px; }
+</style><style>
+/* =====================================================================
+   Permit-specific additions.
+
+   Everything above is record-page-capa.html's stylesheet verbatim. What
+   follows is only what a permit needs and a CAPA has no equivalent for:
+   a blocking banner, the header's status chips, a workflow that can show a
+   *current* step rather than only done/not-done, and a related-records tree
+   that is a plain hierarchy rather than the CAPA process map's accordion.
+   ===================================================================== */
+
+/* ---- Header status chips ------------------------------------------- */
+.ph-chips{ display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap; }
+.ph-chip{ display:inline-flex; align-items:center; gap:6px; font-size:.75rem; font-weight:600;
+  padding:5px 10px; border-radius:999px; background:var(--ehsq-color-surface-subtle);
+  color:var(--ehsq-color-text-secondary); white-space:nowrap; }
+.ph-chip__key{ width:8px; height:8px; border-radius:2px; background:var(--ehsq-color-red-50,#e04b5a); flex-shrink:0; }
+/* Amber, and deliberately the only warm chip in the row: it is the one that
+   says the permit cannot move yet. */
+.ph-chip--pending{ background:var(--ehsq-color-yellow-10,#fdf3d7); color:#8a5a00; }
+body[data-theme="dark"] .ph-chip--pending{ background:rgba(212,136,15,.20); color:#e6ab53; }
+.ph-chip .icon{ width:14px; height:14px; }
+
+/* ---- Blocking banner ------------------------------------------------ */
+/* A snackbar rather than a full-bleed band. Its side margins are .record's own
+   horizontal padding, so it lines up exactly with the three columns underneath
+   and reads as a message about this record — a band running to both screen
+   edges reads as a message about the whole application.
+   It states the block and then how to clear it: a banner that only says "no"
+   makes the reader hunt for the next move. */
+.permit-banner{ display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px; border-radius:10px;
+  font-size:.8125rem; line-height:1.5;
+  background:var(--ehsq-color-yellow-10,#fdf3d7); color:var(--ehsq-color-text-primary);
+  border:1px solid rgba(176,120,26,.28);
+  box-shadow:0 1px 2px rgba(16,36,58,.06), 0 4px 12px rgba(16,36,58,.05); }
+/* Same centred column as .toolbar__inner and .record, with .record's own 24px
+   gutters, so the snackbar's edges land on the guide and tree columns exactly. */
+.permit-bannerwrap{ width:100%;
+  max-width:calc(750px + 600px + 2 * var(--ehsq-space-16) + 2 * var(--ehsq-space-24));
+  margin:var(--ehsq-space-16) auto 0;
+  padding:0 var(--ehsq-space-24); }
+.permit-banner strong{ font-weight:700; }
+.permit-banner span.permit-banner__hint{ color:var(--ehsq-color-text-secondary); }
+.permit-banner .icon{ width:18px; height:18px; flex-shrink:0; margin-top:1px; color:#b0781a; }
+body[data-theme="dark"] .permit-banner{ background:rgba(212,136,15,.14);
+  border-color:rgba(230,171,83,.28); box-shadow:none; }
+body[data-theme="dark"] .permit-banner .icon{ color:#e6ab53; }
+
+/* ---- Toolbar: the two decision buttons ------------------------------ */
+/* Authorise is present but not yet available, so it is shown disabled rather
+   than hidden: the reader needs to see that authorising is the goal, and that
+   something is standing in front of it. */
+/* Authorise is the goal of this page, so it stays on screen — but while the
+   isolation certificate is outstanding it is genuinely unavailable, and a
+   button tinted with the brand colour does not say that. Disabled here means
+   neutral fill, neutral ink and no shadow: nothing about it invites a press. */
+.toolbar .tbtn--authorise[disabled]{
+  background:var(--ehsq-color-neutral-10,#eceef0);
+  color:var(--ehsq-color-neutral-40,#9aa7b4);
+  border-color:transparent; box-shadow:none; font-weight:600;
+  opacity:1; cursor:not-allowed; }
+.toolbar .tbtn--authorise[disabled] .icon,
+.toolbar .tbtn--authorise[disabled] span{ color:inherit; }
+body[data-theme="dark"] .toolbar .tbtn--authorise[disabled]{
+  background:rgba(255,255,255,.06); color:rgba(255,255,255,.32); }
+/* Specificity: the reference sheet colours .toolbar .tbtn, so a bare
+   .tbtn--reject loses to it. */
+.toolbar .tbtn--reject,
+.toolbar .tbtn--reject span{ color:var(--ehsq-color-red-60,#c62828); font-weight:600; }
+body[data-theme="dark"] .tbtn--reject{ color:#f2a2ad; }
+
+/* ---- Current task --------------------------------------------------- */
+.ctask-person{ display:flex; align-items:flex-start; gap:10px; }
+.ctask-person__av{ width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  display:grid; place-items:center; font-size:.75rem; font-weight:700; letter-spacing:.02em;
+  background:var(--ehsq-color-teal-60,#1b838b); color:#fff; }
+.ctask-person__who{ min-width:0; }
+.ctask-person__nm{ display:block; font-size:.875rem; font-weight:700; color:var(--ehsq-color-text-primary); }
+.ctask-person__rl{ display:block; font-size:.75rem; line-height:1.4; color:var(--ehsq-color-text-secondary); margin-top:1px; }
+.ctask-open{ margin-top:10px; font-size:.75rem; color:var(--ehsq-color-text-secondary); }
+
+/* ---- Workflow: a current step, not just done / not-done ------------- */
+/* record-page-capa.html only ever needs --complete and --skip, because a CAPA
+   guide shows a finished chain. A permit is mid-flight, so the step the record
+   is actually sitting on has to be legible at a glance — it is the only bold
+   row, and the only ring. */
+.wf__step--current{ font-weight:700; color:var(--ehsq-color-text-primary); }
+.wf__step--current .icon{ color:var(--ehsq-color-teal-60,#1b838b); }
+body[data-theme="dark"] .wf__step--current .icon{ color:#29d2d7; }
+/* The connector. Drawn on the step rather than between them so it cannot fall
+   out of step with the list, and stopped on the last child so the chain ends
+   at the last marker instead of trailing into the padding. */
+.wf__steps{ position:relative; }
+.wf__step{ position:relative; }
+.wf__step::after{ content:""; position:absolute; left:11px; top:24px; bottom:-6px; width:2px;
+  background:var(--ehsq-color-border-default); }
+.wf__step:last-child::after{ display:none; }
+.wf__step--complete::after{ background:var(--ehsq-color-teal-60,#1b838b); opacity:.45; }
+
+/* ---- Related records tree ------------------------------------------- */
+/* A plain hierarchy: work order, the permit under it, and the documents the
+   permit depends on. No accordion — four rows do not need one. */
+.rel__root{ display:block; font-size:.8125rem; font-weight:600; color:var(--ehsq-color-text-secondary);
+  padding:8px 0 6px; }
+.rel__kids{ list-style:none; margin:0; padding:0 0 0 6px; }
+.rel__kids .rel__kids{ padding-left:18px; }
+.rel__item{ display:block; font-size:.8125rem; padding:7px 10px; border-radius:6px;
+  color:var(--ehsq-color-text-secondary); text-decoration:none; }
+.rel__item:hover{ background:var(--ehsq-color-surface-subtle); color:var(--ehsq-color-text-primary); }
+/* The permit you are on. Amber rather than the interactive teal, so it reads as
+   "you are here" and not as "this is a link to somewhere else". */
+.rel__item--current{ background:var(--ehsq-color-yellow-10,#fdf3d7); color:var(--ehsq-color-text-primary);
+  font-weight:700; }
+.rel__item--current:hover{ background:var(--ehsq-color-yellow-10,#fdf3d7); }
+body[data-theme="dark"] .rel__item--current{ background:rgba(212,136,15,.20); color:#f0d9a8; }
+
+/* ---- Field-row extras ----------------------------------------------- */
+/* The pulled-from-SAP row is boxed because it is the one value on the page the
+   plant did not type: it arrived from another system and can go stale. */
+.field--sourced{ background:var(--ehsq-color-surface-subtle); border-radius:8px;
+  margin:0 var(--ehsq-space-16); padding-left:8px; padding-right:8px; }
+.field--sourced::before{ display:none; }
+.val-chip{ display:inline-flex; align-items:center; gap:5px; font-size:.6875rem; font-weight:600;
+  padding:3px 8px; border-radius:999px; background:var(--ehsq-color-surface-subtle);
+  color:var(--ehsq-color-text-secondary); margin-left:8px; white-space:nowrap; }
+.field--sourced .val-chip{ background:var(--ehsq-color-neutral-10,#eceef0); }
+.val-chip--ok{ background:var(--ehsq-color-green-10,#e3f3ea); color:var(--ehsq-color-green-60,#1e8e5a); }
+.val-chip--ok .icon{ width:13px; height:13px; }
+body[data-theme="dark"] .val-chip--ok{ background:rgba(70,200,138,.16); color:#46c88a; }
+
+/* ---- Card titles carry a glyph here ---------------------------------- */
+/* .card__title is a plain inline label in the reference sheet; these three
+   cards lead with an icon, so it becomes a row. */
+.card__title{ display:inline-flex; align-items:center; gap:8px; }
+.card__title .icon{ width:16px; height:16px; color:var(--ehsq-color-text-secondary); }
+
+/* ---- Theme button ----------------------------------------------------- */
+/* index.html gets these from wcm-praxis.css, which this page does not load. */
+.wcm-ico{ display:inline-grid; place-items:center; }
+.wcm-ico .icon{ width:20px; height:20px; }
+.wcm-theme__sun{ display:none; }
+body[data-theme="dark"] .wcm-theme__moon{ display:none; }
+body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
+
+/* ---- Certify checkbox ------------------------------------------------- */
+/* The one control on this page that is not a read-out. It sits unchecked and
+   belongs to the isolating authority, not to whoever is reading — the label
+   says the act, so it cannot be mistaken for a filter or a preference. */
+.certify{ display:inline-flex; align-items:center; gap:10px; font-size:.875rem;
+  color:var(--ehsq-color-text-primary); cursor:pointer; }
+.certify input{ width:16px; height:16px; accent-color:var(--ehsq-color-teal-60,#1b838b); margin:0; }
+
+/* ---- Read-only switch ------------------------------------------------ */
+/* Shown on rather than as a "Yes": the source record carries a boolean and this
+   page is a read-out of it. */
+.roswitch{ width:40px; height:22px; border-radius:999px; background:var(--ehsq-color-teal-60,#1b838b);
+  position:relative; display:inline-block; }
+.roswitch::after{ content:""; position:absolute; top:3px; right:3px; width:16px; height:16px;
+  border-radius:50%; background:#fff; }
+.roswitch--off{ background:var(--ehsq-color-neutral-40,#9aa7b4); }
+.roswitch--off::after{ right:auto; left:3px; }
+</style>
+<body data-variant="praxis" data-theme="light">
+<script>
+  /* Before first paint — the attribute lives on <body>, so this cannot run from
+     <head>. gl-theme is the key the Praxis profile menu writes. */
+  try { var t = localStorage.getItem('gl-theme'); if (t) document.body.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<a class="px-skip" href="#px-main">Skip to content</a>
+<div class="app">
+
+  <!-- ===================================================== APP BAR -->
+  <header class="appbar">
+    <a class="appbar__brand" href="index.html" aria-label="Ideagen — Home">
+      <img class="appbar__logo-img appbar__logo-img--onlight" src="assets/ideagen-logo-onlight.svg" alt="Ideagen" />
+      <img class="appbar__logo-img appbar__logo-img--ondark" src="assets/ideagen-logo-dark.svg" alt="" />
+    </a>
+    <div class="appbar__search" role="search">
+      <button class="appbar__module" type="button" aria-haspopup="menu" aria-expanded="false">
+        <span>Work clearance management</span>&nbsp;<svg class="icon--16 icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <input type="text" placeholder="Search records, people, help" aria-label="Search records, people, help" autocomplete="off" />
+      <button class="appbar__search-btn" aria-label="Search">
+        <svg class="icon--20 icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </button>
+    </div>
+    <div class="appbar__right">
+      <div class="appbar__ai">
+        <button class="appbar__mazlan" type="button">
+          <span class="mazlan-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          Mazlan
+        </button>
+      </div>
+      <button class="appbar__iconbtn" type="button" aria-label="Play guided demo">
+        <i data-lucide="play" class="icon" aria-hidden="true"></i>
+      </button>
+      <button class="appbar__iconbtn" type="button" aria-label="Notifications">
+        <i data-lucide="bell" class="icon" aria-hidden="true"></i>
+      </button>
+      <button class="appbar__iconbtn" type="button" id="themeBtn" aria-label="Switch to dark theme">
+        <span class="wcm-ico wcm-theme__moon" aria-hidden="true"><i data-lucide="moon" class="icon"></i></span>
+        <span class="wcm-ico wcm-theme__sun" aria-hidden="true"><i data-lucide="sun" class="icon"></i></span>
+      </button>
+      <button class="appbar__avatar" type="button" aria-label="Your profile">jo</button>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ======================================================= NAV RAIL -->
+    <nav class="ehsq-navrail" aria-label="Primary navigation">
+      <div class="ehsq-navrail__core">
+        <div class="ehsq-navrail__item">
+          <button class="ehsq-navrail__btn ehsq-navrail__btn--create" type="button" aria-label="Create new">
+            <i data-lucide="plus" class="icon" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="ehsq-navrail__item">
+          <a class="ehsq-navrail__btn" href="index.html" aria-label="Home"><i data-lucide="house" class="icon" aria-hidden="true"></i></a>
+        </div>
+        <div class="ehsq-navrail__item">
+          <button class="ehsq-navrail__btn" type="button" aria-label="SAP work orders"><i data-lucide="file-text" class="icon" aria-hidden="true"></i></button>
+        </div>
+        <div class="ehsq-navrail__item">
+          <button class="ehsq-navrail__btn" type="button" aria-label="Dashboard"><i data-lucide="layout-dashboard" class="icon" aria-hidden="true"></i></button>
+        </div>
+        <div class="ehsq-navrail__item">
+          <button class="ehsq-navrail__btn ehsq-navrail__btn--active" type="button" aria-current="page" aria-label="Permits"><i data-lucide="list-checks" class="icon" aria-hidden="true"></i></button>
+        </div>
+      </div>
+    </nav>
+
+    <main id="px-main" class="main">
+
+      <!-- ============================================ PAGE HEADER -->
+      <div class="pageheader">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html" aria-label="Home"><svg class="icon--16 icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a><span class="breadcrumb__sep">&rsaquo;</span>
+          <a href="#">Work clearance management</a><span class="breadcrumb__sep">&rsaquo;</span>
+          <a href="#">Permits</a><span class="breadcrumb__sep">&rsaquo;</span>
+          <span class="breadcrumb__current">WCM-00482</span>
+        </nav>
+        <div class="pageheader__titlerow">
+          <span class="pageheader__icon" aria-hidden="true"><i data-lucide="flame" class="icon"></i></span>
+          <h1 class="pageheader__title">WCM-00482 &middot; hot work on boiler B2 relief valve</h1>
+          <div class="ph-chips">
+            <span class="ph-chip"><span class="ph-chip__key" aria-hidden="true"></span>P206 hot work</span>
+            <span class="ph-chip ph-chip--pending">Isolation pending</span>
+            <span class="ph-chip"><i data-lucide="map-pin" class="icon" aria-hidden="true"></i>Boiler house, bay 3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================= TOOLBAR -->
+      <div class="toolbar" role="toolbar" aria-label="Record tools">
+        <div class="toolbar__inner">
+          <div class="toolbar__group">
+            <a class="tbtn tbtn--icon" href="index.html" aria-label="Go back">
+              <i data-lucide="arrow-left" class="icon" aria-hidden="true"></i>
+            </a>
+            <!-- Disabled until the isolation certificate is signed. The banner
+                 below says so, and the workflow column shows which step it is. -->
+            <button class="tbtn tbtn--authorise" type="button" disabled
+                    aria-describedby="permit-block">
+              <i data-lucide="circle-check" class="icon" aria-hidden="true"></i>
+              <span>Authorise</span>
+            </button>
+            <button class="tbtn tbtn--reject" type="button">
+              <span>Reject</span>
+            </button>
+            <button class="tbtn" type="button">
+              <i data-lucide="tablet-smartphone" class="icon" aria-hidden="true"></i>
+              <span>Technician view</span>
+            </button>
+          </div>
+
+          <!-- Required-fields guide, the same component the CAPA page uses. -->
+          <div class="ehsq-rfguide" style="margin-left:auto;">
+            <div class="ehsq-rfguide__bar">
+              <div class="ehsq-rfguide__track"><div class="ehsq-rfguide__fill" style="width:83%;"></div></div>
+            </div>
+            <div class="ehsq-rfguide__row">
+              <span class="ehsq-rfguide__message">5 of 6 required fields</span>
+              <button class="ehsq-rfguide__action" type="button" aria-haspopup="dialog" aria-expanded="false" data-rfguide>
+                <svg class="ehsq-rfguide__chevron" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+              </button>
+            </div>
+            <div class="ehsq-rfpopup" role="dialog" aria-label="Remaining required fields" hidden>
+              <div class="ehsq-rfpopup__header">
+                <span class="ehsq-rfpopup__count">1 Remaining <span class="ehsq-rfpopup__required">Required</span><span class="ehsq-rfpopup__asterisk">*</span> Field</span>
+                <button class="ehsq-rfpopup__close" type="button" aria-label="Close" data-rfclose>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+              </div>
+              <div class="ehsq-rfpopup__list">
+                <a class="ehsq-rfpopup__item" href="#"><span>Isolation certificate</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================= BLOCKING BANNER -->
+      <div class="permit-bannerwrap">
+        <div class="permit-banner" id="permit-block" role="status">
+          <i data-lucide="triangle-alert" class="icon" aria-hidden="true"></i>
+          <div>
+            <strong>Isolation must be certified before this permit can be authorised.</strong>
+            <span class="permit-banner__hint">The isolating authority signs the certificate on the isolation tab.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== RECORD GRID -->
+      <div class="record">
+
+        <!-- ----------------------------------- GUIDE COLUMN (left) -->
+        <aside class="record__guide" aria-label="Record guides">
+
+          <section class="card">
+            <div class="card__titlebar">
+              <span class="card__title"><i data-lucide="user-round" class="icon icon--20" aria-hidden="true"></i> Current task</span>
+            </div>
+            <div class="card__body">
+              <div class="ctask-person">
+                <span class="ctask-person__av" aria-hidden="true">ak</span>
+                <span class="ctask-person__who">
+                  <span class="ctask-person__nm">A. Kowalski</span>
+                  <span class="ctask-person__rl">Authorising person &middot; awaiting review</span>
+                </span>
+              </div>
+              <div class="ctask-open">Open 2h 14m</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card__titlebar">
+              <span class="card__title"><i data-lucide="git-branch" class="icon icon--20" aria-hidden="true"></i> Workflow</span>
+            </div>
+            <div class="card__body wf__panel">
+              <ul class="wf__steps">
+                <li class="wf__step wf__step--complete">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>
+                  Draft
+                </li>
+                <li class="wf__step wf__step--complete">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>
+                  Submitted
+                </li>
+                <li class="wf__step wf__step--skip">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                  Isolation certified
+                </li>
+                <li class="wf__step wf__step--current" aria-current="step">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+                  Authorised
+                </li>
+                <li class="wf__step wf__step--skip">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                  Live
+                </li>
+                <li class="wf__step wf__step--skip">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                  De-isolated
+                </li>
+                <li class="wf__step wf__step--skip">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                  Closed
+                </li>
+              </ul>
+            </div>
+          </section>
+        </aside>
+
+        <!-- -------------------------------- CONTENT COLUMN (center) -->
+        <section class="record__content" aria-label="Record content">
+          <div class="content-card">
+            <div class="tabs" role="tablist" aria-label="Record sections">
+              <button class="tab tab--active" role="tab" aria-selected="true" data-tab="details">Details</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="isolation">Isolation</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="risk">Risk assessment</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="audit">Audit trail</button>
+            </div>
+
+            <!-- DETAILS -->
+            <div class="tabpanel tabpanel--active" data-panel="details" role="tabpanel">
+              <div class="field">
+                <span class="field__prompt">Work order:</span>
+                <span class="field__value"><a href="#">4471029</a></span>
+              </div>
+              <div class="field field--sourced">
+                <span class="field__prompt">Source:</span>
+                <span class="field__value">
+                  <a href="#">SAP PM work order 4471029</a>
+                  <span class="val-chip">Pulled automatically</span>
+                </span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Permit type:</span>
+                <span class="field__value">P206 &mdash; hot work</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Location:</span>
+                <span class="field__value">Boiler house, bay 3</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Work window:</span>
+                <span class="field__value">12 Aug 2026, 08:00&ndash;14:00</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Description:</span>
+                <span class="field__value">Hot work on boiler B2 relief valve &mdash; grinding and welding. Fire watch required for the duration plus 30 minutes after completion.</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Isolation required:</span>
+                <span class="field__value">
+                  <span class="roswitch" role="img" aria-label="Yes"></span>
+                </span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Contractor involved:</span>
+                <span class="field__value">
+                  ThermoServ GmbH
+                  <span class="val-chip val-chip--ok"><i data-lucide="circle-check" class="icon" aria-hidden="true"></i>Induction verified</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- The other three tabs are stubs: this page exists to show the
+                 authorisation decision, and the isolation certificate is the
+                 thing standing in front of it. -->
+            <div class="tabpanel" data-panel="isolation" role="tabpanel" hidden>
+              <div class="field">
+                <span class="field__prompt">Isolation certificate:</span>
+                <span class="field__value"><a href="#">IC-0097</a></span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Energy type:</span>
+                <span class="field__value">Thermal, electrical (valve actuator)</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Lock and tag numbers:</span>
+                <span class="field__value">A214, A215</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Isolating authority:</span>
+                <span class="field__value">J. M&uuml;ller</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Certified:</span>
+                <span class="field__value">
+                  <label class="certify">
+                    <input type="checkbox" id="certify-iso">
+                    <span>Sign to certify isolation</span>
+                  </label>
+                </span>
+              </div>
+            </div>
+            <div class="tabpanel" data-panel="risk" role="tabpanel" hidden>
+              <div class="field">
+                <span class="field__prompt">Risk assessment:</span>
+                <span class="field__value"><a href="#">RA-1188</a></span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Radiological assessment:</span>
+                <span class="field__value">Not applicable to this permit type</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">Method statement:</span>
+                <span class="field__value"><a href="#">MS-0231</a></span>
+              </div>
+            </div>
+            <!-- Oldest first: an audit trail is read as a sequence, and a
+                 permit's sequence runs forwards. -->
+            <div class="tabpanel" data-panel="audit" role="tabpanel" hidden>
+              <div class="field">
+                <span class="field__prompt">12 Aug 09:14</span>
+                <span class="field__value">Submitted by M. Fischer</span>
+              </div>
+              <div class="field">
+                <span class="field__prompt">12 Aug 09:40</span>
+                <span class="field__value">Isolation planning started &mdash; J. M&uuml;ller</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ------------------------------- RELATED COLUMN (right) -->
+        <aside class="record__tree" aria-label="Related records">
+          <nav class="card" aria-label="Related records">
+            <div class="card__titlebar">
+              <span class="card__title"><i data-lucide="git-branch" class="icon icon--20" aria-hidden="true"></i> Related records</span>
+            </div>
+            <div class="card__body">
+              <span class="rel__root">Work order 4471029</span>
+              <ul class="rel__kids">
+                <li>
+                  <a class="rel__item rel__item--current" href="#" aria-current="page">Permit WCM-00482</a>
+                  <ul class="rel__kids">
+                    <li><a class="rel__item" href="#">Isolation certificate IC-0097</a></li>
+                    <li><a class="rel__item" href="#">Risk assessment RA-1188</a></li>
+                    <li><a class="rel__item" href="#">Method statement MS-0231</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </aside>
+
+      </div><!-- /.record -->
+    </main>
+  </div>
+</div>
+
+<script src="praxis-lucide.js"></script>
+<script src="praxis-navdrawer.js"></script>
+<script src="praxis-profile-menu.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* Tabs. The panels are siblings under one content card, keyed by data-tab /
+     data-panel so adding a tab is one button and one panel. */
+  var tabs = document.querySelectorAll('.tabs .tab');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (o) {
+        o.classList.toggle('tab--active', o === t);
+        o.setAttribute('aria-selected', String(o === t));
+      });
+      document.querySelectorAll('.tabpanel').forEach(function (p) {
+        var on = p.getAttribute('data-panel') === t.getAttribute('data-tab');
+        p.classList.toggle('tabpanel--active', on);
+        p.hidden = !on;
+      });
+    });
+  });
+
+  /* Required-fields popover. */
+  var rfBtn = document.querySelector('[data-rfguide]');
+  var rfPop = document.querySelector('.ehsq-rfpopup');
+  var rfClose = document.querySelector('[data-rfclose]');
+  if (rfBtn && rfPop) {
+    rfBtn.addEventListener('click', function () {
+      var open = !rfPop.hidden;
+      rfPop.hidden = open;
+      rfBtn.setAttribute('aria-expanded', String(!open));
+    });
+  }
+  if (rfClose && rfPop) {
+    rfClose.addEventListener('click', function () {
+      rfPop.hidden = true;
+      if (rfBtn) rfBtn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  /* Theme, on the same localStorage key as index.html. */
+  var themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      var dark = document.body.getAttribute('data-theme') === 'dark';
+      var next = dark ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      themeBtn.setAttribute('aria-label', dark ? 'Switch to dark theme' : 'Switch to light theme');
+      try { localStorage.setItem('gl-theme', next); } catch (e) {}
+    });
+  }
+})();
+</script>
+</body>
+</html>
