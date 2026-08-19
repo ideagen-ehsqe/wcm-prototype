@@ -1310,10 +1310,47 @@ body[data-theme="dark"] .permit-banner .icon{ color:#e6ab53; }
 /* Authorise is present but not yet available, so it is shown disabled rather
    than hidden: the reader needs to see that authorising is the goal, and that
    something is standing in front of it. */
+/* Live, it wears the system's primary fill — --px-primary-grad is the lit-teal
+   gradient with the inset top highlight, and it ships a designed dark-theme
+   counterpart, so this is the product's primary treatment rather than a bespoke
+   teal invented here.
+   The selector has to carry .toolbar to reach (0,3,1): praxis-core.css styles
+   primaries at body[data-variant] :is(...) = (0,2,1), and this page's own
+   body[data-variant="praxis"] .tbtn rule ties that specificity while loading
+   later — so the neutral tool fill was winning on source order. */
+body[data-variant="praxis"] .toolbar .tbtn--authorise:not([disabled]){
+  background:var(--px-primary-grad, linear-gradient(180deg,#1f8f97,#1b838b));
+  color:var(--px-primary-fg,#fff);
+  box-shadow:var(--px-primary-shadow);
+}
+body[data-variant="praxis"] .toolbar .tbtn--authorise:not([disabled]) .icon,
+body[data-variant="praxis"] .toolbar .tbtn--authorise:not([disabled]) span{ color:inherit; }
+body[data-variant="praxis"] .toolbar .tbtn--authorise:not([disabled]):hover{
+  filter:brightness(1.06); background:var(--px-primary-grad);
+}
+/* Dark takes the soft chip, not the bold cyan, and this is praxis-core's own
+   ruling rather than a preference of mine: it scopes the soft treatment to
+   toolbars on purpose, because "a toolbar CTA sits among neutral tools, and the
+   bold cyan made it shout across the whole bar". In-dialog CTAs keep the bold
+   fill because they sit alone on their own surface — which is why the signature
+   dialog's Sign button and this one are allowed to differ. */
+body[data-variant="praxis"][data-theme="dark"] .toolbar .tbtn--authorise:not([disabled]){
+  background:var(--px-primary-soft);
+  color:var(--px-primary-soft-fg);
+  box-shadow:var(--px-primary-soft-shadow-sm);
+}
+body[data-variant="praxis"][data-theme="dark"] .toolbar .tbtn--authorise:not([disabled]):hover{
+  background:var(--px-primary-soft-hover);
+  box-shadow:var(--px-primary-soft-shadow-hover);
+  filter:none;
+}
+
 /* Authorise is the goal of this page, so it stays on screen — but while the
    isolation certificate is outstanding it is genuinely unavailable, and a
    button tinted with the brand colour does not say that. Disabled here means
-   neutral fill, neutral ink and no shadow: nothing about it invites a press. */
+   neutral fill, neutral ink and no shadow: nothing about it invites a press.
+   Written to out-specify .tbtn--primary, so the two states cannot both apply. */
+body[data-variant="praxis"] .toolbar .tbtn--authorise[disabled],
 .toolbar .tbtn--authorise[disabled]{
   background:var(--ehsq-color-neutral-10,#eceef0);
   color:var(--ehsq-color-neutral-40,#9aa7b4);
@@ -1327,6 +1364,11 @@ body[data-theme="dark"] .toolbar .tbtn--authorise[disabled]{
    .tbtn--reject loses to it. */
 .toolbar .tbtn--reject,
 .toolbar .tbtn--reject span{ color:var(--ehsq-color-red-60,#c62828); font-weight:600; }
+/* Retired once the permit is authorised — and it has to stop looking like a live
+   danger action, or a disabled control reads as a broken one. */
+.toolbar .tbtn--reject[disabled],
+.toolbar .tbtn--reject[disabled] span{ color:var(--ehsq-color-neutral-40,#9aa7b4); }
+.toolbar .tbtn--reject[disabled]{ opacity:.7; cursor:not-allowed; box-shadow:none; }
 body[data-theme="dark"] .tbtn--reject{ color:#f2a2ad; }
 
 /* ---- Current task --------------------------------------------------- */
@@ -1402,6 +1444,105 @@ body[data-theme="dark"] .val-chip--ok{ background:rgba(70,200,138,.16); color:#4
 body[data-theme="dark"] .wcm-theme__moon{ display:none; }
 body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
 
+/* ---- Persona switcher ------------------------------------------------- */
+/* Avatar plus a short name, and the role only inside the popover. The full name
+   and role side by side is what wcm-praxis.css records as overlapping the centred
+   search pill, so the appbar gets the short form and the menu carries the rest. */
+.persona{ position:relative; }
+.persona__btn{ display:flex; align-items:center; gap:8px; padding:3px 8px 3px 3px;
+  border:0; border-radius:999px; background:transparent; font:inherit; cursor:pointer;
+  color:var(--ehsq-color-text-primary); }
+.persona__btn:hover{ background:var(--px-hover-btn,rgba(16,36,58,.05)); }
+.persona__av{ width:30px; height:30px; border-radius:50%; flex-shrink:0; display:grid;
+  place-items:center; font-size:.75rem; font-weight:700;
+  background:var(--ehsq-color-teal-60,#1b838b); color:#fff; }
+.persona__short{ font-size:.8125rem; font-weight:600; white-space:nowrap; }
+.persona__btn .icon{ width:16px; height:16px; color:var(--ehsq-color-text-secondary); }
+@media (max-width:1100px){ .persona__short{ display:none; } }
+
+.persona__pop{ position:absolute; top:calc(100% + 8px); right:0; z-index:60; min-width:270px;
+  padding:8px; border-radius:12px; background:var(--ehsq-color-surface-default,#fff);
+  border:1px solid var(--ehsq-color-border-default);
+  box-shadow:0 4px 12px rgba(16,36,58,.10), 0 16px 40px rgba(16,36,58,.14); }
+.persona__label{ margin:4px 8px 6px; font-size:.6875rem; font-weight:700; letter-spacing:.02em;
+  color:var(--ehsq-color-text-secondary); }
+/* A demonstrator control, said out loud. The switcher exists so one person can
+   walk both sides of a segregation-of-duties flow; pretending it is a normal
+   profile menu would be the one dishonest thing on the page. */
+.persona__note{ margin:8px 8px 2px; padding-top:8px; font-size:.6875rem; line-height:1.45;
+  color:var(--ehsq-color-text-secondary); border-top:1px solid var(--ehsq-color-border-default); }
+.persona__opt{ display:flex; align-items:center; gap:10px; width:100%; padding:8px;
+  border:0; border-radius:8px; background:transparent; font:inherit; text-align:left; cursor:pointer; }
+.persona__opt:hover{ background:var(--ehsq-color-surface-subtle); }
+.persona__opt .persona__av{ width:28px; height:28px; }
+.persona__opt-nm{ display:block; font-size:.8125rem; font-weight:700; color:var(--ehsq-color-text-primary); }
+.persona__opt-rl{ display:block; font-size:.6875rem; color:var(--ehsq-color-text-secondary); }
+.persona__tick{ margin-left:auto; width:16px; height:16px; color:var(--ehsq-color-teal-60,#1b838b); opacity:0; }
+.persona__opt[aria-checked="true"] .persona__tick{ opacity:1; }
+
+/* ---- Signature modal --------------------------------------------------- */
+.sig{ position:fixed; inset:0; z-index:200; display:grid; place-items:center; padding:24px; }
+.sig[hidden]{ display:none; }
+.sig__scrim{ position:absolute; inset:0; background:rgba(16,36,58,.45); }
+.sig__box{ position:relative; width:min(520px,100%); border-radius:14px;
+  background:var(--ehsq-color-surface-default,#fff); border:1px solid var(--ehsq-color-border-default);
+  box-shadow:0 24px 64px rgba(16,36,58,.28); overflow:hidden; }
+.sig__head{ padding:16px 18px 12px; border-bottom:1px solid var(--ehsq-color-border-default); }
+.sig__title{ font-size:1rem; font-weight:700; color:var(--ehsq-color-text-primary); }
+.sig__sub{ margin-top:3px; font-size:.8125rem; color:var(--ehsq-color-text-secondary); }
+.sig__body{ padding:16px 18px; }
+.sig__who{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.sig__stmt{ font-size:.8125rem; line-height:1.5; color:var(--ehsq-color-text-primary);
+  padding:10px 12px; border-radius:8px; background:var(--ehsq-color-surface-subtle);
+  margin-bottom:14px; }
+.sig__padlabel{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; }
+.sig__padlabel span{ font-size:.75rem; font-weight:600; color:var(--ehsq-color-text-secondary); }
+.sig__clear{ border:0; background:transparent; font:inherit; font-size:.75rem; font-weight:600;
+  color:var(--ehsq-color-text-link); cursor:pointer; padding:0; }
+.sig__pad{ position:relative; height:132px; border-radius:8px; background:#fff;
+  border:1px dashed var(--ehsq-color-neutral-30,#c6ccd3); overflow:hidden; }
+body[data-theme="dark"] .sig__pad{ background:#f7f9fb; }
+.sig__pad canvas{ display:block; width:100%; height:100%; touch-action:none; cursor:crosshair; }
+.sig__hint{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none;
+  font-size:.8125rem; color:var(--ehsq-color-neutral-40,#9aa7b4); }
+.sig__pad.is-drawn .sig__hint{ display:none; }
+/* A pad cannot be drawn on with a keyboard, so typing the name is a real
+   alternative rather than a fallback nobody meant. Either one signs. */
+.sig__typed{ margin-top:12px; }
+.sig__typed label{ display:block; font-size:.75rem; font-weight:600;
+  color:var(--ehsq-color-text-secondary); margin-bottom:5px; }
+.sig__typed input{ width:100%; box-sizing:border-box; height:38px; padding:0 10px;
+  font:inherit; font-size:.875rem; border-radius:8px; border:1px solid var(--ehsq-color-border-default);
+  background:var(--ehsq-color-surface-default); color:var(--ehsq-color-text-primary); }
+.sig__foot{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 18px 16px; }
+.sig__meta{ font-size:.6875rem; color:var(--ehsq-color-text-secondary); }
+.sig__acts{ display:flex; gap:8px; }
+
+/* A disabled primary button that still looks pressable is worse than no
+   affordance at all — the pad is empty and the dialog is telling you so. */
+.btn[disabled], .btn--primary[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+
+/* ---- A signed isolation ------------------------------------------------- */
+.signed{ display:flex; align-items:center; gap:12px; }
+.signed__mark{ width:120px; height:44px; border-radius:6px; background:#fff;
+  border:1px solid var(--ehsq-color-border-default); object-fit:contain; flex-shrink:0; }
+.signed__txt{ font-size:.8125rem; color:var(--ehsq-color-text-primary); }
+.signed__when{ display:block; font-size:.75rem; color:var(--ehsq-color-text-secondary); margin-top:1px; }
+/* Why a control is unavailable, beside the control. A disabled checkbox with no
+   explanation reads as a broken page rather than a rule being enforced. */
+.gate{ display:block; margin-top:6px; font-size:.75rem; color:var(--ehsq-color-text-secondary); }
+.certify input[disabled] + span{ color:var(--ehsq-color-text-disabled,#9aa7b4); }
+.certify:has(input[disabled]){ cursor:not-allowed; }
+
+/* ---- Success states ---------------------------------------------------- */
+.ph-chip--ok{ background:var(--ehsq-color-green-10,#e3f3ea); color:var(--ehsq-color-green-60,#1e8e5a); }
+body[data-theme="dark"] .ph-chip--ok{ background:rgba(70,200,138,.16); color:#46c88a; }
+.permit-banner--ok{ background:var(--ehsq-color-green-10,#e3f3ea); border-color:rgba(30,142,90,.28); }
+.permit-banner--ok .icon{ color:var(--ehsq-color-green-60,#1e8e5a); }
+body[data-theme="dark"] .permit-banner--ok{ background:rgba(70,200,138,.12); border-color:rgba(70,200,138,.28); }
+body[data-theme="dark"] .permit-banner--ok .icon{ color:#46c88a; }
+
 /* ---- Certify checkbox ------------------------------------------------- */
 /* The one control on this page that is not a read-out. It sits unchecked and
    belongs to the isolating authority, not to whoever is reading — the label
@@ -1461,7 +1602,40 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
         <span class="wcm-ico wcm-theme__moon" aria-hidden="true"><i data-lucide="moon" class="icon"></i></span>
         <span class="wcm-ico wcm-theme__sun" aria-hidden="true"><i data-lucide="sun" class="icon"></i></span>
       </button>
-      <button class="appbar__avatar" type="button" aria-label="Your profile">jo</button>
+      <!-- Persona switcher. Two people, because this permit needs two: only the
+           isolating authority can certify the isolation, and only the authorising
+           person can authorise the permit. Segregation of duties is the point of
+           the record, so a demo has to be able to stand in both places. -->
+      <div class="persona">
+        <button class="persona__btn" type="button" id="personaBtn"
+                aria-haspopup="true" aria-expanded="false" aria-controls="personaPop">
+          <span class="persona__av" id="personaAv" aria-hidden="true">jo</span>
+          <span class="persona__short" id="personaShort">Julia</span>
+          <i data-lucide="chevron-down" class="icon" aria-hidden="true"></i>
+        </button>
+        <div class="persona__pop" id="personaPop" role="menu" aria-label="Viewing as" hidden>
+          <p class="persona__label" id="personaLabel">Viewing as</p>
+          <div role="radiogroup" aria-labelledby="personaLabel">
+            <button class="persona__opt" type="button" role="radio" data-user="julia" aria-checked="true">
+              <span class="persona__av" aria-hidden="true">jo</span>
+              <span>
+                <span class="persona__opt-nm">Julia O&rsquo;Connell</span>
+                <span class="persona__opt-rl">Authorising person</span>
+              </span>
+              <i data-lucide="check" class="persona__tick" aria-hidden="true"></i>
+            </button>
+            <button class="persona__opt" type="button" role="radio" data-user="james" aria-checked="false">
+              <span class="persona__av" aria-hidden="true">jm</span>
+              <span>
+                <span class="persona__opt-nm">James M&uuml;ller</span>
+                <span class="persona__opt-rl">Isolating authority</span>
+              </span>
+              <i data-lucide="check" class="persona__tick" aria-hidden="true"></i>
+            </button>
+          </div>
+          <p class="persona__note">A demonstrator control. In the product you are one of these people, not both.</p>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -1505,7 +1679,7 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
           <h1 class="pageheader__title">WCM-00482 &middot; hot work on boiler B2 relief valve</h1>
           <div class="ph-chips">
             <span class="ph-chip"><span class="ph-chip__key" aria-hidden="true"></span>P206 hot work</span>
-            <span class="ph-chip ph-chip--pending">Isolation pending</span>
+            <span class="ph-chip ph-chip--pending" id="statusChip">Isolation pending</span>
             <span class="ph-chip"><i data-lucide="map-pin" class="icon" aria-hidden="true"></i>Boiler house, bay 3</span>
           </div>
         </div>
@@ -1520,7 +1694,7 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
             </a>
             <!-- Disabled until the isolation certificate is signed. The banner
                  below says so, and the workflow column shows which step it is. -->
-            <button class="tbtn tbtn--authorise" type="button" disabled
+            <button class="tbtn tbtn--authorise" type="button" id="authoriseBtn" disabled
                     aria-describedby="permit-block">
               <i data-lucide="circle-check" class="icon" aria-hidden="true"></i>
               <span>Authorise</span>
@@ -1537,10 +1711,10 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
           <!-- Required-fields guide, the same component the CAPA page uses. -->
           <div class="ehsq-rfguide" style="margin-left:auto;">
             <div class="ehsq-rfguide__bar">
-              <div class="ehsq-rfguide__track"><div class="ehsq-rfguide__fill" style="width:83%;"></div></div>
+              <div class="ehsq-rfguide__track"><div class="ehsq-rfguide__fill" id="rfFill" style="width:83%;"></div></div>
             </div>
             <div class="ehsq-rfguide__row">
-              <span class="ehsq-rfguide__message">5 of 6 required fields</span>
+              <span class="ehsq-rfguide__message" id="rfMsg">5 of 6 required fields</span>
               <button class="ehsq-rfguide__action" type="button" aria-haspopup="dialog" aria-expanded="false" data-rfguide>
                 <svg class="ehsq-rfguide__chevron" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
               </button>
@@ -1583,13 +1757,13 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
             </div>
             <div class="card__body">
               <div class="ctask-person">
-                <span class="ctask-person__av" aria-hidden="true">ak</span>
+                <span class="ctask-person__av" id="taskAv" aria-hidden="true">jm</span>
                 <span class="ctask-person__who">
-                  <span class="ctask-person__nm">A. Kowalski</span>
-                  <span class="ctask-person__rl">Authorising person &middot; awaiting review</span>
+                  <span class="ctask-person__nm" id="taskNm">James M&uuml;ller</span>
+                  <span class="ctask-person__rl" id="taskRl">Isolating authority &middot; certificate outstanding</span>
                 </span>
               </div>
-              <div class="ctask-open">Open 2h 14m</div>
+              <div class="ctask-open" id="taskOpen">Open 2h 14m</div>
             </div>
           </section>
 
@@ -1598,36 +1772,10 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
               <span class="card__title"><i data-lucide="git-branch" class="icon icon--20" aria-hidden="true"></i> Workflow</span>
             </div>
             <div class="card__body wf__panel">
-              <ul class="wf__steps">
-                <li class="wf__step wf__step--complete">
-                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>
-                  Draft
-                </li>
-                <li class="wf__step wf__step--complete">
-                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>
-                  Submitted
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  Isolation certified
-                </li>
-                <li class="wf__step wf__step--current" aria-current="step">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
-                  Authorised
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  Live
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  De-isolated
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  Closed
-                </li>
-              </ul>
+              <!-- Rendered from WF in the script below: the record moves through
+                   these steps twice during the demo, and three states across seven
+                   rows is twenty-one places to keep in sync by hand. -->
+              <ul class="wf__steps" id="wfSteps"></ul>
             </div>
           </section>
         </aside>
@@ -1704,15 +1852,16 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
               </div>
               <div class="field">
                 <span class="field__prompt">Isolating authority:</span>
-                <span class="field__value">J. M&uuml;ller</span>
+                <span class="field__value">James M&uuml;ller</span>
               </div>
               <div class="field">
                 <span class="field__prompt">Certified:</span>
-                <span class="field__value">
+                <span class="field__value" id="certifyCell">
                   <label class="certify">
-                    <input type="checkbox" id="certify-iso">
+                    <input type="checkbox" id="certifyChk">
                     <span>Sign to certify isolation</span>
                   </label>
+                  <span class="gate" id="certifyGate" hidden></span>
                 </span>
               </div>
             </div>
@@ -1732,14 +1881,14 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
             </div>
             <!-- Oldest first: an audit trail is read as a sequence, and a
                  permit's sequence runs forwards. -->
-            <div class="tabpanel" data-panel="audit" role="tabpanel" hidden>
+            <div class="tabpanel" data-panel="audit" role="tabpanel" id="auditPanel" hidden>
               <div class="field">
                 <span class="field__prompt">12 Aug 09:14</span>
                 <span class="field__value">Submitted by M. Fischer</span>
               </div>
               <div class="field">
                 <span class="field__prompt">12 Aug 09:40</span>
-                <span class="field__value">Isolation planning started &mdash; J. M&uuml;ller</span>
+                <span class="field__value">Isolation planning started &mdash; James M&uuml;ller</span>
               </div>
             </div>
           </div>
@@ -1772,12 +1921,60 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
   </div>
 </div>
 
+
+<!-- ===================================================== SIGNATURE DIALOG -->
+<!-- One dialog, parameterised. Certifying an isolation and authorising a permit
+     are different acts by different people, but both are a wet signature against
+     a named statement, and two near-identical dialogs would drift apart. -->
+<div class="sig" id="sigModal" hidden>
+  <div class="sig__scrim" data-sig-cancel></div>
+  <div class="sig__box" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
+    <div class="sig__head">
+      <div class="sig__title" id="sigTitle">Certify isolation</div>
+      <div class="sig__sub" id="sigSub">WCM-00482 &middot; hot work on boiler B2 relief valve</div>
+    </div>
+    <div class="sig__body">
+      <div class="sig__who">
+        <span class="persona__av" id="sigAv" aria-hidden="true">jm</span>
+        <span>
+          <span class="persona__opt-nm" id="sigNm">James M&uuml;ller</span>
+          <span class="persona__opt-rl" id="sigRl">Isolating authority</span>
+        </span>
+      </div>
+      <p class="sig__stmt" id="sigStmt"></p>
+      <div class="sig__padlabel">
+        <span>Signature</span>
+        <button class="sig__clear" type="button" id="sigClear">Clear</button>
+      </div>
+      <div class="sig__pad" id="sigPad">
+        <canvas id="sigCanvas"></canvas>
+        <span class="sig__hint">Sign here</span>
+      </div>
+      <div class="sig__typed">
+        <label for="sigTyped">Or type your full name</label>
+        <input type="text" id="sigTyped" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="sig__foot">
+      <span class="sig__meta" id="sigMeta"></span>
+      <span class="sig__acts">
+        <button class="btn" type="button" data-sig-cancel>Cancel</button>
+        <button class="btn btn--primary" type="button" id="sigConfirm" disabled>Sign</button>
+      </span>
+    </div>
+  </div>
+</div>
+
 <script src="praxis-lucide.js"></script>
 <script src="praxis-navdrawer.js"></script>
 <script src="praxis-profile-menu.js"></script>
 <script>
 (function () {
   'use strict';
+
+  var $$ = function (sel, root) {
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  };
 
   /* Tabs. The panels are siblings under one content card, keyed by data-tab /
      data-panel so adding a tab is one button and one panel. */
@@ -1814,6 +2011,340 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
     });
   }
 
+  /* ==================================================================
+     Two people, one permit.
+
+     The record enforces segregation of duties: the isolating authority signs the
+     isolation certificate, the authorising person authorises the permit, and
+     neither can do the other's job. That is the whole reason this page needs a
+     persona switcher — a demo has to be able to stand in both places, one after
+     the other, in the order the real flow runs.
+
+     State is three facts. Everything on the page — the banner, the header chip,
+     the toolbar, the workflow column, the current-task card, the required-fields
+     meter, the isolation tab and the audit trail — is a function of them, so a
+     step forward is one assignment followed by render().
+     ================================================================== */
+
+  var PEOPLE = {
+    julia: { nm: 'Julia O’Connell', short: 'Julia', init: 'jo', role: 'Authorising person' },
+    james: { nm: 'James Müller',    short: 'J. Müller', init: 'jm', role: 'Isolating authority' }
+  };
+
+  var st = { user: 'julia', certified: null, authorised: null };
+
+  /* A fixed clock, not the wall clock. This permit's work window is 08:00–14:00
+     on 12 Aug and its audit trail starts at 09:14, so stamping a signature with
+     the real time of day puts the certificate outside the window the permit is
+     valid for — and a demo run at 16:00 would certify an isolation two hours
+     after the job was due to finish. 11:28 is 09:14 plus the 2h 14m the
+     current-task card already claims, so the record stays internally consistent
+     however late in the day this is shown. */
+  var CLOCK = { certify: '11:28', authorise: '11:33' };
+
+  /* Seven steps, three states. 'gate' is the step the record is trying to reach
+     rather than the next one in the list: submitted-and-waiting sits against
+     Authorised, with isolation certification shown as the prerequisite it is. */
+  var WF = [
+    { key: 'draft',      label: 'Draft' },
+    { key: 'submitted',  label: 'Submitted' },
+    { key: 'isolation',  label: 'Isolation certified' },
+    { key: 'authorised', label: 'Authorised' },
+    { key: 'live',       label: 'Live' },
+    { key: 'deisolated', label: 'De-isolated' },
+    { key: 'closed',     label: 'Closed' }
+  ];
+
+  var ICON_DONE = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>';
+  var ICON_RING = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>';
+  var ICON_OPEN = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+
+  function stepState(key) {
+    if (key === 'draft' || key === 'submitted') return 'complete';
+    if (key === 'isolation')  return st.certified ? 'complete' : 'skip';
+    if (key === 'authorised') return st.authorised ? 'complete' : 'current';
+    if (key === 'live')       return st.authorised ? 'current' : 'skip';
+    return 'skip';
+  }
+
+  function renderWorkflow() {
+    var host = document.getElementById('wfSteps');
+    if (!host) return;
+    host.innerHTML = WF.map(function (step) {
+      var state = stepState(step.key);
+      var icon = state === 'complete' ? ICON_DONE : (state === 'current' ? ICON_RING : ICON_OPEN);
+      return '<li class="wf__step wf__step--' + state + '"' +
+             (state === 'current' ? ' aria-current="step"' : '') + '>' +
+             icon + step.label + '</li>';
+    }).join('');
+  }
+
+  function render() {
+    var me = PEOPLE[st.user];
+
+    /* --- who am I --- */
+    document.getElementById('personaAv').textContent = me.init;
+    document.getElementById('personaShort').textContent = me.short;
+    document.getElementById('personaBtn').setAttribute('aria-label', 'Viewing as ' + me.nm + ', ' + me.role);
+    $$('.persona__opt').forEach(function (o) {
+      o.setAttribute('aria-checked', String(o.getAttribute('data-user') === st.user));
+    });
+
+    /* --- header chip --- */
+    var chip = document.getElementById('statusChip');
+    chip.className = 'ph-chip ' + (st.authorised || st.certified ? 'ph-chip--ok' : 'ph-chip--pending');
+    chip.textContent = st.authorised ? 'Authorised' : (st.certified ? 'Isolation certified' : 'Isolation pending');
+
+    /* --- banner --- */
+    var ban = document.getElementById('permit-block');
+    var icon = '<i data-lucide="' + (st.certified ? 'circle-check' : 'triangle-alert') + '" class="icon" aria-hidden="true"></i>';
+    var body;
+    if (st.authorised) {
+      body = '<strong>Permit authorised by ' + PEOPLE.julia.nm + ' at ' + st.authorised.at + '.</strong> ' +
+             '<span class="permit-banner__hint">The technician can now be issued to site.</span>';
+    } else if (st.certified) {
+      body = '<strong>Isolation certified by ' + PEOPLE.james.nm + ' at ' + st.certified.at + '.</strong> ' +
+             '<span class="permit-banner__hint">This permit can now be authorised.</span>';
+    } else {
+      body = '<strong>Isolation must be certified before this permit can be authorised.</strong> ' +
+             '<span class="permit-banner__hint">The isolating authority signs the certificate on the isolation tab.</span>';
+    }
+    ban.className = 'permit-banner' + (st.certified ? ' permit-banner--ok' : '');
+    ban.innerHTML = icon + '<div>' + body + '</div>';
+
+    /* --- authorise --- */
+    /* Two different reasons to be unavailable, and the button says which: the
+       isolation is outstanding, or you are not the person who authorises. */
+    /* Reject retires once the permit is authorised: the decision has been made
+       and signed for, and un-deciding it is a different act with a different name. */
+    var rej = document.querySelector('.tbtn--reject');
+    if (rej) rej.disabled = !!st.authorised;
+
+    var auth = document.getElementById('authoriseBtn');
+    var canAuth = st.user === 'julia' && st.certified && !st.authorised;
+    auth.disabled = !canAuth;
+    /* The live styling is CSS, not a class swap: .tbtn--primary also carries
+       padding:0 18px, so adding it would widen the button the moment it went
+       live and shove the rest of the toolbar sideways. See .tbtn--authorise. */
+    auth.querySelector('span').textContent = st.authorised ? 'Authorised' : 'Authorise';
+    auth.title = st.authorised ? 'Authorised at ' + st.authorised.at
+      : (!st.certified ? 'Isolation must be certified first'
+      : (st.user !== 'julia' ? 'Only the authorising person can authorise this permit' : ''));
+
+    /* --- required fields --- */
+    document.getElementById('rfFill').style.width = st.certified ? '100%' : '83%';
+    document.getElementById('rfMsg').textContent = st.certified ? '6 of 6 required fields' : '5 of 6 required fields';
+    document.getElementById('rfFill').classList.toggle('ehsq-rfguide__fill--complete', !!st.certified);
+    document.getElementById('rfMsg').classList.toggle('ehsq-rfguide__message--complete', !!st.certified);
+
+    /* --- current task: whoever the record is waiting on --- */
+    var av = document.getElementById('taskAv'), nm = document.getElementById('taskNm'),
+        rl = document.getElementById('taskRl'), op = document.getElementById('taskOpen');
+    if (st.authorised) {
+      av.textContent = '✓'; nm.textContent = 'No open task';
+      rl.textContent = 'Permit authorised · ready to go live';
+      op.textContent = 'Closed ' + st.authorised.at;
+    } else if (st.certified) {
+      av.textContent = PEOPLE.julia.init; nm.textContent = PEOPLE.julia.nm;
+      rl.textContent = 'Authorising person · awaiting review';
+      op.textContent = 'Open since ' + st.certified.at;
+    } else {
+      av.textContent = PEOPLE.james.init; nm.textContent = PEOPLE.james.nm;
+      rl.textContent = 'Isolating authority · certificate outstanding';
+      op.textContent = 'Open 2h 14m';
+    }
+
+    renderWorkflow();
+
+    /* --- isolation tab --- */
+    var cell = document.getElementById('certifyCell');
+    if (st.certified) {
+      cell.innerHTML = '<span class="signed">' +
+        '<img class="signed__mark" src="' + st.certified.mark + '" alt="Signature of ' + PEOPLE.james.nm + '">' +
+        '<span class="signed__txt">Certified by ' + PEOPLE.james.nm +
+        '<span class="signed__when">Isolating authority · 12 Aug ' + st.certified.at + '</span></span></span>';
+    } else {
+      var chk = document.getElementById('certifyChk');
+      var gate = document.getElementById('certifyGate');
+      var mine = st.user === 'james';
+      chk.disabled = !mine;
+      chk.checked = false;
+      gate.hidden = mine;
+      gate.textContent = mine ? '' : 'Only the isolating authority can certify this isolation.';
+    }
+
+    if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+  }
+
+  /* ---------------- signature dialog ---------------- */
+  var sig = document.getElementById('sigModal');
+  var canvas = document.getElementById('sigCanvas');
+  var pad = document.getElementById('sigPad');
+  var typed = document.getElementById('sigTyped');
+  var confirmBtn = document.getElementById('sigConfirm');
+  var ctx = null, drawing = false, drawn = false, pending = null, lastFocus = null;
+
+  function sizeCanvas() {
+    var r = pad.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(r.width * dpr);
+    canvas.height = Math.round(r.height * dpr);
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#22313f';
+  }
+
+  function clearPad() {
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawn = false;
+    pad.classList.remove('is-drawn');
+    syncConfirm();
+  }
+
+  /* Either channel signs, so the button follows whichever has something in it. */
+  function syncConfirm() {
+    confirmBtn.disabled = !(drawn || typed.value.trim().length > 1);
+  }
+
+  function pt(e) {
+    var r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  canvas.addEventListener('pointerdown', function (e) {
+    drawing = true; canvas.setPointerCapture(e.pointerId);
+    var q = pt(e); ctx.beginPath(); ctx.moveTo(q.x, q.y);
+    drawn = true; pad.classList.add('is-drawn'); syncConfirm();
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!drawing) return;
+    var q = pt(e); ctx.lineTo(q.x, q.y); ctx.stroke();
+  });
+  canvas.addEventListener('pointerup', function () { drawing = false; });
+  typed.addEventListener('input', syncConfirm);
+  document.getElementById('sigClear').addEventListener('click', clearPad);
+
+  /* A typed name is rendered to the same canvas, so both channels produce one
+     artefact and the signed block downstream does not care which was used. */
+  function markFromTyped(name) {
+    clearPad();
+    ctx.save();
+    ctx.font = 'italic 30px Georgia, serif';
+    ctx.fillStyle = '#22313f';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, 16, pad.getBoundingClientRect().height / 2);
+    ctx.restore();
+    return canvas.toDataURL('image/png');
+  }
+
+  function openSig(kind) {
+    pending = kind;
+    var who = kind === 'certify' ? PEOPLE.james : PEOPLE.julia;
+    document.getElementById('sigTitle').textContent = kind === 'certify' ? 'Certify isolation' : 'Authorise permit';
+    document.getElementById('sigAv').textContent = who.init;
+    document.getElementById('sigNm').textContent = who.nm;
+    document.getElementById('sigRl').textContent = who.role;
+    document.getElementById('sigStmt').textContent = kind === 'certify'
+      ? 'I confirm the isolation described on certificate IC-0097 has been applied, proved dead and locked, and that I am the isolating authority for it.'
+      : 'I authorise permit WCM-00482 for hot work on boiler B2 relief valve, having satisfied myself that the isolation is certified and the risk assessment is current.';
+    document.getElementById('sigMeta').textContent = '12 Aug 2026, ' +
+      (kind === 'certify' ? CLOCK.certify : CLOCK.authorise);
+    confirmBtn.textContent = kind === 'certify' ? 'Sign and certify' : 'Sign and authorise';
+    typed.value = '';
+    lastFocus = document.activeElement;
+    sig.hidden = false;
+    sizeCanvas();
+    clearPad();
+    typed.focus();
+  }
+
+  function closeSig() {
+    sig.hidden = true;
+    pending = null;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  $$('[data-sig-cancel]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      /* Cancelling a certification has to put the checkbox back: the tick is a
+         request to sign, not the signature. */
+      var chk = document.getElementById('certifyChk');
+      if (chk) chk.checked = false;
+      closeSig();
+    });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !sig.hidden) {
+      var chk = document.getElementById('certifyChk');
+      if (chk) chk.checked = false;
+      closeSig();
+    }
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    var mark = drawn ? canvas.toDataURL('image/png') : markFromTyped(typed.value.trim());
+    if (pending === 'certify') {
+      st.certified = { at: CLOCK.certify, mark: mark };
+      addAudit(CLOCK.certify, 'Isolation certified — ' + PEOPLE.james.nm);
+    } else {
+      st.authorised = { at: CLOCK.authorise, mark: mark };
+      addAudit(CLOCK.authorise, 'Authorised — ' + PEOPLE.julia.nm);
+    }
+    closeSig();
+    render();
+  });
+
+  /* The audit trail runs oldest first, so a new event goes on the end. */
+  function addAudit(time, text) {
+    var host = document.getElementById('auditPanel');
+    if (!host) return;
+    var row = document.createElement('div');
+    row.className = 'field';
+    row.innerHTML = '<span class="field__prompt">12 Aug ' + time + '</span>' +
+                    '<span class="field__value">' + text + '</span>';
+    host.appendChild(row);
+  }
+
+  /* ---------------- wiring ---------------- */
+  document.getElementById('certifyChk').addEventListener('change', function (e) {
+    if (e.target.checked) openSig('certify');
+  });
+
+  document.getElementById('authoriseBtn').addEventListener('click', function () {
+    if (!this.disabled) openSig('authorise');
+  });
+
+  var pBtn = document.getElementById('personaBtn'), pPop = document.getElementById('personaPop');
+  pBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = !pPop.hidden;
+    pPop.hidden = open;
+    pBtn.setAttribute('aria-expanded', String(!open));
+  });
+  document.addEventListener('click', function () {
+    if (!pPop.hidden) { pPop.hidden = true; pBtn.setAttribute('aria-expanded', 'false'); }
+  });
+  $$('.persona__opt').forEach(function (o) {
+    o.addEventListener('click', function () {
+      st.user = o.getAttribute('data-user');
+      pPop.hidden = true;
+      pBtn.setAttribute('aria-expanded', 'false');
+      render();
+      /* Switching to the isolating authority is only useful on the tab where the
+         certificate is, so go there. */
+      if (st.user === 'james' && !st.certified) {
+        var t = document.querySelector('.tabs .tab[data-tab="isolation"]');
+        if (t) t.click();
+      }
+    });
+  });
+
+  render();
+
   /* Theme, on the same localStorage key as index.html. */
   var themeBtn = document.getElementById('themeBtn');
   if (themeBtn) {
@@ -1827,5 +2358,6 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
   }
 })();
 </script>
+
 </body>
 </html>
