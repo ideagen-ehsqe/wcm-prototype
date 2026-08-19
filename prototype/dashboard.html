@@ -3,19 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Permit WCM-00482 — Ideagen EHSQ Enterprise</title>
+<title>Work clearance management dashboard — Ideagen EHSQ Enterprise</title>
 <!--
-  Work clearance management — permit record page.
+  Work clearance management — dashboard.
 
   Built to the same baseline as groom-lake's record-page-capa.html, which is the
-  reference for this layout: the Simple Workflow Layout the live product uses —
-  a guide column carrying Current task and Workflow, a tabbed content column, and
-  a related-records column on the right. The stylesheet below is that page's,
-  taken verbatim so this permit sits in exactly the same material as every other
-  record page; the block after it carries only what a permit needs and a CAPA
-  does not.
+  reference for the chrome and the material; record-page-permit.html is where the
+  shell and the second stylesheet come from.
 
-  Reached from the Up Next card on index.html.
+  The five figures are stat tiles rather than a chart: a handful of current values
+  is a KPI row, and a five-bar chart of unrelated measures would be inventing a
+  comparison nobody asked for. There is no hero figure — the five are peers, and
+  promoting one to 48px would claim a priority the data does not have.
 -->
 <link rel="stylesheet" href="praxis-core.css">
 <link rel="stylesheet" href="praxis-profile-menu.css" />
@@ -1257,6 +1256,162 @@ body[data-variant="praxis"][data-theme="dark"] .toolbar :where(.btn--primary, .t
    default, so the dot grid needs its own clearance. Declared on the selector
    praxis-core.css uses — a :root override loses to it. */
 body[data-variant="praxis"]{ --px-dot-clear:202px; }
+/* =====================================================================
+   Dashboard additions — a KPI row and a blocked-permit snackbar.
+
+   The five headline figures are stat tiles, not a chart: a handful of
+   current values is a KPI row, and a five-bar bar chart of unrelated
+   measures would be inventing a comparison nobody asked for. There is
+   deliberately no hero figure — these five are peers, and promoting one to
+   48px would claim a priority the data does not have.
+   ===================================================================== */
+.dash{ width:100%;
+  max-width:calc(750px + 600px + 2 * var(--ehsq-space-16) + 2 * var(--ehsq-space-24));
+  margin:0 auto; padding:var(--ehsq-space-16) var(--ehsq-space-24) var(--ehsq-space-24); }
+
+.kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:var(--ehsq-space-16); }
+@media (max-width:1200px){ .kpis{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width:760px){ .kpis{ grid-template-columns:repeat(2,1fr); } }
+
+.kpi{ background:var(--ehsq-color-surface-default,#fff); border:1px solid var(--ehsq-color-border-default);
+  border-radius:12px; padding:16px; min-width:0; }
+/* Sentence case, no trailing colon — a tile label is a name, not a prompt. */
+.kpi__label{ font-size:.75rem; font-weight:600; color:var(--ehsq-color-text-secondary); }
+/* Proportional figures on purpose. tabular-nums gives every digit the width of a
+   zero, which makes a value like 11 look loose at this size; tabular belongs in
+   columns that have to align vertically, not on a standalone figure. */
+.kpi__value{ margin-top:6px; font-size:2rem; line-height:1.05; font-weight:600;
+  letter-spacing:-.02em; color:var(--ehsq-color-text-primary); font-variant-numeric:proportional-nums; }
+.kpi__value .kpi__unit{ font-size:1.125rem; font-weight:600; color:var(--ehsq-color-text-secondary); margin-left:2px; }
+/* Signed, and always against a named period — a delta with no baseline is a
+   decoration. Direction alone is not the signal: colour is direction times
+   whether up is good, so more permits waiting is red and more authorised is green. */
+.kpi__delta{ margin-top:8px; font-size:.75rem; font-weight:600; color:var(--ehsq-color-text-secondary);
+  display:flex; align-items:center; gap:5px; }
+.kpi__delta--good{ color:var(--ehsq-color-green-60,#1e8e5a); }
+.kpi__delta--bad{ color:var(--ehsq-color-red-60,#c62828); }
+.kpi__delta .icon{ width:14px; height:14px; }
+.kpi__delta--none{ visibility:hidden; }
+body[data-theme="dark"] .kpi{ background:var(--ehsq-color-surface-default); }
+body[data-theme="dark"] .kpi__delta--good{ color:#46c88a; }
+body[data-theme="dark"] .kpi__delta--bad{ color:#f2a2ad; }
+
+/* ---- Panels ---------------------------------------------------------- */
+.dash-row{ display:grid; grid-template-columns:1.55fr 1fr; gap:var(--ehsq-space-16);
+  margin-top:var(--ehsq-space-16); }
+@media (max-width:1100px){ .dash-row{ grid-template-columns:1fr; } }
+/* Flex column so the body can claim the leftover height — see .bars and
+   .arealist, which distribute their rows into it. Without that, the shorter of
+   the two panels in a row stretches to its neighbour and leaves a dead gap at
+   the bottom rather than sitting evenly. */
+.panel{ background:var(--ehsq-color-surface-default,#fff); border:1px solid var(--ehsq-color-border-default);
+  border-radius:12px; padding:16px; min-width:0; display:flex; flex-direction:column; }
+/* Scoped to stacked panels only. Unscoped, this put a 16px top margin on the
+   second panel *inside* .dash-row, which is what pushed the two side-by-side
+   cards out of alignment — they are grid siblings and share a row. */
+.dash-row + .panel,
+.panel + .dash-row{ margin-top:var(--ehsq-space-16); }
+.panel__hdr{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+.panel__title{ font-size:.9375rem; font-weight:700; color:var(--ehsq-color-text-primary); }
+/* The aux line is where the chart's denominator lives. A bar chart of counts with
+   no total leaves the reader guessing what the longest bar means. */
+.panel__aux{ font-size:.75rem; color:var(--ehsq-color-text-secondary); }
+
+/* ---- Horizontal bars ------------------------------------------------- */
+/* One series, so one hue for every bar — the category is named on the left, and
+   a second colour per row would encode nothing the label does not already say.
+   Horizontal because the labels are long: "Confined space (P204)" does not fit
+   under a column.
+   No track behind the fill: a track implies a limit, and there is no limit here.
+   Bars are compared against the longest, which is the honest reading. */
+.bars{ display:grid; gap:2px; flex:1; align-content:space-between; }
+.bar{ display:grid; grid-template-columns:150px 1fr 30px; align-items:center; gap:12px;
+  padding:7px 8px; margin:0 -8px; border-radius:8px; position:relative; }
+.bar:hover{ background:var(--ehsq-color-surface-subtle); }
+.bar__label{ font-size:.8125rem; color:var(--ehsq-color-text-secondary); min-width:0; }
+.bar__labeltext{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar__plot{ min-width:0; }
+/* Thin mark, rounded only on the data end, anchored to the baseline. */
+.bar__fill{ display:block; height:10px; border-radius:0 4px 4px 0;
+  background:var(--ehsq-color-teal-60,#1b838b); min-width:3px; }
+.bar__val{ font-size:.8125rem; font-weight:700; color:var(--ehsq-color-text-primary);
+  text-align:right; font-variant-numeric:tabular-nums; }
+body[data-theme="dark"] .bar__fill{ background:#29d2d7; }
+
+/* ---- Live activity by area: a list, not a chart ---------------------- */
+/* Five areas with five counts do not need a second bar chart beside the first.
+   As a list the counts read as a column of figures — which is also the one place
+   tabular figures belong, so they align on the decimal-free right edge — and the
+   row has somewhere to put a state without stealing width from a mark. */
+.arealist{ list-style:none; margin:0; padding:0; flex:1;
+  display:flex; flex-direction:column; justify-content:space-between; }
+.arealist__row{ display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:10px;
+  padding:11px 8px; margin:0 -8px; border-radius:8px;
+  border-top:1px solid var(--ehsq-color-border-default); }
+.arealist__row:first-child{ border-top:0; }
+.arealist__row:hover{ background:var(--ehsq-color-surface-subtle); }
+.arealist__name{ font-size:.875rem; color:var(--ehsq-color-text-primary); min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.arealist__count{ font-size:.9375rem; font-weight:700; color:var(--ehsq-color-text-primary);
+  font-variant-numeric:tabular-nums; min-width:16px; text-align:right; }
+/* Status colour is reserved for state, and it ships with a label beside it —
+   never colour alone. */
+.chip-warn{ display:inline-flex; align-items:center; gap:4px;
+  font-size:.6875rem; font-weight:700; padding:2px 7px; border-radius:999px;
+  background:var(--ehsq-color-yellow-10,#fdf3d7); color:#8a5a00; white-space:nowrap; }
+.chip-warn .icon{ width:12px; height:12px; }
+body[data-theme="dark"] .chip-warn{ background:rgba(212,136,15,.20); color:#e6ab53; }
+
+/* Hover tooltip. The bars already show their value, so the tooltip earns its
+   place by carrying the share of the total instead of repeating the count. */
+.bar__tip{ position:absolute; left:162px; bottom:calc(100% - 4px); z-index:5;
+  padding:6px 9px; border-radius:8px; font-size:.75rem; font-weight:600; white-space:nowrap;
+  background:var(--ehsq-color-neutral-90,#22313f); color:#fff;
+  opacity:0; visibility:hidden; transition:opacity .12s ease; pointer-events:none; }
+.bar:hover .bar__tip{ opacity:1; visibility:visible; }
+
+/* ---- Recent activity ------------------------------------------------- */
+/* Newest first. An audit trail on a single record runs forwards because it is a
+   sequence; a cross-record feed runs backwards because the reader wants the last
+   thing that happened. */
+.feed{ display:grid; }
+.feed__row{ display:grid; grid-template-columns:78px 26px 1fr auto; align-items:baseline; gap:12px;
+  padding:11px 8px; margin:0 -8px; border-radius:8px; border-top:1px solid var(--ehsq-color-border-default); }
+.feed__row:first-child{ border-top:0; }
+.feed__row:hover{ background:var(--ehsq-color-surface-subtle); }
+.feed__time{ font-size:.75rem; color:var(--ehsq-color-text-secondary); font-variant-numeric:tabular-nums; }
+.feed__dot{ display:grid; place-items:center; }
+.feed__dot .icon{ width:16px; height:16px; color:var(--ehsq-color-text-secondary); }
+.feed__dot--ok .icon{ color:var(--ehsq-color-green-60,#1e8e5a); }
+.feed__dot--warn .icon{ color:var(--ehsq-color-yellow-60,#d4880f); }
+.feed__what{ font-size:.8125rem; color:var(--ehsq-color-text-primary); }
+.feed__who{ color:var(--ehsq-color-text-secondary); }
+.feed__ref{ font-size:.8125rem; font-weight:600; color:var(--ehsq-color-text-link); text-decoration:none; white-space:nowrap; }
+.feed__ref:hover{ text-decoration:underline; }
+body[data-theme="dark"] .feed__dot--ok .icon{ color:#46c88a; }
+body[data-theme="dark"] .feed__dot--warn .icon{ color:#e6ab53; }
+
+/* ---- Blocked-permit snackbar ---------------------------------------- */
+/* Same material as the permit page's banner so the two read as one voice,
+   with the action on the right: the message names the blockage, the link goes
+   to the only place it can be cleared. */
+.blocked{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin-bottom:var(--ehsq-space-16);
+  padding:12px 14px; border-radius:10px; font-size:.8125rem; line-height:1.5;
+  background:var(--ehsq-color-yellow-10,#fdf3d7); color:var(--ehsq-color-text-primary);
+  border:1px solid rgba(176,120,26,.28);
+  box-shadow:0 1px 2px rgba(16,36,58,.06), 0 4px 12px rgba(16,36,58,.05); }
+.blocked > .icon{ width:18px; height:18px; flex-shrink:0; color:#b0781a; }
+.blocked__body{ min-width:0; flex:1; }
+.blocked__what{ font-weight:700; }
+.blocked__where{ color:var(--ehsq-color-text-secondary); }
+.blocked__link{ display:inline-flex; align-items:center; gap:6px; flex-shrink:0;
+  font-weight:700; color:var(--ehsq-color-text-link); text-decoration:none; }
+.blocked__link:hover{ text-decoration:underline; }
+.blocked__link .icon{ width:15px; height:15px; }
+body[data-theme="dark"] .blocked{ background:rgba(212,136,15,.14);
+  border-color:rgba(230,171,83,.28); box-shadow:none; }
+body[data-theme="dark"] .blocked > .icon{ color:#e6ab53; }
 </style><style>
 /* =====================================================================
    Permit-specific additions.
@@ -1482,10 +1637,10 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
           <button class="ehsq-navrail__btn" type="button" aria-label="SAP work orders"><i data-lucide="file-text" class="icon" aria-hidden="true"></i></button>
         </div>
         <div class="ehsq-navrail__item">
-          <a class="ehsq-navrail__btn" href="dashboard.html" aria-label="Dashboard"><i data-lucide="layout-dashboard" class="icon" aria-hidden="true"></i></a>
+          <a class="ehsq-navrail__btn ehsq-navrail__btn--active" href="dashboard.html" aria-current="page" aria-label="Dashboard"><i data-lucide="layout-dashboard" class="icon" aria-hidden="true"></i></a>
         </div>
         <div class="ehsq-navrail__item">
-          <button class="ehsq-navrail__btn ehsq-navrail__btn--active" type="button" aria-current="page" aria-label="Permits"><i data-lucide="list-checks" class="icon" aria-hidden="true"></i></button>
+          <button class="ehsq-navrail__btn" type="button" aria-label="Permits"><i data-lucide="list-checks" class="icon" aria-hidden="true"></i></button>
         </div>
       </div>
     </nav>
@@ -1497,277 +1652,215 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <a href="index.html" aria-label="Home"><svg class="icon--16 icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a><span class="breadcrumb__sep">&rsaquo;</span>
           <a href="#">Work clearance management</a><span class="breadcrumb__sep">&rsaquo;</span>
-          <a href="#">Permits</a><span class="breadcrumb__sep">&rsaquo;</span>
-          <span class="breadcrumb__current">WCM-00482</span>
+          <span class="breadcrumb__current">Dashboard</span>
         </nav>
         <div class="pageheader__titlerow">
-          <span class="pageheader__icon" aria-hidden="true"><i data-lucide="flame" class="icon"></i></span>
-          <h1 class="pageheader__title">WCM-00482 &middot; hot work on boiler B2 relief valve</h1>
+          <span class="pageheader__icon" aria-hidden="true"><i data-lucide="layout-dashboard" class="icon"></i></span>
+          <h1 class="pageheader__title">Work clearance management dashboard</h1>
           <div class="ph-chips">
-            <span class="ph-chip"><span class="ph-chip__key" aria-hidden="true"></span>P206 hot work</span>
-            <span class="ph-chip ph-chip--pending">Isolation pending</span>
-            <span class="ph-chip"><i data-lucide="map-pin" class="icon" aria-hidden="true"></i>Boiler house, bay 3</span>
+            <span class="ph-chip"><i data-lucide="map-pin" class="icon" aria-hidden="true"></i>Urenco Deutschland, Gronau</span>
+            <span class="ph-chip"><i data-lucide="clock" class="icon" aria-hidden="true"></i>Updated just now</span>
           </div>
         </div>
       </div>
 
-      <!-- ================================================= TOOLBAR -->
-      <div class="toolbar" role="toolbar" aria-label="Record tools">
-        <div class="toolbar__inner">
-          <div class="toolbar__group">
-            <a class="tbtn tbtn--icon" href="index.html" aria-label="Go back">
-              <i data-lucide="arrow-left" class="icon" aria-hidden="true"></i>
-            </a>
-            <!-- Disabled until the isolation certificate is signed. The banner
-                 below says so, and the workflow column shows which step it is. -->
-            <button class="tbtn tbtn--authorise" type="button" disabled
-                    aria-describedby="permit-block">
-              <i data-lucide="circle-check" class="icon" aria-hidden="true"></i>
-              <span>Authorise</span>
-            </button>
-            <button class="tbtn tbtn--reject" type="button">
-              <span>Reject</span>
-            </button>
-            <button class="tbtn" type="button">
-              <i data-lucide="tablet-smartphone" class="icon" aria-hidden="true"></i>
-              <span>Technician view</span>
-            </button>
-          </div>
+      <div class="dash">
 
-          <!-- Required-fields guide, the same component the CAPA page uses. -->
-          <div class="ehsq-rfguide" style="margin-left:auto;">
-            <div class="ehsq-rfguide__bar">
-              <div class="ehsq-rfguide__track"><div class="ehsq-rfguide__fill" style="width:83%;"></div></div>
-            </div>
-            <div class="ehsq-rfguide__row">
-              <span class="ehsq-rfguide__message">5 of 6 required fields</span>
-              <button class="ehsq-rfguide__action" type="button" aria-haspopup="dialog" aria-expanded="false" data-rfguide>
-                <svg class="ehsq-rfguide__chevron" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
-              </button>
-            </div>
-            <div class="ehsq-rfpopup" role="dialog" aria-label="Remaining required fields" hidden>
-              <div class="ehsq-rfpopup__header">
-                <span class="ehsq-rfpopup__count">1 Remaining <span class="ehsq-rfpopup__required">Required</span><span class="ehsq-rfpopup__asterisk">*</span> Field</span>
-                <button class="ehsq-rfpopup__close" type="button" aria-label="Close" data-rfclose>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </button>
-              </div>
-              <div class="ehsq-rfpopup__list">
-                <a class="ehsq-rfpopup__item" href="#"><span>Isolation certificate</span></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================================================= BLOCKING BANNER -->
-      <div class="permit-bannerwrap">
-        <div class="permit-banner" id="permit-block" role="status">
+        <!-- ===================================== BLOCKED PERMIT -->
+        <div class="blocked" role="status">
           <i data-lucide="triangle-alert" class="icon" aria-hidden="true"></i>
-          <div>
-            <strong>Isolation must be certified before this permit can be authorised.</strong>
-            <span class="permit-banner__hint">The isolating authority signs the certificate on the isolation tab.</span>
+          <div class="blocked__body">
+            <span class="blocked__what">WCM-00482 is blocked on isolation certification</span>
+            <span class="blocked__where">&mdash; P206 hot work, boiler house bay 3</span>
           </div>
+          <a class="blocked__link" href="record-page-permit.html">
+            Open permit
+            <i data-lucide="arrow-right" class="icon" aria-hidden="true"></i>
+          </a>
         </div>
-      </div>
 
-      <!-- ============================================== RECORD GRID -->
-      <div class="record">
+        <!-- ===================================== HEADLINE FIGURES -->
+        <!-- Five peers. Read left to right they are the queue: what is open, what
+             is stuck with a person, what is physically live on the plant, what got
+             through today, and how long the whole thing takes. -->
+        <div class="kpis">
 
-        <!-- ----------------------------------- GUIDE COLUMN (left) -->
-        <aside class="record__guide" aria-label="Record guides">
-
-          <section class="card">
-            <div class="card__titlebar">
-              <span class="card__title"><i data-lucide="user-round" class="icon icon--20" aria-hidden="true"></i> Current task</span>
+          <div class="kpi">
+            <div class="kpi__label">Open permits</div>
+            <div class="kpi__value">24</div>
+            <!-- Neither direction is good news here: more open permits is more
+                 work in flight, not a win or a failure. Neutral ink. -->
+            <div class="kpi__delta">
+              <i data-lucide="arrow-up-right" class="icon" aria-hidden="true"></i>
+              3 vs last week
             </div>
-            <div class="card__body">
-              <div class="ctask-person">
-                <span class="ctask-person__av" aria-hidden="true">ak</span>
-                <span class="ctask-person__who">
-                  <span class="ctask-person__nm">A. Kowalski</span>
-                  <span class="ctask-person__rl">Authorising person &middot; awaiting review</span>
-                </span>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi__label">Waiting authorisation</div>
+            <div class="kpi__value">6</div>
+            <div class="kpi__delta kpi__delta--bad">
+              <i data-lucide="arrow-up-right" class="icon" aria-hidden="true"></i>
+              2 vs yesterday
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi__label">Live isolations</div>
+            <div class="kpi__value">11</div>
+            <!-- A point-in-time count of what is energised-off right now. A
+                 week-on-week delta would imply a trend that means nothing. -->
+            <div class="kpi__delta kpi__delta--none">&nbsp;</div>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi__label">Authorised today</div>
+            <div class="kpi__value">8</div>
+            <div class="kpi__delta kpi__delta--good">
+              <i data-lucide="arrow-up-right" class="icon" aria-hidden="true"></i>
+              2 vs yesterday
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi__label">Average cycle time</div>
+            <div class="kpi__value">4<span class="kpi__unit">h</span> 20<span class="kpi__unit">m</span></div>
+            <div class="kpi__delta kpi__delta--good">
+              <i data-lucide="arrow-down-right" class="icon" aria-hidden="true"></i>
+              35m vs last week
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===================================== TWO-UP: what and where -->
+        <div class="dash-row">
+
+          <!-- Permit type. Five named categories, one measure: a horizontal bar
+               chart, sorted longest first so the ranking is the shape. -->
+          <section class="panel" aria-labelledby="pt-t">
+            <div class="panel__hdr">
+              <span class="panel__title" id="pt-t">Permit type</span>
+              <span class="panel__aux">24 open permits</span>
+            </div>
+            <div class="bars">
+              <div class="bar">
+                <span class="bar__label"><span class="bar__labeltext">Hot work (P206)</span></span>
+                <span class="bar__plot"><span class="bar__fill" style="width:100%" aria-hidden="true"></span></span>
+                <span class="bar__val">7</span>
+                <span class="bar__tip" aria-hidden="true">7 of 24 &middot; 29%</span>
               </div>
-              <div class="ctask-open">Open 2h 14m</div>
+              <div class="bar">
+                <span class="bar__label"><span class="bar__labeltext">Isolation (P205)</span></span>
+                <span class="bar__plot"><span class="bar__fill" style="width:85.7%" aria-hidden="true"></span></span>
+                <span class="bar__val">6</span>
+                <span class="bar__tip" aria-hidden="true">6 of 24 &middot; 25%</span>
+              </div>
+              <div class="bar">
+                <span class="bar__label"><span class="bar__labeltext">Confined space (P204)</span></span>
+                <span class="bar__plot"><span class="bar__fill" style="width:57.1%" aria-hidden="true"></span></span>
+                <span class="bar__val">4</span>
+                <span class="bar__tip" aria-hidden="true">4 of 24 &middot; 17%</span>
+              </div>
+              <div class="bar">
+                <span class="bar__label"><span class="bar__labeltext">Scaffolding (P208)</span></span>
+                <span class="bar__plot"><span class="bar__fill" style="width:57.1%" aria-hidden="true"></span></span>
+                <span class="bar__val">4</span>
+                <span class="bar__tip" aria-hidden="true">4 of 24 &middot; 17%</span>
+              </div>
+              <div class="bar">
+                <span class="bar__label"><span class="bar__labeltext">Work permit (P203)</span></span>
+                <span class="bar__plot"><span class="bar__fill" style="width:42.9%" aria-hidden="true"></span></span>
+                <span class="bar__val">3</span>
+                <span class="bar__tip" aria-hidden="true">3 of 24 &middot; 13%</span>
+              </div>
             </div>
           </section>
 
-          <section class="card">
-            <div class="card__titlebar">
-              <span class="card__title"><i data-lucide="git-branch" class="icon icon--20" aria-hidden="true"></i> Workflow</span>
+          <!-- Live activity by area. A list rather than a second bar chart: the
+               question is "where is work happening, and where is it at risk",
+               which is a roll call with a state against one entry — not a shape
+               to compare. The aux line names the total so this cannot be misread
+               against the 11 live isolations in the KPI row; isolations are a
+               subset of what is counted here. -->
+          <section class="panel" aria-labelledby="la-t">
+            <div class="panel__hdr">
+              <span class="panel__title" id="la-t">Live activity by area</span>
+              <span class="panel__aux">17 permits and isolations live now</span>
             </div>
-            <div class="card__body wf__panel">
-              <ul class="wf__steps">
-                <li class="wf__step wf__step--complete">
-                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>
-                  Draft
-                </li>
-                <li class="wf__step wf__step--complete">
-                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM9.29 16.29 5.7 12.7a.996.996 0 1 1 1.41-1.41L10 14.17l6.88-6.88a.996.996 0 1 1 1.41 1.41l-7.59 7.59a.996.996 0 0 1-1.41 0z"/></svg>
-                  Submitted
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  Isolation certified
-                </li>
-                <li class="wf__step wf__step--current" aria-current="step">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
-                  Authorised
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  Live
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  De-isolated
-                </li>
-                <li class="wf__step wf__step--skip">
-                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                  Closed
-                </li>
-              </ul>
-            </div>
+            <ul class="arealist">
+              <li class="arealist__row">
+                <span class="arealist__name">Boiler house</span>
+                <span class="chip-warn"><i data-lucide="clock" class="icon" aria-hidden="true"></i>2 expiring &lt; 4h</span>
+                <span class="arealist__count">5</span>
+              </li>
+              <li class="arealist__row">
+                <span class="arealist__name">Cascade hall</span>
+                <span></span>
+                <span class="arealist__count">4</span>
+              </li>
+              <li class="arealist__row">
+                <span class="arealist__name">Turbine hall</span>
+                <span></span>
+                <span class="arealist__count">3</span>
+              </li>
+              <li class="arealist__row">
+                <span class="arealist__name">Tank farm</span>
+                <span></span>
+                <span class="arealist__count">3</span>
+              </li>
+              <li class="arealist__row">
+                <span class="arealist__name">Workshop</span>
+                <span></span>
+                <span class="arealist__count">2</span>
+              </li>
+            </ul>
           </section>
-        </aside>
+        </div>
 
-        <!-- -------------------------------- CONTENT COLUMN (center) -->
-        <section class="record__content" aria-label="Record content">
-          <div class="content-card">
-            <div class="tabs" role="tablist" aria-label="Record sections">
-              <button class="tab tab--active" role="tab" aria-selected="true" data-tab="details">Details</button>
-              <button class="tab" role="tab" aria-selected="false" data-tab="isolation">Isolation</button>
-              <button class="tab" role="tab" aria-selected="false" data-tab="risk">Risk assessment</button>
-              <button class="tab" role="tab" aria-selected="false" data-tab="audit">Audit trail</button>
+        <!-- ===================================== RECENT ACTIVITY -->
+        <section class="panel" aria-labelledby="ra-t">
+          <div class="panel__hdr">
+            <span class="panel__title" id="ra-t">Recent activity</span>
+            <span class="panel__aux">Across all permits today</span>
+          </div>
+          <div class="feed">
+            <div class="feed__row">
+              <span class="feed__time">12:22</span>
+              <span class="feed__dot feed__dot--ok"><i data-lucide="circle-check" class="icon" aria-hidden="true"></i></span>
+              <span class="feed__what">Closed out &mdash; P204 confined space, tank farm <span class="feed__who">&middot; R. Vo&szlig;</span></span>
+              <a class="feed__ref" href="#">WCM-00468</a>
             </div>
-
-            <!-- DETAILS -->
-            <div class="tabpanel tabpanel--active" data-panel="details" role="tabpanel">
-              <div class="field">
-                <span class="field__prompt">Work order:</span>
-                <span class="field__value"><a href="#">4471029</a></span>
-              </div>
-              <div class="field field--sourced">
-                <span class="field__prompt">Source:</span>
-                <span class="field__value">
-                  <a href="#">SAP PM work order 4471029</a>
-                  <span class="val-chip">Pulled automatically</span>
-                </span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Permit type:</span>
-                <span class="field__value">P206 &mdash; hot work</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Location:</span>
-                <span class="field__value">Boiler house, bay 3</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Work window:</span>
-                <span class="field__value">12 Aug 2026, 08:00&ndash;14:00</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Description:</span>
-                <span class="field__value">Hot work on boiler B2 relief valve &mdash; grinding and welding. Fire watch required for the duration plus 30 minutes after completion.</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Isolation required:</span>
-                <span class="field__value">
-                  <span class="roswitch" role="img" aria-label="Yes"></span>
-                </span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Contractor involved:</span>
-                <span class="field__value">
-                  ThermoServ GmbH
-                  <span class="val-chip val-chip--ok"><i data-lucide="circle-check" class="icon" aria-hidden="true"></i>Induction verified</span>
-                </span>
-              </div>
+            <div class="feed__row">
+              <span class="feed__time">11:47</span>
+              <span class="feed__dot feed__dot--ok"><i data-lucide="circle-check" class="icon" aria-hidden="true"></i></span>
+              <span class="feed__what">Authorised &mdash; P205 isolation, cascade hall <span class="feed__who">&middot; A. Kowalski</span></span>
+              <a class="feed__ref" href="#">WCM-00479</a>
             </div>
-
-            <!-- The other three tabs are stubs: this page exists to show the
-                 authorisation decision, and the isolation certificate is the
-                 thing standing in front of it. -->
-            <div class="tabpanel" data-panel="isolation" role="tabpanel" hidden>
-              <div class="field">
-                <span class="field__prompt">Isolation certificate:</span>
-                <span class="field__value"><a href="#">IC-0097</a></span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Energy type:</span>
-                <span class="field__value">Thermal, electrical (valve actuator)</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Lock and tag numbers:</span>
-                <span class="field__value">A214, A215</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Isolating authority:</span>
-                <span class="field__value">J. M&uuml;ller</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Certified:</span>
-                <span class="field__value">
-                  <label class="certify">
-                    <input type="checkbox" id="certify-iso">
-                    <span>Sign to certify isolation</span>
-                  </label>
-                </span>
-              </div>
+            <div class="feed__row">
+              <span class="feed__time">10:36</span>
+              <span class="feed__dot feed__dot--ok"><i data-lucide="circle-check" class="icon" aria-hidden="true"></i></span>
+              <span class="feed__what">Isolation certified &mdash; IC-0094 <span class="feed__who">&middot; J. M&uuml;ller</span></span>
+              <a class="feed__ref" href="#">WCM-00477</a>
             </div>
-            <div class="tabpanel" data-panel="risk" role="tabpanel" hidden>
-              <div class="field">
-                <span class="field__prompt">Risk assessment:</span>
-                <span class="field__value"><a href="#">RA-1188</a></span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Radiological assessment:</span>
-                <span class="field__value">Not applicable to this permit type</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">Method statement:</span>
-                <span class="field__value"><a href="#">MS-0231</a></span>
-              </div>
+            <!-- These last two are the same two events the permit page's audit
+                 trail carries, to the minute. One plant, one set of facts. -->
+            <div class="feed__row">
+              <span class="feed__time">09:40</span>
+              <span class="feed__dot feed__dot--warn"><i data-lucide="loader" class="icon" aria-hidden="true"></i></span>
+              <span class="feed__what">Isolation planning started <span class="feed__who">&middot; J. M&uuml;ller</span></span>
+              <a class="feed__ref" href="record-page-permit.html">WCM-00482</a>
             </div>
-            <!-- Oldest first: an audit trail is read as a sequence, and a
-                 permit's sequence runs forwards. -->
-            <div class="tabpanel" data-panel="audit" role="tabpanel" hidden>
-              <div class="field">
-                <span class="field__prompt">12 Aug 09:14</span>
-                <span class="field__value">Submitted by M. Fischer</span>
-              </div>
-              <div class="field">
-                <span class="field__prompt">12 Aug 09:40</span>
-                <span class="field__value">Isolation planning started &mdash; J. M&uuml;ller</span>
-              </div>
+            <div class="feed__row">
+              <span class="feed__time">09:14</span>
+              <span class="feed__dot"><i data-lucide="send" class="icon" aria-hidden="true"></i></span>
+              <span class="feed__what">Submitted for authorisation <span class="feed__who">&middot; M. Fischer</span></span>
+              <a class="feed__ref" href="record-page-permit.html">WCM-00482</a>
             </div>
           </div>
         </section>
 
-        <!-- ------------------------------- RELATED COLUMN (right) -->
-        <aside class="record__tree" aria-label="Related records">
-          <nav class="card" aria-label="Related records">
-            <div class="card__titlebar">
-              <span class="card__title"><i data-lucide="git-branch" class="icon icon--20" aria-hidden="true"></i> Related records</span>
-            </div>
-            <div class="card__body">
-              <span class="rel__root">Work order 4471029</span>
-              <ul class="rel__kids">
-                <li>
-                  <a class="rel__item rel__item--current" href="#" aria-current="page">Permit WCM-00482</a>
-                  <ul class="rel__kids">
-                    <li><a class="rel__item" href="#">Isolation certificate IC-0097</a></li>
-                    <li><a class="rel__item" href="#">Risk assessment RA-1188</a></li>
-                    <li><a class="rel__item" href="#">Method statement MS-0231</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-          </nav>
-        </aside>
-
-      </div><!-- /.record -->
+      </div>
     </main>
   </div>
 </div>
