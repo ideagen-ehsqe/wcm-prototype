@@ -1651,8 +1651,12 @@ body[data-theme="dark"] .wcm-theme__sun{ display:inline-grid; }
       <div class="pageheader">
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <a href="index.html" aria-label="Home"><svg class="icon--16 icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a><span class="breadcrumb__sep">&rsaquo;</span>
-          <a href="#">Work clearance management</a><span class="breadcrumb__sep">&rsaquo;</span>
-          <span class="breadcrumb__current">Dashboard</span>
+          <!-- No "Dashboard" crumb: the dashboard is not a page inside the
+               module, it is the module's landing page. A crumb trail that ends
+               "Work clearance management > Dashboard" claims a level of hierarchy
+               that does not exist and gives the reader a link to where they
+               already are. -->
+          <span class="breadcrumb__current">Work clearance management</span>
         </nav>
         <div class="pageheader__titlerow">
           <span class="pageheader__icon" aria-hidden="true"><i data-lucide="layout-dashboard" class="icon"></i></span>
