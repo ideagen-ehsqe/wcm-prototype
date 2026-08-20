@@ -1360,16 +1360,49 @@ body[data-variant="praxis"] .toolbar .tbtn--authorise[disabled],
 .toolbar .tbtn--authorise[disabled] span{ color:inherit; }
 body[data-theme="dark"] .toolbar .tbtn--authorise[disabled]{
   background:rgba(255,255,255,.06); color:rgba(255,255,255,.32); }
-/* Specificity: the reference sheet colours .toolbar .tbtn, so a bare
-   .tbtn--reject loses to it. */
-.toolbar .tbtn--reject,
-.toolbar .tbtn--reject span{ color:var(--ehsq-color-red-60,#c62828); font-weight:600; }
+/* Geometry, from Home's quick actions (.qa): 16px sides and a 10px radius,
+   rather than the 12px flat tool the rest of the bar wears. Applied to both
+   states, not just the live one — otherwise Authorise would change width the
+   moment the isolation is certified. */
+.toolbar .tbtn--authorise,
+.toolbar .tbtn--reject{
+  padding:0 16px; border-radius:10px;
+  transition:filter 100ms ease, background 120ms ease, box-shadow 120ms ease; }
+
+/* Reject now takes .qa's filled control in the danger ramp instead of red ink
+   on a neutral tool: same height, same radius, same inset top highlight and
+   lift-on-hover, so the two decisions read as a pair. Specificity carries
+   .toolbar because the reference sheet colours .toolbar .tbtn, and :not() keeps
+   the retired state below out of it. */
+body[data-variant="praxis"] .toolbar .tbtn--reject:not([disabled]),
+.toolbar .tbtn--reject:not([disabled]){
+  background:linear-gradient(180deg,#d93a45,#c02630);
+  color:#fff; font-weight:600;
+  box-shadow:0 0 0 .5px rgba(58,16,20,.2),0 1px 2px rgba(58,16,20,.15),
+             0 8px 18px -8px rgba(192,38,48,.5),inset 0 .5px 0 rgba(255,255,255,.28); }
+.toolbar .tbtn--reject:not([disabled]) .icon,
+.toolbar .tbtn--reject:not([disabled]) span{ color:inherit; }
+body[data-variant="praxis"] .toolbar .tbtn--reject:not([disabled]):hover{
+  filter:brightness(1.06); background:linear-gradient(180deg,#d93a45,#c02630); }
+
+/* Dark follows the same ruling as Authorise: the soft translucent wash with a
+   bright label, not the light-mode slab carried onto a dark page. */
+body[data-variant="praxis"][data-theme="dark"] .toolbar .tbtn--reject:not([disabled]){
+  background:linear-gradient(180deg,rgb(74,27,33) 0%,rgb(52,19,24) 100%);
+  color:#ff9aa4;
+  box-shadow:0 0 0 .5px rgba(242,162,173,.28),0 1px 2px rgba(0,0,0,.28),
+             0 4px 10px -8px rgba(242,162,173,.22),inset 0 1px 0 rgba(255,255,255,.10); }
+body[data-variant="praxis"][data-theme="dark"] .toolbar .tbtn--reject:not([disabled]):hover{
+  background:linear-gradient(180deg,rgb(90,33,40) 0%,rgb(62,23,29) 100%); filter:none; }
+
 /* Retired once the permit is authorised — and it has to stop looking like a live
    danger action, or a disabled control reads as a broken one. */
 .toolbar .tbtn--reject[disabled],
 .toolbar .tbtn--reject[disabled] span{ color:var(--ehsq-color-neutral-40,#9aa7b4); }
-.toolbar .tbtn--reject[disabled]{ opacity:.7; cursor:not-allowed; box-shadow:none; }
-body[data-theme="dark"] .tbtn--reject{ color:#f2a2ad; }
+.toolbar .tbtn--reject[disabled]{ background:var(--ehsq-color-neutral-10,#eceef0);
+  opacity:.7; cursor:not-allowed; box-shadow:none; }
+body[data-theme="dark"] .toolbar .tbtn--reject[disabled]{
+  background:rgba(255,255,255,.06); color:rgba(255,255,255,.32); }
 
 /* ---- Current task --------------------------------------------------- */
 .ctask-person{ display:flex; align-items:flex-start; gap:10px; }
@@ -1533,7 +1566,6 @@ body[data-theme="dark"] .sig__pad{ background:#f7f9fb; }
    explanation reads as a broken page rather than a rule being enforced. */
 .gate{ display:block; margin-top:6px; font-size:.75rem; color:var(--ehsq-color-text-secondary); }
 .certify input[disabled] + span{ color:var(--ehsq-color-text-disabled,#9aa7b4); }
-.certify:has(input[disabled]){ cursor:not-allowed; }
 
 /* ---- Success states ---------------------------------------------------- */
 .ph-chip--ok{ background:var(--ehsq-color-green-10,#e3f3ea); color:var(--ehsq-color-green-60,#1e8e5a); }
@@ -1547,9 +1579,45 @@ body[data-theme="dark"] .permit-banner--ok .icon{ color:#46c88a; }
 /* The one control on this page that is not a read-out. It sits unchecked and
    belongs to the isolating authority, not to whoever is reading — the label
    says the act, so it cannot be mistaken for a filter or a preference. */
+/* It is also the easiest thing on the page to miss: a hairline native box on a
+   pale field, sat among rows of read-out text. Given a tinted, bordered target
+   so the eye lands on it, and a 2px box that is plainly empty until plainly full. */
 .certify{ display:inline-flex; align-items:center; gap:10px; font-size:.875rem;
-  color:var(--ehsq-color-text-primary); cursor:pointer; }
-.certify input{ width:16px; height:16px; accent-color:var(--ehsq-color-teal-60,#1b838b); margin:0; }
+  color:var(--ehsq-color-text-primary); cursor:pointer; font-weight:500;
+  padding:8px 12px 8px 10px; border-radius:8px;
+  border:1px solid var(--ehsq-color-teal-60,#1b838b);
+  background:var(--ehsq-color-teal-10,#e6f2f3); }
+.certify:hover{ background:var(--ehsq-color-teal-20,#cfe6e8); }
+.certify input{ appearance:none; -webkit-appearance:none; margin:0; flex-shrink:0;
+  width:20px; height:20px; border-radius:4px; background:#fff; cursor:pointer;
+  border:2px solid var(--ehsq-color-teal-60,#1b838b);
+  display:grid; place-content:center; }
+.certify input::after{ content:""; width:11px; height:6px; margin-top:-3px;
+  border-left:2.5px solid #fff; border-bottom:2.5px solid #fff;
+  transform:rotate(-45deg) scale(0); transition:transform .12s ease; }
+.certify input:checked{ background:var(--ehsq-color-teal-60,#1b838b); }
+.certify input:checked::after{ transform:rotate(-45deg) scale(1); }
+.certify input:focus-visible{ outline:2px solid var(--ehsq-color-border-focus,#1b838b);
+  outline-offset:2px; }
+
+/* Unavailable to this reader: the target drops back to the page so it stops
+   inviting a click, but the box stays legible enough to read as a rule. */
+.certify:has(input[disabled]){ cursor:not-allowed; background:transparent;
+  border-color:var(--ehsq-color-border-default); }
+.certify input[disabled]{ cursor:not-allowed;
+  border-color:var(--ehsq-color-border-strong,#9aa7b4);
+  background:var(--ehsq-color-surface-subtle,#f2f4f6); }
+
+body[data-theme="dark"] .certify{ background:rgba(27,131,139,.16);
+  border-color:rgba(64,190,199,.55); }
+body[data-theme="dark"] .certify:hover{ background:rgba(27,131,139,.26); }
+body[data-theme="dark"] .certify input{ background:transparent; border-color:#40bec7; }
+body[data-theme="dark"] .certify input:checked{ background:#40bec7; }
+body[data-theme="dark"] .certify input:checked::after{ border-color:#08282b; }
+body[data-theme="dark"] .certify:has(input[disabled]){ background:transparent;
+  border-color:var(--ehsq-color-border-default); }
+body[data-theme="dark"] .certify input[disabled]{ background:transparent;
+  border-color:var(--ehsq-color-border-default); }
 
 /* ---- Read-only switch ------------------------------------------------ */
 /* Shown on rather than as a "Yes": the source record carries a boolean and this
