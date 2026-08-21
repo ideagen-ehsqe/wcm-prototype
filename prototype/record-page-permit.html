@@ -1628,6 +1628,211 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
   border-radius:50%; background:#fff; }
 .roswitch--off{ background:var(--ehsq-color-neutral-40,#9aa7b4); }
 .roswitch--off::after{ right:auto; left:3px; }
+
+/* Live is its own state, and it is not a green one: hot work is in progress
+   under this permit and the header should read that way at a glance. */
+.ph-chip--live{ background:var(--ehsq-color-red-10); color:var(--ehsq-color-red-60); }
+body[data-theme="dark"] .ph-chip--live{ background:rgba(226,45,56,.18); color:#f08a90; }
+
+/* ================================================ TECHNICIAN VIEW
+   The permit is a desk artefact until someone carries it to the plant, so the
+   technician half of the story is shown as the thing the technician actually
+   holds: a phone, over the record it belongs to. Everything the field user does
+   in here calls back into st and render(), so the workflow column, the banner
+   and the audit trail on the page behind move while the phone is open — the
+   point of the demo is that the two views are one record. */
+.tech{ position:fixed; inset:0; z-index:240; display:grid; place-items:center; padding:20px; }
+.tech[hidden]{ display:none; }
+.tech__scrim{ position:absolute; inset:0; background:rgba(16,36,58,.55); }
+.tech__stage{ position:relative; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.tech__close{ display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px;
+  border:0; border-radius:999px; background:rgba(255,255,255,.92); cursor:pointer;
+  font:inherit; font-size:.75rem; font-weight:600; color:var(--ehsq-color-neutral-90); }
+.tech__close:hover{ background:#fff; }
+.tech__close .icon{ width:14px; height:14px; }
+
+/* --- the handset --- */
+.phone{ position:relative; width:352px; height:704px; padding:11px; border-radius:46px;
+  background:#111820; box-shadow:0 0 0 3px #98a3ac, 0 28px 64px rgba(8,20,32,.5); }
+.phone__notch{ position:absolute; z-index:3; top:11px; left:50%; transform:translateX(-50%);
+  width:126px; height:26px; border-radius:0 0 15px 15px; background:#111820; }
+.phone__screen{ position:relative; height:100%; border-radius:36px; overflow:hidden;
+  background:var(--ehsq-color-neutral-10);
+  /* The handset is a separate app with its own theme, so the tokens inside it
+     are pinned to the light ramp: the desktop dark mode is Julia's preference
+     at her desk, not a setting on Tom's phone in the boiler house. Without this
+     the screen inherits the dark neutrals and the inks, which are fixed, vanish. */
+  --ehsq-color-white:#ffffff;
+  --ehsq-color-neutral-05:#f4f5f6; --ehsq-color-neutral-10:#edf0f2;
+  --ehsq-color-neutral-40:#8898a9; --ehsq-color-neutral-50:#718499;
+  --ehsq-color-neutral-60:#4d657f; --ehsq-color-neutral-70:#465c74;
+  --ehsq-color-neutral-80:#37485a; --ehsq-color-neutral-90:#2a3846;
+  --ehsq-color-neutral-100:#202a35;
+  --ehsq-color-teal-60:#1b838b; --ehsq-color-teal-70:#176f76; --ehsq-color-teal-80:#135d63;
+  --ehsq-color-green-10:#e6f3ee; --ehsq-color-green-60:#098b53;
+  --ehsq-color-orange-10:#fdf2e6;
+  --ehsq-color-red-10:#fceaeb; --ehsq-color-red-60:#e22d38; }
+
+/* One screen at a time; the stack is absolute so a taller list never resizes
+   the handset around it. */
+.pscr{ position:absolute; inset:0; display:flex; flex-direction:column; }
+.pscr[hidden]{ display:none; }
+.pscr__body{ flex:1; overflow-y:auto; padding:0 16px 16px; }
+.pscr__foot{ padding:12px 16px 22px; }
+
+.pscr__head{ display:flex; align-items:center; gap:12px; padding:44px 16px 14px; }
+.pscr__back{ display:grid; place-items:center; width:30px; height:30px; flex:none; padding:0;
+  border:0; border-radius:999px; background:var(--ehsq-color-white); cursor:pointer;
+  color:var(--ehsq-color-neutral-80); box-shadow:0 1px 2px rgba(16,36,58,.10); }
+.pscr__back .icon{ width:16px; height:16px; }
+.pscr__title{ font-size:1.0625rem; font-weight:700; color:var(--ehsq-color-neutral-100); }
+
+/* --- lock screen and the push --- */
+.pscr--lock{ background:linear-gradient(165deg,#123c47 0%,#1b838b 52%,#0e2c38 100%); padding:0; }
+.plock{ display:flex; flex-direction:column; height:100%; padding:66px 14px 26px; }
+.plock__time{ text-align:center; font-size:3.25rem; font-weight:700; line-height:1; color:#fff;
+  letter-spacing:-.02em; }
+.plock__date{ margin-top:6px; text-align:center; font-size:.8125rem; font-weight:600;
+  color:rgba(255,255,255,.78); }
+.ppush{ margin-top:26px; display:flex; gap:11px; width:100%; padding:13px 14px; text-align:left;
+  border:0; border-radius:16px; background:rgba(255,255,255,.94); cursor:pointer; font:inherit;
+  box-shadow:0 10px 26px rgba(6,22,30,.32);
+  animation:ppush-in .55s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes ppush-in{ from{ opacity:0; transform:translateY(-22px) scale(.96); } to{ opacity:1; transform:none; } }
+.ppush[hidden]{ display:none; }
+.ppush:hover{ background:#fff; }
+.ppush__icon{ display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:9px;
+  background:var(--ehsq-color-teal-60); color:#fff; }
+.ppush__icon .icon{ width:18px; height:18px; }
+.ppush > span:last-child{ display:block; min-width:0; }
+.ppush__app{ display:flex; justify-content:space-between; font-size:.6875rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.04em; color:var(--ehsq-color-neutral-50); }
+.ppush__ttl{ display:block; margin-top:3px; font-size:.875rem; font-weight:700; color:var(--ehsq-color-neutral-100); }
+.ppush__txt{ display:block; margin-top:2px; font-size:.8125rem; line-height:1.35; color:var(--ehsq-color-neutral-70); }
+.plock__hint{ margin-top:auto; text-align:center; font-size:.75rem; color:rgba(255,255,255,.7); }
+
+/* --- job list --- */
+.pjob{ display:block; width:100%; margin-bottom:10px; padding:13px 14px; text-align:left; font:inherit;
+  border:1px solid transparent; border-radius:12px; background:var(--ehsq-color-white); cursor:pointer;
+  box-shadow:0 1px 2px rgba(16,36,58,.06); }
+.pjob__ref{ display:block; font-size:.875rem; font-weight:700; color:var(--ehsq-color-neutral-100); }
+.pjob__sub{ display:block; margin-top:3px; font-size:.75rem; color:var(--ehsq-color-neutral-60); }
+/* The job this permit is about is the only live card in the list — white and
+   tappable against the flat grey of the ones that are not yours to start. */
+.pjob--muted{ background:var(--ehsq-color-neutral-05); cursor:default; box-shadow:none; }
+.pjob--muted .pjob__ref{ color:var(--ehsq-color-neutral-50); }
+.pjob--muted .pjob__sub{ color:var(--ehsq-color-neutral-40); }
+
+/* --- detail table --- */
+.pcard{ padding:4px 14px; border-radius:12px; background:var(--ehsq-color-white);
+  box-shadow:0 1px 2px rgba(16,36,58,.06); }
+.prow{ display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:11px 0; }
+.prow + .prow{ border-top:1px solid var(--ehsq-color-neutral-10); }
+.prow__k{ font-size:.8125rem; color:var(--ehsq-color-neutral-60); }
+.prow__v{ font-size:.8125rem; font-weight:600; text-align:right; color:var(--ehsq-color-neutral-100); }
+
+/* --- checklists --- */
+.pchecks{ border-radius:14px; }
+.pchk{ display:flex; align-items:flex-start; gap:11px; margin-bottom:8px; padding:12px 13px;
+  border-radius:10px; background:var(--ehsq-color-white); cursor:pointer;
+  box-shadow:0 1px 2px rgba(16,36,58,.06); }
+.pchecks .pchk:last-child{ margin-bottom:0; }
+.pchk input{ flex:none; width:17px; height:17px; margin:1px 0 0; accent-color:var(--ehsq-color-teal-60); }
+.pchk__t{ font-size:.8125rem; line-height:1.35; color:var(--ehsq-color-neutral-90); }
+.pchk--done .pchk__t{ color:var(--ehsq-color-neutral-60); }
+
+/* --- notes --- */
+.pnote{ display:flex; align-items:flex-start; gap:9px; margin-bottom:14px; padding:11px 13px;
+  border-radius:10px; font-size:.8125rem; line-height:1.35; }
+.pnote .icon{ width:16px; height:16px; flex:none; margin-top:1px; }
+.pnote--warn{ background:var(--ehsq-color-orange-10); color:#8a4b00; }
+.pnote--fire{ background:var(--ehsq-color-red-10); color:var(--ehsq-color-red-60); font-weight:600; }
+.pnote--ok{ background:var(--ehsq-color-green-10); color:var(--ehsq-color-green-60); font-weight:600; }
+
+/* --- the permit clock ---
+   A permit is a licence to work for a fixed window, and the thing most likely
+   to be forgotten in the middle of a job is when that window shuts. On site it
+   is the first thing on the screen, above even the fire watch: the fire watch
+   is a condition of working, the clock is permission to be working at all. */
+.ptimer{ margin-bottom:14px; padding:13px 14px 15px; border-radius:12px;
+  background:var(--ehsq-color-white); box-shadow:0 1px 2px rgba(16,36,58,.06); }
+.ptimer__row{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.ptimer__lbl{ font-size:.75rem; font-weight:600; color:var(--ehsq-color-neutral-60); }
+.ptimer__end{ font-size:.75rem; color:var(--ehsq-color-neutral-50); }
+/* Tabular figures, or the whole line jitters sideways once a second. */
+.ptimer__clock{ margin:4px 0 10px; font-size:1.875rem; font-weight:700; line-height:1.1;
+  letter-spacing:-.01em; font-variant-numeric:tabular-nums;
+  color:var(--ehsq-color-teal-70); }
+.ptimer__track{ height:6px; border-radius:999px; background:var(--ehsq-color-neutral-10); overflow:hidden; }
+.ptimer__fill{ height:100%; width:0; border-radius:999px; background:var(--ehsq-color-teal-60);
+  transition:width 1s linear; }
+.ptimer__note{ margin-top:9px; font-size:.75rem; line-height:1.35; font-weight:600;
+  color:var(--ehsq-color-neutral-60); }
+.ptimer__note[hidden]{ display:none; }
+
+/* Three degrees of running out, each louder than the last. */
+.ptimer--warn{ background:var(--ehsq-color-orange-10); box-shadow:none; }
+.ptimer--warn .ptimer__clock{ color:#8a4b00; }
+.ptimer--warn .ptimer__fill{ background:var(--ehsq-color-orange-60,#ef8100); }
+.ptimer--warn .ptimer__note{ color:#8a4b00; }
+.ptimer--warn .ptimer__track{ background:rgba(138,75,0,.14); }
+
+.ptimer--urgent{ background:var(--ehsq-color-red-10); box-shadow:none;
+  /* The pulse is on the card, not on the number. Fading the figure itself takes
+     the one thing on the screen you have to be able to read at a glance and
+     drops it below readable contrast for half of every cycle. */
+  animation:ptimer-pulse 1.8s ease-in-out infinite; }
+.ptimer--urgent .ptimer__clock{ color:var(--ehsq-color-red-60); }
+.ptimer--urgent .ptimer__fill{ background:var(--ehsq-color-red-60); }
+.ptimer--urgent .ptimer__note{ color:var(--ehsq-color-red-60); }
+.ptimer--urgent .ptimer__track{ background:rgba(226,45,56,.16); }
+@keyframes ptimer-pulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(226,45,56,0); }
+  50%    { box-shadow:0 0 0 4px rgba(226,45,56,.22); }
+}
+
+.ptimer--over{ background:var(--ehsq-color-red-60); box-shadow:none; }
+.ptimer--over .ptimer__lbl,
+.ptimer--over .ptimer__end,
+.ptimer--over .ptimer__clock,
+.ptimer--over .ptimer__note{ color:#fff; }
+.ptimer--over .ptimer__end{ color:rgba(255,255,255,.8); }
+.ptimer--over .ptimer__track{ background:rgba(255,255,255,.28); }
+.ptimer--over .ptimer__fill{ background:#fff; }
+/* Nobody should have to watch a pulsing zero. Once it is expired it is expired. */
+.ptimer--over{ animation:none; }
+
+@media (prefers-reduced-motion:reduce){
+  .ptimer__fill{ transition:none; }
+  .ptimer--urgent{ animation:none; }
+}
+
+/* --- primary action --- */
+.pbtn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; height:48px;
+  border:0; border-radius:10px; font:inherit; font-size:.9375rem; font-weight:600; cursor:pointer;
+  background:var(--ehsq-color-teal-70); color:#fff; }
+.pbtn:hover:not(:disabled){ background:var(--ehsq-color-teal-80); }
+/* Disabled is muted rather than greyed out: the button still has to read as the
+   thing you are working towards while the checklist is unfinished. */
+.pbtn:disabled{ background:#8fb1b4; cursor:not-allowed; }
+.pbtn .icon{ width:17px; height:17px; }
+.pbtn--ghost{ margin-top:8px; height:40px; background:transparent; color:var(--ehsq-color-teal-70);
+  font-size:.8125rem; }
+.pbtn--ghost:hover:not(:disabled){ background:rgba(27,131,139,.08); }
+
+.pdone{ display:flex; flex-direction:column; align-items:center; height:100%;
+  padding:96px 26px 4px; text-align:center; }
+.pdone__ring{ display:grid; place-items:center; width:66px; height:66px; border-radius:999px;
+  background:var(--ehsq-color-green-10); color:var(--ehsq-color-green-60); }
+.pdone__ring .icon{ width:32px; height:32px; }
+.pdone__ttl{ margin-top:14px; font-size:1.125rem; font-weight:700; color:var(--ehsq-color-neutral-100); }
+.pdone__txt{ margin-top:5px; font-size:.8125rem; line-height:1.45; color:var(--ehsq-color-neutral-60); }
+.pdone__self{ align-self:stretch; margin-top:auto; }
+.pdone .pnote{ justify-content:center; }
+
+/* Shorter laptops: shrink the handset rather than let it run off the viewport. */
+@media (max-height:820px){ .phone{ transform:scale(.86); transform-origin:top center; margin-bottom:-96px; } }
+@media (max-height:720px){ .phone{ transform:scale(.74); margin-bottom:-180px; } }
 </style>
 <body data-variant="praxis" data-theme="light">
 <script>
@@ -1770,7 +1975,14 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
             <button class="tbtn tbtn--reject" type="button">
               <span>Reject</span>
             </button>
-            <button class="tbtn" type="button">
+            <!-- The other end of the permit. Disabled until the isolation has
+                 been removed, for the same reason Authorise is disabled until it
+                 has been applied: the signature has to follow the plant. -->
+            <button class="tbtn tbtn--authorise" type="button" id="closeBtn" disabled>
+              <i data-lucide="archive" class="icon" aria-hidden="true"></i>
+              <span>Close permit</span>
+            </button>
+            <button class="tbtn" type="button" id="techBtn">
               <i data-lucide="tablet-smartphone" class="icon" aria-hidden="true"></i>
               <span>Technician view</span>
             </button>
@@ -1932,6 +2144,13 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
                   <span class="gate" id="certifyGate" hidden></span>
                 </span>
               </div>
+              <!-- Rendered from st: an isolation cannot be removed before the
+                   work under it has been handed back, so this cell says what it
+                   is waiting for until it becomes an action. -->
+              <div class="field">
+                <span class="field__prompt">Isolation removed:</span>
+                <span class="field__value" id="deisolateCell"></span>
+              </div>
             </div>
             <div class="tabpanel" data-panel="risk" role="tabpanel" hidden>
               <div class="field">
@@ -2033,6 +2252,190 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
   </div>
 </div>
 
+<!-- ============================================== TECHNICIAN VIEW
+     The same permit as it reaches the person doing the work. Six screens in one
+     handset: the push that tells them the permit is authorised, their job list,
+     the permit itself, the pre-job brief, the isolation proof at the point of
+     work, and the live job. Each screen that commits something writes back to
+     the record behind it — see techGo() in the script below. -->
+<div class="tech" id="techModal" hidden>
+  <div class="tech__scrim" data-tech-close></div>
+  <div class="tech__stage">
+    <button class="tech__close" type="button" data-tech-close>
+      <i data-lucide="x" class="icon" aria-hidden="true"></i>Close technician view
+    </button>
+    <div class="phone" role="dialog" aria-modal="true" aria-label="Technician view — T. Wright's phone">
+      <span class="phone__notch" aria-hidden="true"></span>
+      <div class="phone__screen">
+
+        <!-- 0 · lock screen with the authorisation push -->
+        <div class="pscr pscr--lock" data-scr="push">
+          <div class="plock">
+            <div class="plock__time" id="techPushTime">11:33</div>
+            <div class="plock__date">Wednesday 12 August</div>
+            <button class="ppush" type="button" id="techPushBtn">
+              <span class="ppush__icon" aria-hidden="true"><i data-lucide="shield-check" class="icon"></i></span>
+              <span>
+                <span class="ppush__app"><span>Ideagen EHSQ</span><span>now</span></span>
+                <span class="ppush__ttl">Permit authorised</span>
+                <span class="ppush__txt">WCM-00482 &middot; hot work, boiler house bay 3. You are cleared to start.</span>
+              </span>
+            </button>
+            <div class="plock__hint" id="techLockHint">Tap the notification to open your jobs</div>
+          </div>
+        </div>
+
+        <!-- 1 · job list -->
+        <div class="pscr" data-scr="jobs" hidden>
+          <div class="pscr__head">
+            <button class="pscr__back" type="button" data-tech-back="push" aria-label="Back">
+              <i data-lucide="arrow-left" class="icon" aria-hidden="true"></i>
+            </button>
+            <span class="pscr__title">My jobs &mdash; T. Wright</span>
+          </div>
+          <div class="pscr__body">
+            <button class="pjob" type="button" id="techJobBtn">
+              <span class="pjob__ref">WCM-00482 &middot; hot work</span>
+              <span class="pjob__sub" id="techJobSub">Boiler house, bay 3 &middot; authorised, ready to start</span>
+            </button>
+            <div class="pjob pjob--muted">
+              <span class="pjob__ref">WCM-00475 &middot; isolation</span>
+              <span class="pjob__sub">Pump room 2 &middot; live</span>
+            </div>
+            <div class="pjob pjob--muted">
+              <span class="pjob__ref">WCM-00468 &middot; scaffolding</span>
+              <span class="pjob__sub">Turbine hall &middot; draft</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 · the permit -->
+        <div class="pscr" data-scr="detail" hidden>
+          <div class="pscr__head">
+            <button class="pscr__back" type="button" data-tech-back="jobs" aria-label="Back">
+              <i data-lucide="arrow-left" class="icon" aria-hidden="true"></i>
+            </button>
+            <span class="pscr__title">WCM-00482</span>
+          </div>
+          <div class="pscr__body">
+            <div class="pcard">
+              <div class="prow"><span class="prow__k">Type</span><span class="prow__v">P206 hot work</span></div>
+              <div class="prow"><span class="prow__k">Location</span><span class="prow__v">Boiler house, bay 3</span></div>
+              <div class="prow"><span class="prow__k">Window</span><span class="prow__v">08:00&ndash;14:00</span></div>
+              <div class="prow"><span class="prow__k">Isolation certificate</span><span class="prow__v">IC-0097</span></div>
+              <div class="prow"><span class="prow__k">Lock and tag</span><span class="prow__v">A214, A215</span></div>
+              <div class="prow"><span class="prow__k">PPE</span><span class="prow__v">Face shield, FR coveralls</span></div>
+            </div>
+          </div>
+          <div class="pscr__foot">
+            <button class="pbtn" type="button" data-tech-next="brief">Start pre-job brief</button>
+          </div>
+        </div>
+
+        <!-- 3 · pre-job brief -->
+        <div class="pscr" data-scr="brief" hidden>
+          <div class="pscr__head">
+            <button class="pscr__back" type="button" data-tech-back="detail" aria-label="Back">
+              <i data-lucide="arrow-left" class="icon" aria-hidden="true"></i>
+            </button>
+            <span class="pscr__title">Pre-job brief</span>
+          </div>
+          <div class="pscr__body">
+            <div class="pchecks" data-checkset="brief">
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Reviewed method statement MS-0231</span></label>
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Reviewed hazards and required PPE</span></label>
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Confirmed isolation certificate IC-0097</span></label>
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Fire watch briefed and in position</span></label>
+            </div>
+          </div>
+          <div class="pscr__foot">
+            <button class="pbtn" type="button" data-tech-next="isolation" data-needs="brief" disabled>Acknowledge and continue</button>
+          </div>
+        </div>
+
+        <!-- 4 · prove dead at the point of work -->
+        <div class="pscr" data-scr="isolation" hidden>
+          <div class="pscr__head">
+            <button class="pscr__back" type="button" data-tech-back="brief" aria-label="Back">
+              <i data-lucide="arrow-left" class="icon" aria-hidden="true"></i>
+            </button>
+            <span class="pscr__title">Verify isolation</span>
+          </div>
+          <div class="pscr__body">
+            <div class="pnote pnote--warn">
+              <i data-lucide="triangle-alert" class="icon" aria-hidden="true"></i>
+              <span>Prove dead before starting hot work.</span>
+            </div>
+            <div class="pchecks" data-checkset="isolation">
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Visual check &mdash; locks and tags A214, A215 in place</span></label>
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Test point 1 &mdash; electrical, zero energy confirmed</span></label>
+              <label class="pchk"><input type="checkbox"><span class="pchk__t">Test point 2 &mdash; thermal and valve, isolation confirmed</span></label>
+            </div>
+          </div>
+          <div class="pscr__foot">
+            <button class="pbtn" type="button" data-tech-next="active" data-needs="isolation" disabled>Confirm zero energy and start work</button>
+          </div>
+        </div>
+
+        <!-- 5 · live -->
+        <div class="pscr" data-scr="active" hidden>
+          <div class="pscr__head">
+            <span class="pscr__title">WCM-00482 &middot; active</span>
+          </div>
+          <div class="pscr__body">
+            <!-- role=timer with aria-live off on purpose: a screen reader
+                 announcing a new value every second would be unusable. The
+                 label and the expiry time carry the meaning; the note below
+                 speaks up only when the state actually changes. -->
+            <div class="ptimer" id="techTimer">
+              <div class="ptimer__row">
+                <span class="ptimer__lbl">Time left on permit</span>
+                <span class="ptimer__end">Expires 14:00</span>
+              </div>
+              <div class="ptimer__clock" id="techClock" role="timer" aria-live="off">&mdash;</div>
+              <div class="ptimer__track"><div class="ptimer__fill" id="techClockFill"></div></div>
+              <p class="ptimer__note" id="techClockNote" role="status" hidden></p>
+            </div>
+            <div class="pnote pnote--fire">
+              <i data-lucide="flame" class="icon" aria-hidden="true"></i>
+              <span>Fire watch active</span>
+            </div>
+            <div class="pcard">
+              <div class="prow"><span class="prow__k">Status</span><span class="prow__v">Work in progress</span></div>
+              <div class="prow"><span class="prow__k">Started</span><span class="prow__v" id="techStarted">&mdash;</span></div>
+              <div class="prow"><span class="prow__k">Isolation</span><span class="prow__v">Verified, zero energy</span></div>
+            </div>
+          </div>
+          <div class="pscr__foot">
+            <button class="pbtn" type="button" data-tech-next="done">Complete job</button>
+          </div>
+        </div>
+
+        <!-- 6 · handed back -->
+        <div class="pscr" data-scr="done" hidden>
+          <div class="pscr__body pdone">
+            <div>
+              <div class="pdone__ring" aria-hidden="true"><i data-lucide="check" class="icon"></i></div>
+            </div>
+            <div>
+              <div class="pdone__ttl">Job complete</div>
+              <p class="pdone__txt" id="techDoneTxt">WCM-00482 handed back at 13:26. Fire watch stood down after the 60 minute watch period.</p>
+            </div>
+            <div class="pdone__self">
+              <div class="pnote pnote--ok">
+                <i data-lucide="user-round-check" class="icon" aria-hidden="true"></i>
+                <span id="techHandNote">Sent to J. M&uuml;ller for de-isolation</span>
+              </div>
+              <button class="pbtn" type="button" data-tech-back="jobs">Back to my jobs</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="praxis-lucide.js"></script>
 <script src="praxis-navdrawer.js"></script>
 <script src="praxis-profile-menu.js"></script>
@@ -2096,10 +2499,14 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
 
   var PEOPLE = {
     julia: { nm: 'Julia O’Connell', short: 'Julia', init: 'jo', role: 'Authorising person' },
-    james: { nm: 'James Müller',    short: 'J. Müller', init: 'jm', role: 'Isolating authority' }
+    james: { nm: 'James Müller',    short: 'J. Müller', init: 'jm', role: 'Isolating authority' },
+    /* Not a persona you can switch to on the desktop record — Tom is out in the
+       boiler house, and the only place he appears is the technician view. */
+    tom:   { nm: 'Tom Wright',      short: 'T. Wright', init: 'tw', role: 'Permit holder' }
   };
 
-  var st = { user: 'julia', certified: null, authorised: null };
+  var st = { user: 'julia', certified: null, authorised: null, started: null, completed: null,
+             deisolated: null, closed: null };
 
   /* A fixed clock, not the wall clock. This permit's work window is 08:00–14:00
      on 12 Aug and its audit trail starts at 09:14, so stamping a signature with
@@ -2108,7 +2515,19 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
      after the job was due to finish. 11:28 is 09:14 plus the 2h 14m the
      current-task card already claims, so the record stays internally consistent
      however late in the day this is shown. */
-  var CLOCK = { certify: '11:28', authorise: '11:33' };
+  var CLOCK = {
+    certify: '11:28', authorise: '11:33',
+    /* The field half of the same fixed clock. Issue follows authorisation by a
+       minute, the brief and the isolation proof take the twenty minutes they
+       take in life, and the job finishes inside the 08:00–14:00 window. */
+    issued: '11:34', brief: '11:41', verified: '11:48', start: '11:52', complete: '13:26',
+    /* Closing out. The isolating authority walks the plant and takes the locks
+       off, then the authorising person signs the permit shut. */
+    deisolate: '13:41', close: '13:55',
+    /* The window the permit is valid for. Everything else on this page is a
+       stamp; this one is a deadline, and the handset counts down to it. */
+    windowEnd: '14:00'
+  };
 
   /* Seven steps, three states. 'gate' is the step the record is trying to reach
      rather than the next one in the list: submitted-and-waiting sits against
@@ -2131,7 +2550,11 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
     if (key === 'draft' || key === 'submitted') return 'complete';
     if (key === 'isolation')  return st.certified ? 'complete' : 'skip';
     if (key === 'authorised') return st.authorised ? 'complete' : 'current';
-    if (key === 'live')       return st.authorised ? 'current' : 'skip';
+    /* Live covers the whole time the technician is on the job, so it stays
+       current from the moment work starts and only completes on hand-back. */
+    if (key === 'live')       return st.completed ? 'complete' : (st.authorised ? 'current' : 'skip');
+    if (key === 'deisolated') return st.deisolated ? 'complete' : (st.completed ? 'current' : 'skip');
+    if (key === 'closed')     return st.closed ? 'complete' : (st.deisolated ? 'current' : 'skip');
     return 'skip';
   }
 
@@ -2160,14 +2583,35 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
 
     /* --- header chip --- */
     var chip = document.getElementById('statusChip');
-    chip.className = 'ph-chip ' + (st.authorised || st.certified ? 'ph-chip--ok' : 'ph-chip--pending');
-    chip.textContent = st.authorised ? 'Authorised' : (st.certified ? 'Isolation certified' : 'Isolation pending');
+    var chipMod = 'ph-chip--pending', chipTxt = 'Isolation pending';
+    if (st.closed)         { chipMod = 'ph-chip--ok';      chipTxt = 'Closed'; }
+    else if (st.deisolated){ chipMod = 'ph-chip--ok';      chipTxt = 'De-isolated'; }
+    else if (st.completed) { chipMod = 'ph-chip--ok';      chipTxt = 'Work complete'; }
+    else if (st.started)   { chipMod = 'ph-chip--live';    chipTxt = 'Live · work in progress'; }
+    else if (st.authorised){ chipMod = 'ph-chip--ok';      chipTxt = 'Authorised'; }
+    else if (st.certified) { chipMod = 'ph-chip--ok';      chipTxt = 'Isolation certified'; }
+    chip.className = 'ph-chip ' + chipMod;
+    chip.textContent = chipTxt;
 
     /* --- banner --- */
     var ban = document.getElementById('permit-block');
-    var icon = '<i data-lucide="' + (st.certified ? 'circle-check' : 'triangle-alert') + '" class="icon" aria-hidden="true"></i>';
+    var glyph = st.certified ? 'circle-check' : 'triangle-alert';
+    if (st.started && !st.completed) glyph = 'flame';
+    var icon = '<i data-lucide="' + glyph + '" class="icon" aria-hidden="true"></i>';
     var body;
-    if (st.authorised) {
+    if (st.closed) {
+      body = '<strong>Permit WCM-00482 closed by ' + PEOPLE.julia.nm + ' at ' + st.closed.at + '.</strong> ' +
+             '<span class="permit-banner__hint">Work complete, isolation removed, plant back in service. Nothing is outstanding.</span>';
+    } else if (st.deisolated) {
+      body = '<strong>Isolation removed by ' + PEOPLE.james.nm + ' at ' + st.deisolated.at + '.</strong> ' +
+             '<span class="permit-banner__hint">Locks and tags A214, A215 are off and the plant is back in service. The permit can now be closed.</span>';
+    } else if (st.completed) {
+      body = '<strong>Work completed and handed back at ' + st.completed.at + ' by ' + PEOPLE.tom.nm + '.</strong> ' +
+             '<span class="permit-banner__hint">The isolating authority can now remove the isolation and de-isolate the plant.</span>';
+    } else if (st.started) {
+      body = '<strong>Work in progress on site since ' + st.started.at + '.</strong> ' +
+             '<span class="permit-banner__hint">' + PEOPLE.tom.nm + ' verified zero energy at the point of work. Fire watch in position.</span>';
+    } else if (st.authorised) {
       body = '<strong>Permit authorised by ' + PEOPLE.julia.nm + ' at ' + st.authorised.at + '.</strong> ' +
              '<span class="permit-banner__hint">The technician can now be issued to site.</span>';
     } else if (st.certified) {
@@ -2199,6 +2643,14 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
       : (!st.certified ? 'Isolation must be certified first'
       : (st.user !== 'julia' ? 'Only the authorising person can authorise this permit' : ''));
 
+    var cls = document.getElementById('closeBtn');
+    cls.disabled = !(st.user === 'julia' && st.deisolated && !st.closed);
+    cls.querySelector('span').textContent = st.closed ? 'Closed' : 'Close permit';
+    cls.title = st.closed ? 'Closed at ' + st.closed.at
+      : (!st.completed ? 'The work has to be completed first'
+      : (!st.deisolated ? 'The isolation has to be removed first'
+      : (st.user !== 'julia' ? 'Only the authorising person can close this permit' : '')));
+
     /* --- required fields --- */
     document.getElementById('rfFill').style.width = st.certified ? '100%' : '83%';
     document.getElementById('rfMsg').textContent = st.certified ? '6 of 6 required fields' : '5 of 6 required fields';
@@ -2208,10 +2660,26 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
     /* --- current task: whoever the record is waiting on --- */
     var av = document.getElementById('taskAv'), nm = document.getElementById('taskNm'),
         rl = document.getElementById('taskRl'), op = document.getElementById('taskOpen');
-    if (st.authorised) {
+    if (st.closed) {
       av.textContent = '✓'; nm.textContent = 'No open task';
-      rl.textContent = 'Permit authorised · ready to go live';
-      op.textContent = 'Closed ' + st.authorised.at;
+      rl.textContent = 'Permit closed · nothing outstanding';
+      op.textContent = 'Closed ' + st.closed.at;
+    } else if (st.deisolated) {
+      av.textContent = PEOPLE.julia.init; nm.textContent = PEOPLE.julia.nm;
+      rl.textContent = 'Authorising person · final check and closure';
+      op.textContent = 'Open since ' + st.deisolated.at;
+    } else if (st.completed) {
+      av.textContent = PEOPLE.james.init; nm.textContent = PEOPLE.james.nm;
+      rl.textContent = 'Isolating authority · remove isolation';
+      op.textContent = 'Open since ' + st.completed.at;
+    } else if (st.started) {
+      av.textContent = PEOPLE.tom.init; nm.textContent = PEOPLE.tom.nm;
+      rl.textContent = 'Permit holder · work in progress on site';
+      op.textContent = 'Started ' + st.started.at;
+    } else if (st.authorised) {
+      av.textContent = PEOPLE.tom.init; nm.textContent = PEOPLE.tom.nm;
+      rl.textContent = 'Permit holder · issued, not yet started';
+      op.textContent = 'Issued ' + st.authorised.at;
     } else if (st.certified) {
       av.textContent = PEOPLE.julia.init; nm.textContent = PEOPLE.julia.nm;
       rl.textContent = 'Authorising person · awaiting review';
@@ -2239,6 +2707,25 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
       chk.checked = false;
       gate.hidden = mine;
       gate.textContent = mine ? '' : 'Only the isolating authority can certify this isolation.';
+    }
+
+    /* --- isolation removal, the mirror of certification --- */
+    var dcell = document.getElementById('deisolateCell');
+    if (st.deisolated) {
+      dcell.innerHTML = '<span class="signed">' +
+        '<img class="signed__mark" src="' + st.deisolated.mark + '" alt="Signature of ' + PEOPLE.james.nm + '">' +
+        '<span class="signed__txt">Removed by ' + PEOPLE.james.nm +
+        '<span class="signed__when">Isolating authority · 12 Aug ' + st.deisolated.at +
+        ' · locks and tags A214, A215 returned</span></span></span>';
+    } else if (!st.completed) {
+      dcell.innerHTML = '<span class="gate">Held while the work is in progress. ' +
+        'The isolation stays on until the permit holder hands the job back.</span>';
+    } else if (st.user === 'james') {
+      dcell.innerHTML = '<label class="certify">' +
+        '<input type="checkbox" id="deisolateChk">' +
+        '<span>Sign to remove isolation</span></label>';
+    } else {
+      dcell.innerHTML = '<span class="gate">Only the isolating authority can remove this isolation.</span>';
     }
 
     if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
@@ -2308,25 +2795,51 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
     return canvas.toDataURL('image/png');
   }
 
+  /* Four signing acts, one dialog. Each is a person, a statement, a time and a
+     verb — so they are data, and the dialog stays a single thing to maintain. */
+  var SIGS = {
+    certify: {
+      who: 'james', title: 'Certify isolation', at: CLOCK.certify, cta: 'Sign and certify',
+      stmt: 'I confirm the isolation described on certificate IC-0097 has been applied, proved dead and locked, and that I am the isolating authority for it.'
+    },
+    authorise: {
+      who: 'julia', title: 'Authorise permit', at: CLOCK.authorise, cta: 'Sign and authorise',
+      stmt: 'I authorise permit WCM-00482 for hot work on boiler B2 relief valve, having satisfied myself that the isolation is certified and the risk assessment is current.'
+    },
+    deisolate: {
+      who: 'james', title: 'Remove isolation', at: CLOCK.deisolate, cta: 'Sign and remove isolation',
+      stmt: 'I confirm the work under permit WCM-00482 has been handed back, that the isolation on certificate IC-0097 has been removed, that locks and tags A214 and A215 are off, and that the plant has been returned to service.'
+    },
+    close: {
+      who: 'julia', title: 'Close permit', at: CLOCK.close, cta: 'Sign and close permit',
+      stmt: 'I confirm the work is complete, the isolation has been removed and the plant returned to service, and I am closing permit WCM-00482.'
+    }
+  };
+
   function openSig(kind) {
     pending = kind;
-    var who = kind === 'certify' ? PEOPLE.james : PEOPLE.julia;
-    document.getElementById('sigTitle').textContent = kind === 'certify' ? 'Certify isolation' : 'Authorise permit';
+    var cfg = SIGS[kind];
+    var who = PEOPLE[cfg.who];
+    document.getElementById('sigTitle').textContent = cfg.title;
     document.getElementById('sigAv').textContent = who.init;
     document.getElementById('sigNm').textContent = who.nm;
     document.getElementById('sigRl').textContent = who.role;
-    document.getElementById('sigStmt').textContent = kind === 'certify'
-      ? 'I confirm the isolation described on certificate IC-0097 has been applied, proved dead and locked, and that I am the isolating authority for it.'
-      : 'I authorise permit WCM-00482 for hot work on boiler B2 relief valve, having satisfied myself that the isolation is certified and the risk assessment is current.';
-    document.getElementById('sigMeta').textContent = '12 Aug 2026, ' +
-      (kind === 'certify' ? CLOCK.certify : CLOCK.authorise);
-    confirmBtn.textContent = kind === 'certify' ? 'Sign and certify' : 'Sign and authorise';
+    document.getElementById('sigStmt').textContent = cfg.stmt;
+    document.getElementById('sigMeta').textContent = '12 Aug 2026, ' + cfg.at;
+    confirmBtn.textContent = cfg.cta;
     typed.value = '';
     lastFocus = document.activeElement;
     sig.hidden = false;
     sizeCanvas();
     clearPad();
     typed.focus();
+  }
+
+  function untickAll() {
+    ['certifyChk', 'deisolateChk'].forEach(function (id) {
+      var chk = document.getElementById(id);
+      if (chk) chk.checked = false;
+    });
   }
 
   function closeSig() {
@@ -2337,18 +2850,16 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
 
   $$('[data-sig-cancel]').forEach(function (el) {
     el.addEventListener('click', function () {
-      /* Cancelling a certification has to put the checkbox back: the tick is a
-         request to sign, not the signature. */
-      var chk = document.getElementById('certifyChk');
-      if (chk) chk.checked = false;
+      /* Cancelling has to put the checkbox back: the tick is a request to
+         sign, not the signature. Either checkbox can be the one that opened it. */
+      untickAll();
       closeSig();
     });
   });
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !sig.hidden) {
-      var chk = document.getElementById('certifyChk');
-      if (chk) chk.checked = false;
+      untickAll();
       closeSig();
     }
   });
@@ -2358,9 +2869,15 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
     if (pending === 'certify') {
       st.certified = { at: CLOCK.certify, mark: mark };
       addAudit(CLOCK.certify, 'Isolation certified — ' + PEOPLE.james.nm);
-    } else {
+    } else if (pending === 'authorise') {
       st.authorised = { at: CLOCK.authorise, mark: mark };
       addAudit(CLOCK.authorise, 'Authorised — ' + PEOPLE.julia.nm);
+    } else if (pending === 'deisolate') {
+      st.deisolated = { at: CLOCK.deisolate, mark: mark };
+      addAudit(CLOCK.deisolate, 'Isolation removed, locks and tags A214, A215 returned — ' + PEOPLE.james.nm);
+    } else {
+      st.closed = { at: CLOCK.close, mark: mark };
+      addAudit(CLOCK.close, 'Permit closed — ' + PEOPLE.julia.nm);
     }
     closeSig();
     render();
@@ -2382,8 +2899,16 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
     if (e.target.checked) openSig('certify');
   });
 
+  document.getElementById('deisolateCell').addEventListener('change', function (e) {
+    if (e.target.id === 'deisolateChk' && e.target.checked) openSig('deisolate');
+  });
+
   document.getElementById('authoriseBtn').addEventListener('click', function () {
     if (!this.disabled) openSig('authorise');
+  });
+
+  document.getElementById('closeBtn').addEventListener('click', function () {
+    if (!this.disabled) openSig('close');
   });
 
   var pBtn = document.getElementById('personaBtn'), pPop = document.getElementById('personaPop');
@@ -2404,12 +2929,188 @@ body[data-theme="dark"] .certify input[disabled]{ background:transparent;
       render();
       /* Switching to the isolating authority is only useful on the tab where the
          certificate is, so go there. */
-      if (st.user === 'james' && !st.certified) {
+      var jamesIsNeeded = !st.certified || (st.completed && !st.deisolated);
+      if (st.user === 'james' && jamesIsNeeded) {
         var t = document.querySelector('.tabs .tab[data-tab="isolation"]');
         if (t) t.click();
       }
     });
   });
+
+  /* ---------------- technician view ----------------
+     A second client onto the same st. The handset never keeps its own copy of
+     the permit: every screen reads what render() reads, and the three screens
+     that commit something (brief, isolation proof, hand-back) set a field on st
+     and call render(), so the workflow column and audit trail on the page
+     behind the scrim move while the phone is open. */
+  var tech = document.getElementById('techModal');
+  var techBtn = document.getElementById('techBtn');
+  var techScr = 'push';
+  var techFocus = null;
+  /* Audit lines are facts, not screen visits — replaying a screen must not
+     write the same event twice. */
+  var techLogged = {};
+
+  function techLog(time, text) {
+    if (techLogged[time]) return;
+    techLogged[time] = true;
+    addAudit(time, text);
+  }
+
+  /* ---- permit clock ----
+     The record keeps a fixed clock so the demo reads the same at any hour, but
+     a countdown has to actually move or it is a label. So the window is fixed —
+     work starts at 11:52 against a 14:00 expiry, 2h 08m — and the seconds are
+     real, counted from the moment the technician pressed 'start work'. */
+  var techStartedRealMs = null;
+  var techTimerId = null;
+
+  function mins(hhmm) {
+    var b = hhmm.split(':');
+    return (+b[0]) * 60 + (+b[1]);
+  }
+
+  function fmtLeft(sec) {
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    return h ? h + 'h ' + pad(m) + 'm ' + pad(s) + 's' : m + 'm ' + pad(s) + 's';
+  }
+
+  function techTimerTick() {
+    var box = document.getElementById('techTimer');
+    var clock = document.getElementById('techClock');
+    var fill = document.getElementById('techClockFill');
+    var note = document.getElementById('techClockNote');
+
+    var total = (mins(CLOCK.windowEnd) - mins(CLOCK.start)) * 60;
+    var gone = techStartedRealMs ? Math.floor((Date.now() - techStartedRealMs) / 1000) : 0;
+    var left = Math.max(0, total - gone);
+
+    clock.textContent = left ? fmtLeft(left) : 'Expired';
+    fill.style.width = Math.min(100, (total - left) / total * 100) + '%';
+
+    /* Sixty minutes is the point at which you stop planning and start finishing;
+       twenty is the point at which a hot work job needs to be winding down so
+       the fire watch can run its hour inside the window. */
+    var mod = '', msg = '';
+    if (!left)            { mod = 'ptimer--over';   msg = 'The permit window has closed. Stop work and speak to the authorising person.'; }
+    else if (left <= 1200){ mod = 'ptimer--urgent'; msg = 'Finish up. Hot work must stop before the permit expires.'; }
+    else if (left <= 3600){ mod = 'ptimer--warn';   msg = 'Under an hour left. Finish the job or request an extension.'; }
+    box.className = 'ptimer' + (mod ? ' ' + mod : '');
+    note.textContent = msg;
+    note.hidden = !msg;
+  }
+
+  /* Only runs while the live screen is actually on the handset — there is no
+     point ticking a timer nobody is looking at. */
+  function techTimerSet(on) {
+    if (on && !techTimerId) { techTimerTick(); techTimerId = setInterval(techTimerTick, 1000); }
+    if (!on && techTimerId) { clearInterval(techTimerId); techTimerId = null; }
+  }
+
+  function techShow(name) {
+    techScr = name;
+    $$('#techModal .pscr').forEach(function (el) {
+      el.hidden = el.getAttribute('data-scr') !== name;
+    });
+    techSync();
+    techTimerSet(name === 'active' && !!st.started && !st.completed);
+    var first = tech.querySelector('.pscr:not([hidden]) button:not([disabled])');
+    if (first) first.focus();
+  }
+
+  /* Everything on the handset that depends on where the record has got to. */
+  function techSync() {
+    var sub = document.getElementById('techJobSub');
+    if (st.completed)      sub.textContent = 'Boiler house, bay 3 · complete, handed back ' + st.completed.at;
+    else if (st.started)   sub.textContent = 'Boiler house, bay 3 · work in progress since ' + st.started.at;
+    else if (st.authorised) sub.textContent = 'Boiler house, bay 3 · authorised, ready to start';
+    else                   sub.textContent = 'Boiler house, bay 3 · awaiting authorisation';
+
+    document.getElementById('techHandNote').textContent = st.deisolated
+      ? 'Isolation removed by J. Müller at ' + st.deisolated.at
+      : 'Sent to J. Müller for de-isolation';
+    document.getElementById('techStarted').textContent = st.started ? st.started.at : '—';
+    document.getElementById('techPushTime').textContent = st.authorised ? st.authorised.at : CLOCK.authorise;
+    document.getElementById('techDoneTxt').textContent =
+      'WCM-00482 handed back at ' + (st.completed ? st.completed.at : CLOCK.complete) +
+      '. Fire watch stood down after the 60 minute watch period.';
+
+    /* No permit, no push. The lock screen is the honest place to say so. */
+    var push = document.getElementById('techPushBtn');
+    var hint = document.getElementById('techLockHint');
+    push.hidden = !st.authorised;
+    hint.textContent = st.authorised
+      ? 'Tap the notification to open your jobs'
+      : 'No jobs cleared to start — waiting for the permit to be authorised';
+
+    if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+  }
+
+  function techOpen() {
+    techFocus = document.activeElement;
+    tech.hidden = false;
+    /* Come back in where the job actually is, not where the story starts. */
+    techShow(st.completed ? 'done' : (st.started ? 'active' : (techScr === 'push' && !st.authorised ? 'push' : techScr)));
+  }
+
+  function techClose() {
+    techTimerSet(false);
+    tech.hidden = true;
+    if (techFocus && techFocus.focus) techFocus.focus();
+  }
+
+  techBtn.addEventListener('click', techOpen);
+  $$('[data-tech-close]').forEach(function (el) { el.addEventListener('click', techClose); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !tech.hidden) techClose();
+  });
+
+  document.getElementById('techPushBtn').addEventListener('click', function () {
+    techLog(CLOCK.issued, 'Permit issued to ' + PEOPLE.tom.nm + ' — notified on mobile');
+    techShow('jobs');
+  });
+  document.getElementById('techJobBtn').addEventListener('click', function () {
+    techShow(st.completed ? 'done' : (st.started ? 'active' : 'detail'));
+  });
+  $$('#techModal [data-tech-back]').forEach(function (b) {
+    b.addEventListener('click', function () { techShow(b.getAttribute('data-tech-back')); });
+  });
+
+  /* A checklist gates the button under it: nothing is acknowledged until every
+     line has been read and ticked. */
+  $$('#techModal [data-checkset]').forEach(function (set) {
+    var key = set.getAttribute('data-checkset');
+    var gate = tech.querySelector('[data-needs="' + key + '"]');
+    set.addEventListener('change', function (e) {
+      var row = e.target.closest('.pchk');
+      if (row) row.classList.toggle('pchk--done', e.target.checked);
+      var boxes = $$('input', set);
+      gate.disabled = boxes.some(function (b) { return !b.checked; });
+    });
+  });
+
+  $$('#techModal [data-tech-next]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var to = b.getAttribute('data-tech-next');
+      if (to === 'isolation') {
+        techLog(CLOCK.brief, 'Pre-job brief acknowledged — ' + PEOPLE.tom.nm);
+      } else if (to === 'active') {
+        techLog(CLOCK.verified, 'Isolation verified at point of work, zero energy — ' + PEOPLE.tom.nm);
+        st.started = { at: CLOCK.start };
+        techStartedRealMs = Date.now();
+        techLog(CLOCK.start, 'Work started under permit — ' + PEOPLE.tom.nm);
+        render();
+      } else if (to === 'done') {
+        st.completed = { at: CLOCK.complete };
+        techLog(CLOCK.complete, 'Work completed and permit handed back — ' + PEOPLE.tom.nm);
+        render();
+      }
+      techShow(to);
+    });
+  });
+
+  techSync();
 
   render();
 
